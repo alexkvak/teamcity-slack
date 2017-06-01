@@ -23,9 +23,7 @@ class ConfigManager(paths: ServerPaths) {
 
   def oauthKey: Option[String] = config.flatMap(_.oauthKey)
 
-  private[teamcity] def update(config: Config): Unit = {
-    this.config = Some(config.copy(oauthKey = this.config.flatMap(_.oauthKey)))
-  }
+  private[teamcity] def update(config: Config): Unit = this.config = Some(config)
 
   def updateAndPersist(newConfig: Config): Unit = synchronized {
     update(newConfig)
