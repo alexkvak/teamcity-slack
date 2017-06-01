@@ -8,10 +8,9 @@ import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
 class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: PluginDescriptor)
-  extends AdminPage(pagePlaces, "Slack Notifier", descriptor.getPluginResourcesPath("configPage.jsp"), "Slack Notifier") {
+  extends AdminPage(pagePlaces, "SlackNotifier", descriptor.getPluginResourcesPath("configPage.jsp"), "Slack Notifier") {
 
   register()
-
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest): Unit = {
     import collection.JavaConverters._
