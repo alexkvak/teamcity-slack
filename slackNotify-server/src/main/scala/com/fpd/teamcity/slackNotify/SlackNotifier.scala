@@ -11,7 +11,7 @@ object SlackNotifier {
   private def sendMessage(message: String)(implicit config: ConfigManager) = {
     val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey.getOrElse(""))
     session.connect()
-    val channel = session.findChannelByName("#general") //make sure bot is a member of the channel.
+    val channel = session.findChannelByName("general") //make sure bot is a member of the channel.
     session.sendMessage(channel, message)
   }
 }
@@ -22,7 +22,9 @@ class SlackNotifier(notificatorRegistry: NotificatorRegistry, implicit val confi
   notificatorRegistry.register(this)
 
   override def notifyBuildStarted(build: SRunningBuild, users: util.Set[SUser]): Unit =
-    sendMessage(build.getBuildDescription)
+    sendMessage(s"${build.getAgentName} started")
 
   override def getNotificatorType: String = "slackNotifier"
+
+  override def getDisplayName: String = "Slack Notifier"
 }
