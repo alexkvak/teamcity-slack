@@ -11,16 +11,33 @@ object ConfigController {
   def emptyAsNone(s: String): Option[String] = Option(s).filterNot(_.trim.isEmpty)
 }
 
-class ConfigController(config: ConfigManager, webControllerManager: WebControllerManager) extends BaseController {
-  webControllerManager.registerController("/app/slackNotify/**", this)
+class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager) extends BaseController {
+  import ConfigController._
 
-  override def doHandle(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse): ModelAndView = {
-    def param(name: String) = ConfigController.emptyAsNone(httpServletRequest.getParameter(name))
+  controllerManager.registerController("/app/slackNotify/**", this)
 
-    config.updateAndPersist(Config(
-      param("oauthKey")
-    ))
+  override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
+    def param(name: String) = emptyAsNone(request.getParameter(name))
 
-    new ModelAndView(new RedirectView("/admin/admin.html?item=SlackNotifier"))
+    val newConfig = for {
+      oauthKey ← param("oauthKey")
+      channel ← param("channel")
+    } yield {
+      Config(oauthKey, channel)
+    }
+
+    val option = newConfig map { config ⇒
+      SlackGateway.destinationByConfig(config).map { _ ⇒
+        configManager.updateAndPersist(config)
+      }
+    }
+
+    new ModelAndView(new RedirectView(createRedirect(option)))
   }
+
+  private def createRedirect[T](result: Option[T]): String = result.map(_ ⇒
+    "/admin/admin.html?item=SlackNotifier"
+  ).getOrElse(
+    "/admin/admin.html?item=SlackNotifier&error=1"
+  )
 }

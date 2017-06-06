@@ -16,6 +16,7 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
     import collection.JavaConverters._
 
     model.putAll(extension.details.mapValues(_.getOrElse("")).asJava)
+    model.put("error", Option(request.getParameter("error")).getOrElse(""))
   }
 
   override def isAvailable(request: HttpServletRequest): Boolean =

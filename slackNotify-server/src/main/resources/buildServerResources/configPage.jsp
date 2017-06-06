@@ -1,5 +1,8 @@
 <%@ include file="/include.jsp" %>
 
+<c:if test="${not empty error}">
+    <b>Wrong credentials<b>
+</c:if>
 <form action="/app/slackNotify/config" method="post">
     <table class="runnerFormTable">
         <tbody>
@@ -11,6 +14,13 @@
                     <label for="oauthKey">OAuth Access Token</label>
                 </td><td>
                     <input type="text" id="oauthKey" name="oauthKey" value="${oauthKey}" class="longField">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="channel">Channel name</label>
+                </td><td>
+                    <input type="text" id="channel" name="channel" value="${channel}" class="longField">
                 </td>
             </tr>
         </tbody>

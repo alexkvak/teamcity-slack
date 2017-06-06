@@ -8,7 +8,7 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 
-case class Config(oauthKey: Option[String])
+case class Config(oauthKey: String, channel: String)
 
 class ConfigManager(paths: ServerPaths) {
   private implicit val formats = Serialization.formats(NoTypeHints)
@@ -21,11 +21,12 @@ class ConfigManager(paths: ServerPaths) {
     } else None
   }
 
-  def oauthKey: Option[String] = config.flatMap(_.oauthKey)
+  def oauthKey: Option[String] = config.map(_.oauthKey)
+  def channel: Option[String] = config.map(_.channel)
 
   private[teamcity] def update(config: Config): Unit = this.config = Some(config)
 
-  def updateAndPersist(newConfig: Config): Unit = synchronized {
+  def updateAndPersist(newConfig: Config): Boolean = synchronized {
     update(newConfig)
     val out = new PrintWriter(configFile, "UTF-8")
     try {
@@ -34,9 +35,12 @@ class ConfigManager(paths: ServerPaths) {
     finally {
       out.close()
     }
+
+    true
   }
 
   def details: Map[String, Option[String]] = Map(
-    "oauthKey" → oauthKey
+    "oauthKey" → oauthKey,
+    "channel" → channel
   )
 }
