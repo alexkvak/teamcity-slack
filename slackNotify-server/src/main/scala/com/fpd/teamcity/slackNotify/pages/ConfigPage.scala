@@ -1,14 +1,15 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slackNotify.pages
 
 import java.util
 import javax.servlet.http.HttpServletRequest
 
+import com.fpd.teamcity.slackNotify.{ConfigManager, Strings}
 import jetbrains.buildServer.controllers.admin.AdminPage
 import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
 class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: PluginDescriptor)
-  extends AdminPage(pagePlaces, "SlackNotifier", descriptor.getPluginResourcesPath("configPage.jsp"), "Slack Notifier") {
+  extends AdminPage(pagePlaces, Strings.tabId, descriptor.getPluginResourcesPath("configPage.jsp"), Strings.label) {
 
   register()
 

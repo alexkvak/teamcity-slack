@@ -21,13 +21,12 @@ class ConfigController(configManager: ConfigManager, controllerManager: WebContr
 
     val newConfig = for {
       oauthKey ← param("oauthKey")
-      channel ← param("channel")
     } yield {
-      Config(oauthKey, channel)
+      Config(oauthKey)
     }
 
     val option = newConfig map { config ⇒
-      SlackGateway.destinationByConfig(config).map { _ ⇒
+      SlackGateway.sessionByConfig(config).map { _ ⇒
         configManager.updateAndPersist(config)
       }
     }
@@ -36,8 +35,8 @@ class ConfigController(configManager: ConfigManager, controllerManager: WebContr
   }
 
   private def createRedirect[T](result: Option[T]): String = result.map(_ ⇒
-    "/admin/admin.html?item=SlackNotifier"
+    s"/admin/admin.html?item=${Strings.tabId}"
   ).getOrElse(
-    "/admin/admin.html?item=SlackNotifier&error=1"
+    s"/admin/admin.html?item=${Strings.tabId}&error=1"
   )
 }

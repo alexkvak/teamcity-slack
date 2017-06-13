@@ -16,13 +16,6 @@
                     <input type="text" id="oauthKey" name="oauthKey" value="${oauthKey}" class="longField">
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <label for="channel">Channel name</label>
-                </td><td>
-                    <input type="text" id="channel" name="channel" value="${channel}" class="longField">
-                </td>
-            </tr>
         </tbody>
     </table>
     <input type="submit" class="btn btn-default" value="Submit">

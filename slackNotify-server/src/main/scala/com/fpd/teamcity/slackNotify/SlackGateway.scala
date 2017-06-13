@@ -4,24 +4,27 @@ import com.ullink.slack.simpleslackapi.{SlackChannel, SlackMessageHandle, SlackS
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import com.ullink.slack.simpleslackapi.replies.SlackMessageReply
 
+import scala.util.Try
+
 object SlackGateway {
   case class Destination(session: SlackSession, channel: SlackChannel)
 
   type MessageSent = SlackMessageHandle[SlackMessageReply]
 
-  def destinationByConfig(config: Config): Option[Destination] = {
+  def sessionByConfig(config: Config): Option[SlackSession] = {
     val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
-    session.connect()
-    Option(session.findChannelByName(config.channel)).map(Destination(session, _))
+    Try(session.connect()).map(_ ⇒ session).toOption
   }
 }
 
-class SlackGateway(implicit val configManager: ConfigManager) {
+class SlackGateway(val configManager: ConfigManager) {
   import SlackGateway._
 
-  def destination: Option[Destination] = configManager.config.flatMap(destinationByConfig)
+  def session: Option[SlackSession] = configManager.config.flatMap(sessionByConfig)
 
-  def sendMessage(message: String): Option[MessageSent] = {
-    destination.map(x ⇒ x.session.sendMessage(x.channel, message))
+  def sendMessage(channel: String, message: String): Option[MessageSent] = session.flatMap { x ⇒
+    Option(x.findChannelByName(channel)).map { channel ⇒
+      x.sendMessage(channel, message)
+    }
   }
 }
