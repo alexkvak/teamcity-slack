@@ -6,8 +6,8 @@ import javax.servlet.http.HttpServletRequest
 import com.fpd.teamcity.slackNotify.Strings
 import jetbrains.buildServer.serverSide.{ProjectManager, SProject}
 import jetbrains.buildServer.users.SUser
-import jetbrains.buildServer.web.openapi.{PagePlaces, PluginDescriptor}
 import jetbrains.buildServer.web.openapi.project.ProjectTab
+import jetbrains.buildServer.web.openapi.{PagePlaces, PluginDescriptor}
 
 class ProjectPage(pagePlaces: PagePlaces, projectManager: ProjectManager, descriptor: PluginDescriptor) extends
   ProjectTab(
@@ -15,7 +15,7 @@ class ProjectPage(pagePlaces: PagePlaces, projectManager: ProjectManager, descri
     Strings.label,
     pagePlaces: PagePlaces,
     projectManager: ProjectManager,
-    descriptor.getPluginResourcesPath(ProjectPage.includeUrl)) {
+    descriptor.getPluginResourcesPath(ProjectPage.includeUrl)) with SlackPage {
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, project: SProject, user: SUser): Unit = ???
 }
