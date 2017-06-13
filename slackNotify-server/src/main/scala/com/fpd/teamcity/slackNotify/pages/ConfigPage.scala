@@ -9,7 +9,7 @@ import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
 class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: PluginDescriptor)
-  extends AdminPage(pagePlaces, Strings.tabId, descriptor.getPluginResourcesPath("configPage.jsp"), Strings.label) {
+  extends AdminPage(pagePlaces, Strings.tabId, descriptor.getPluginResourcesPath(ConfigPage.includeUrl), Strings.label) {
 
   register()
 
@@ -24,4 +24,8 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
     super.isAvailable(request) && checkHasGlobalPermission(request, Permission.CHANGE_SERVER_SETTINGS)
 
   override def getGroup: String = Groupable.SERVER_RELATED_GROUP
+}
+
+object ConfigPage {
+  private def includeUrl: String = "configPage.jsp"
 }
