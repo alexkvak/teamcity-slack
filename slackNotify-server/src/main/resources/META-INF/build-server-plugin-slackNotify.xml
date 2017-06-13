@@ -3,7 +3,9 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="constructor">
-    <bean class="com.fpd.teamcity.slackNotify.ConfigPage"/>
+    <bean class="com.fpd.teamcity.slackNotify.pages.BuildPage"/>
+    <bean class="com.fpd.teamcity.slackNotify.pages.ConfigPage"/>
+    <bean class="com.fpd.teamcity.slackNotify.pages.ProjectPage"/>
     <bean class="com.fpd.teamcity.slackNotify.ConfigController"/>
     <bean class="com.fpd.teamcity.slackNotify.ConfigManager"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackNotifier"/>
