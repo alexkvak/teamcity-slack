@@ -14,7 +14,7 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
   Strings.label,
   manager: WebControllerManager,
   projectManager: ProjectManager,
-  descriptor.getPluginResourcesPath(BuildPage.includeUrl)) {
+  descriptor.getPluginResourcesPath(BuildPage.includeUrl)) with SlackPage {
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = ???
 }
