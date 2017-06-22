@@ -5,7 +5,7 @@ BS.SlackNotifierDialog = OO.extend(BS.AbstractModalDialog, {
 });
 
 jQuery(function($) {
-    $('.add-button').on('click', function() {
+    $('.buildSettingsList').on('click', '.add-button', function() {
         BS.SlackNotifierDialog.showCentered();
     });
 });

@@ -15,9 +15,10 @@
     <div id="ajaxContainer" class="center"></div>
 </div>
 
-<bs:modalDialog formId="slackNotifierDialog"
+<bs:modalDialog formId="slackNotifier"
                 title="Edit"
                 action="#"
                 saveCommand="BS.SlackNotifierDialog.close();"
                 closeCommand="BS.SlackNotifierDialog.close();">
+    Loading...
 </bs:modalDialog>
