@@ -1,7 +1,7 @@
 <%@ include file="/include.jsp" %>
 
 <c:if test="${not empty error}">
-    <b>Wrong credentials<b>
+    <b>Wrong credentials</b>
 </c:if>
 <form action="/app/slackNotify/config" method="post">
     <table class="runnerFormTable">

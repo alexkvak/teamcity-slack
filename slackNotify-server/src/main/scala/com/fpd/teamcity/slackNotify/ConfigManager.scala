@@ -8,9 +8,9 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 
-case class Config(oauthKey: String)
-
 class ConfigManager(paths: ServerPaths) {
+  import ConfigManager._
+
   private implicit val formats = Serialization.formats(NoTypeHints)
 
   val configFile = new File(s"${paths.getConfigDir}/slackNotify.json")
@@ -41,4 +41,8 @@ class ConfigManager(paths: ServerPaths) {
   def details: Map[String, Option[String]] = Map(
     "oauthKey" → oauthKey
   )
+}
+
+object ConfigManager {
+  case class Config(oauthKey: String)
 }

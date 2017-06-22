@@ -3,7 +3,7 @@ package com.fpd.teamcity.slackNotify.pages
 import java.util
 import javax.servlet.http.HttpServletRequest
 
-import com.fpd.teamcity.slackNotify.{ConfigManager, Strings}
+import com.fpd.teamcity.slackNotify.{ConfigManager, Resources, Strings}
 import jetbrains.buildServer.controllers.admin.AdminPage
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
@@ -27,5 +27,5 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
 }
 
 object ConfigPage {
-  private def includeUrl: String = "configPage.jsp"
+  private def includeUrl: String = Resources.configPage.view
 }

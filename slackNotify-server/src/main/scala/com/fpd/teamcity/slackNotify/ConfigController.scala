@@ -14,7 +14,7 @@ object ConfigController {
 class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager) extends BaseController {
   import ConfigController._
 
-  controllerManager.registerController("/app/slackNotify/**", this)
+  controllerManager.registerController(Resources.configPage.url, this)
 
   override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     def param(name: String) = emptyAsNone(request.getParameter(name))
@@ -22,7 +22,7 @@ class ConfigController(configManager: ConfigManager, controllerManager: WebContr
     val newConfig = for {
       oauthKey ← param("oauthKey")
     } yield {
-      Config(oauthKey)
+      ConfigManager.Config(oauthKey)
     }
 
     val option = newConfig map { config ⇒
