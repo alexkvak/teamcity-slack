@@ -16,6 +16,9 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
   projectManager: ProjectManager,
   descriptor.getPluginResourcesPath(BuildPage.includeUrl)) with SlackPage {
 
+  addCssFile(descriptor.getPluginResourcesPath("css/slack-notifier.css"))
+  addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier.js"))
+
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = ???
 }
 
