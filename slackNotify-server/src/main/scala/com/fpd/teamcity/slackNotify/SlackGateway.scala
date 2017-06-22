@@ -11,7 +11,7 @@ object SlackGateway {
 
   type MessageSent = SlackMessageHandle[SlackMessageReply]
 
-  def sessionByConfig(config: Config): Option[SlackSession] = {
+  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = {
     val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
     Try(session.connect()).map(_ ⇒ session).toOption
   }
