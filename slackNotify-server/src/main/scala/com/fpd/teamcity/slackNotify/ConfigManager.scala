@@ -9,6 +9,7 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 
 class ConfigManager(paths: ServerPaths) {
+
   import ConfigManager._
 
   private implicit val formats = Serialization.formats(NoTypeHints)
@@ -22,6 +23,10 @@ class ConfigManager(paths: ServerPaths) {
   }
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
+
+  def buildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
+
+  def buildSetting(id: String): Option[BuildSetting] = buildSettingList.get(id)
 
   private[teamcity] def update(config: Config): Unit = this.config = Some(config)
 
@@ -44,5 +49,19 @@ class ConfigManager(paths: ServerPaths) {
 }
 
 object ConfigManager {
-  case class Config(oauthKey: String)
+
+  object BuildSettingFlag extends Enumeration {
+    type BuildSettingFlag = Value
+
+    val firstFail, lastFail = Value
+  }
+
+  import BuildSettingFlag._
+
+  type BuildSettings = Map[String, BuildSetting]
+
+  case class BuildSetting(branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty)
+
+  case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)
+
 }

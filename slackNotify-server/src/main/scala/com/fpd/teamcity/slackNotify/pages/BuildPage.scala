@@ -3,7 +3,7 @@ package com.fpd.teamcity.slackNotify.pages
 import java.util
 import javax.servlet.http.HttpServletRequest
 
-import com.fpd.teamcity.slackNotify.Strings
+import com.fpd.teamcity.slackNotify.{Resources, Strings}
 import jetbrains.buildServer.serverSide.{ProjectManager, SBuildType}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
@@ -14,14 +14,13 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
   Strings.label,
   manager: WebControllerManager,
   projectManager: ProjectManager,
-  descriptor.getPluginResourcesPath(BuildPage.includeUrl)) with SlackPage {
+  descriptor.getPluginResourcesPath(Resources.buildPage.view)) with SlackPage {
 
   addCssFile(descriptor.getPluginResourcesPath("css/slack-notifier.css"))
   addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier.js"))
 
-  override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = ???
-}
-
-object BuildPage {
-  private def includeUrl: String = "buildPage.jsp"
+  override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = {
+    model.put("buildSettingListUrl", Resources.buildSettingListPage.url)
+    model.put("buildSettingEditUrl", Resources.buildSettingEditPage.url)
+  }
 }

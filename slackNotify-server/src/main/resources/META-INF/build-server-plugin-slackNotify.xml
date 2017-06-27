@@ -6,7 +6,8 @@
     <bean class="com.fpd.teamcity.slackNotify.pages.BuildPage"/>
     <bean class="com.fpd.teamcity.slackNotify.pages.ConfigPage"/>
     <bean class="com.fpd.teamcity.slackNotify.pages.ProjectPage"/>
-    <bean class="com.fpd.teamcity.slackNotify.pages.BuildContentPage"/>
+    <bean class="com.fpd.teamcity.slackNotify.pages.BuildSettingListPage"/>
+    <bean class="com.fpd.teamcity.slackNotify.pages.BuildSettingEditPage"/>
     <bean class="com.fpd.teamcity.slackNotify.ConfigController"/>
     <bean class="com.fpd.teamcity.slackNotify.ConfigManager"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackNotifier"/>

@@ -1,14 +1,10 @@
 <%@ include file="/include.jsp" %>
 
 <script type="text/javascript">
-    jQuery(function() {
-        BS.ProgressPopup.showProgress("ajaxContainer", "Loading...");
-        BS.ajaxUpdater("ajaxContainer", "/app/slackNotify/buildContentPage.html", {
-            onSuccess: function () {
-                BS.ProgressPopup.hidePopup()
-            }
-        });
-    });
+    window.slackNotifierUrl = {
+       buildSettingListUrl: "${buildSettingListUrl}",
+       buildSettingEditUrl: "${buildSettingEditUrl}",
+    }
 </script>
 
 <div class="buildSettingsList">
