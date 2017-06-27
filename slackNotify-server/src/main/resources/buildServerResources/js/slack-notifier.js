@@ -15,7 +15,7 @@ jQuery(function($) {
     function buildSettingEdit(id) {
         BS.ajaxRequest(window.slackNotifierUrl.buildSettingEditUrl + (id ? '?id=' + id : ''), {
             onSuccess: function (response) {
-                $('#slackNotifier').find('.modalDialogBody').html(response);
+                $('#slackNotifier').find('.modalDialogBody').html(response.responseText);
                 BS.SlackNotifierDialog.showCentered();
             }
         });
