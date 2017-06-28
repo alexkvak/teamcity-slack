@@ -7,6 +7,7 @@ import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
+import Helpers._
 
 import scala.util.Random
 
@@ -47,7 +48,7 @@ class ConfigManager(paths: ServerPaths) {
 
   @annotation.tailrec
   private def nextKey(map: BuildSettings): String = {
-    val key = Random.nextString(5)
+    val key = Random.randomAlphaNumericString(5)
     if (map.contains(key)) {
       nextKey(map)
     } else {
