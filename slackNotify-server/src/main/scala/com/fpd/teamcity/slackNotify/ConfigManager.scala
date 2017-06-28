@@ -8,6 +8,8 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 
+import scala.util.Random
+
 class ConfigManager(paths: ServerPaths) {
 
   import ConfigManager._
@@ -41,6 +43,27 @@ class ConfigManager(paths: ServerPaths) {
     }
 
     true
+  }
+
+  @annotation.tailrec
+  private def nextKey(map: BuildSettings): String = {
+    val key = Random.nextString(5)
+    if (map.contains(key)) {
+      nextKey(map)
+    } else {
+      key
+    }
+  }
+
+  def updateBuildSetting(setting: BuildSetting, keyOption: Option[String]): Option[Boolean] = config.map { c ⇒
+    val newSettings = keyOption match {
+      case Some(key) ⇒
+        c.buildSettings.updated(key, setting)
+      case _ ⇒
+        c.buildSettings + (nextKey(buildSettingList) → setting)
+    }
+
+    updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
   def details: Map[String, Option[String]] = Map(

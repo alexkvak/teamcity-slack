@@ -13,10 +13,10 @@ class BuildSettingListPage(controllerManager: WebControllerManager,
                            descriptor: PluginDescriptor,
                            config: ConfigManager
                           ) extends BaseController {
-  controllerManager.registerController(Resources.buildSettingListPage.url, this)
+  controllerManager.registerController(Resources.buildSettingList.url, this)
 
   override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    val view = descriptor.getPluginResourcesPath(Resources.buildSettingListPage.view)
+    val view = descriptor.getPluginResourcesPath(Resources.buildSettingList.view)
     new ModelAndView(view, Map("list" → config.buildSettingList.asJava).asJava)
   }
 }

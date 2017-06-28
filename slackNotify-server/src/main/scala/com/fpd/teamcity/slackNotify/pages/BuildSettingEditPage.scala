@@ -13,14 +13,16 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
                            descriptor: PluginDescriptor,
                            config: ConfigManager
                           ) extends BaseController {
-  controllerManager.registerController(Resources.buildSettingEditPage.url, this)
+  controllerManager.registerController(Resources.buildSettingEdit.url, this)
 
   override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    val view = descriptor.getPluginResourcesPath(Resources.buildSettingEditPage.view)
+    import com.fpd.teamcity.slackNotify.Helpers._
+
+    val view = descriptor.getPluginResourcesPath(Resources.buildSettingEdit.view)
 
     // TODO: optimize
     (for {
-      key ← Option(request.getParameter("id"))
+      key ← request.param("id")
       model ← config.buildSetting(key)
     } yield {
       new ModelAndView(view, Map("model" → model, "key" → key).asJava)

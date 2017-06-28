@@ -20,7 +20,8 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
   addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier.js"))
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = {
-    model.put("buildSettingListUrl", Resources.buildSettingListPage.url)
-    model.put("buildSettingEditUrl", Resources.buildSettingEditPage.url)
+    model.put("buildSettingListUrl", Resources.buildSettingList.url)
+    model.put("buildSettingEditUrl", Resources.buildSettingEdit.url)
+    model.put("buildSettingSaveUrl", Resources.buildSettingSave.url)
   }
 }

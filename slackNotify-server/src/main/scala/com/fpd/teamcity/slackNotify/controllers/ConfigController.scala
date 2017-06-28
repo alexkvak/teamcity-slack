@@ -1,26 +1,21 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slackNotify.controllers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import com.fpd.teamcity.slackNotify._
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.view.RedirectView
 
-object ConfigController {
-  def emptyAsNone(s: String): Option[String] = Option(s).filterNot(_.trim.isEmpty)
-}
-
 class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager) extends BaseController {
-  import ConfigController._
+  import Helpers._
 
   controllerManager.registerController(Resources.configPage.url, this)
 
   override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    def param(name: String) = emptyAsNone(request.getParameter(name))
-
     val newConfig = for {
-      oauthKey ← param("oauthKey")
+      oauthKey ← request.param("oauthKey")
     } yield {
       ConfigManager.Config(oauthKey)
     }
