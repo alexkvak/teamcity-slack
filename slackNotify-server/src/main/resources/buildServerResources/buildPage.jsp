@@ -4,6 +4,7 @@
     window.slackNotifierUrl = {
        buildSettingListUrl: "${buildSettingListUrl}",
        buildSettingEditUrl: "${buildSettingEditUrl}",
+       buildSettingSaveUrl: "${buildSettingSaveUrl}",
     }
 </script>
 
@@ -14,7 +15,7 @@
 <bs:modalDialog formId="slackNotifier"
                 title="Edit"
                 action="#"
-                saveCommand="BS.SlackNotifierDialog.close();"
-                closeCommand="BS.SlackNotifierDialog.close();">
+                saveCommand="BS.SlackNotifierDialog.saveBuildConfig()"
+                closeCommand="BS.SlackNotifierDialog.close()">
     Loading...
 </bs:modalDialog>

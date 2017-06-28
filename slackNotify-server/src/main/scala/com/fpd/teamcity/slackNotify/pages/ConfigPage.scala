@@ -18,9 +18,10 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest): Unit = {
     import collection.JavaConverters._
+    import com.fpd.teamcity.slackNotify.Helpers._
 
     model.putAll(extension.details.mapValues(_.getOrElse("")).asJava)
-    model.put("error", Option(request.getParameter("error")).getOrElse(""))
+    model.put("error", request.param("error").getOrElse(""))
   }
 
   override def getGroup: String = Groupable.SERVER_RELATED_GROUP

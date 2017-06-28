@@ -28,4 +28,17 @@ jQuery(function($) {
     $('#mainContent').on('click', '.closeDialog', function() {
         BS.SlackNotifierDialog.close();
     });
+
+    BS.SlackNotifierDialog.saveBuildConfig = function() {
+        var formData = $('#slackNotifier').serialize();
+        $.post(window.slackNotifierUrl.buildSettingSaveUrl, formData, function(data) {
+            if ('' === data) {
+                BS.SlackNotifierDialog.close();
+            } else {
+                $('#slackNotifier').find('.error').html(data).show();
+            }
+        });
+
+        return false;
+    }
 });
