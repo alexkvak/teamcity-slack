@@ -1,6 +1,6 @@
 <%@ include file="/include.jsp" %>
 
-<c:if test="${fn:length(list) > 1 }">
+<c:if test="${fn:length(list) > 0 }">
     <table class="runnerFormTable">
         <tr>
             <th>Branch mask</th>

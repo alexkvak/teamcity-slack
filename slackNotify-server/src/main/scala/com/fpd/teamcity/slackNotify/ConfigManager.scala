@@ -84,7 +84,12 @@ object ConfigManager {
 
   type BuildSettings = Map[String, BuildSetting]
 
-  case class BuildSetting(branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty)
+  case class BuildSetting(branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty) {
+    // Getters for JSP
+    def getBranchMask: String = branchMask
+    def getSlackChannel: String = slackChannel
+    def getFlags: Set[BuildSettingFlag] = flags
+  }
 
   case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)
 
