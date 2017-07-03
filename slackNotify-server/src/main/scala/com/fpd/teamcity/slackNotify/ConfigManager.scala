@@ -67,6 +67,10 @@ class ConfigManager(paths: ServerPaths) {
     updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
+  def removeBuildSetting(key: String): Option[Boolean] = config.map { c ⇒
+    updateAndPersist(c.copy(buildSettings = c.buildSettings - key))
+  }
+
   def details: Map[String, Option[String]] = Map(
     "oauthKey" → oauthKey
   )

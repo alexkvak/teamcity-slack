@@ -12,7 +12,7 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
     pagePlaces,
     Strings.tabId,
     descriptor.getPluginResourcesPath(ConfigPage.includeUrl),
-    Strings.label) with SlackPage {
+    Strings.label) with SlackExtension {
 
   register()
 

@@ -14,7 +14,7 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
   Strings.label,
   manager: WebControllerManager,
   projectManager: ProjectManager,
-  descriptor.getPluginResourcesPath(Resources.buildPage.view)) with SlackPage {
+  descriptor.getPluginResourcesPath(Resources.buildPage.view)) with SlackExtension {
 
   addCssFile(descriptor.getPluginResourcesPath("css/slack-notifier.css"))
   addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier.js"))
@@ -23,5 +23,6 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
     model.put("buildSettingListUrl", Resources.buildSettingList.url)
     model.put("buildSettingEditUrl", Resources.buildSettingEdit.url)
     model.put("buildSettingSaveUrl", Resources.buildSettingSave.url)
+    model.put("buildSettingDeleteUrl", Resources.buildSettingDelete.url)
   }
 }

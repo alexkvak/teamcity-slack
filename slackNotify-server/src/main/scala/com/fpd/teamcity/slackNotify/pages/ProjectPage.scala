@@ -15,7 +15,7 @@ class ProjectPage(pagePlaces: PagePlaces, projectManager: ProjectManager, descri
     Strings.label,
     pagePlaces: PagePlaces,
     projectManager: ProjectManager,
-    descriptor.getPluginResourcesPath(ProjectPage.includeUrl)) with SlackPage {
+    descriptor.getPluginResourcesPath(ProjectPage.includeUrl)) with SlackExtension {
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, project: SProject, user: SUser): Unit = ???
 }

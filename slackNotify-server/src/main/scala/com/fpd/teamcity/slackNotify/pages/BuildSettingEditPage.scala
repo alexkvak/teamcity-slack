@@ -2,6 +2,7 @@ package com.fpd.teamcity.slackNotify.pages
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import com.fpd.teamcity.slackNotify.controllers.SlackController
 import com.fpd.teamcity.slackNotify.{ConfigManager, Resources}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
@@ -12,10 +13,10 @@ import scala.collection.JavaConverters._
 class BuildSettingEditPage(controllerManager: WebControllerManager,
                            descriptor: PluginDescriptor,
                            config: ConfigManager
-                          ) extends BaseController {
+                          ) extends BaseController with SlackController {
   controllerManager.registerController(Resources.buildSettingEdit.url, this)
 
-  override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
+  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     import com.fpd.teamcity.slackNotify.Helpers._
 
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingEdit.view)

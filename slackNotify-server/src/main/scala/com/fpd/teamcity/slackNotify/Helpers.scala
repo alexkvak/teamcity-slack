@@ -2,6 +2,9 @@ package com.fpd.teamcity.slackNotify
 
 import javax.servlet.http.HttpServletRequest
 
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.web.util.SessionUser
+
 import scala.util.Random
 
 object Helpers {
@@ -24,4 +27,7 @@ object Helpers {
       sb.toString
     }
   }
+
+  def checkPermission(request: HttpServletRequest): Boolean =
+    Option(SessionUser.getUser(request)).exists(user ⇒ user.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
 }
