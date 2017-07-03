@@ -81,7 +81,7 @@ object ConfigManager {
   object BuildSettingFlag extends Enumeration {
     type BuildSettingFlag = Value
 
-    val firstFail, lastFail = Value
+    val success, failureToSuccess, failure, successToFailure = Value
   }
 
   import BuildSettingFlag._
@@ -92,7 +92,11 @@ object ConfigManager {
     // Getters for JSP
     def getBranchMask: String = branchMask
     def getSlackChannel: String = slackChannel
-    def getFlags: Set[BuildSettingFlag] = flags
+    // Flags
+    def getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
+    def getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
+    def getFail: Boolean = flags.contains(BuildSettingFlag.failure)
+    def getSuccessToFailure: Boolean = flags.contains(BuildSettingFlag.successToFailure)
   }
 
   case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)

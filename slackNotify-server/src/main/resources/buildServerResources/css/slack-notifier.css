@@ -1,3 +1,9 @@
 .buildSettingsList {
     width: 100%;
 }
+.flagLabel {
+    display: block;
+}
+.indented {
+    padding-left: 20px;
+}

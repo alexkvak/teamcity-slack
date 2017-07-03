@@ -1,3 +1,4 @@
+<%@ taglib prefix="forms" uri="http://www.springframework.org/tags/form" %>
 <%@ include file="/include.jsp" %>
 
 <div class="editPane">
@@ -10,6 +11,24 @@
     <div class="group">
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
       <span><forms:textField className="mediumField textField" name="slackChannel" expandable="false" value="${model.slackChannel}"/></span>
+    </div>
+    <div>
+      <label class="flagLabel">
+        <input type="checkbox" name="success" value="1" <c:if test="${model.success}">checked</c:if>/>
+        Trigger when build is Successful
+      </label>
+      <label class="flagLabel indented">
+        <input type="checkbox" name="failureToSuccess" value="1" <c:if test="${model.failureToSuccess}">checked</c:if>/>
+        Only trigger when build changes from Failure to Success
+      </label>
+      <label class="flagLabel">
+        <input type="checkbox" name="fail" value="1" <c:if test="${model.fail}">checked</c:if>/>
+        Trigger when build Fails
+      </label>
+      <label class="flagLabel indented">
+        <input type="checkbox" name="successToFailure" value="1" <c:if test="${model.successToFailure}">checked</c:if>/>
+        Only trigger when build changes from Success to Failure
+      </label>
     </div>
   </div>
 
