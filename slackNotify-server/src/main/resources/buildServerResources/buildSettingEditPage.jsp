@@ -12,7 +12,7 @@
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
       <span><forms:textField className="mediumField textField" name="slackChannel" expandable="false" value="${model.slackChannel}"/></span>
     </div>
-    <div>
+    <div class="checkboxes-group">
       <label class="flagLabel">
         <input type="checkbox" name="success" value="1" <c:if test="${model.success}">checked</c:if>/>
         Trigger when build is Successful
@@ -21,6 +21,8 @@
         <input type="checkbox" name="failureToSuccess" value="1" <c:if test="${model.failureToSuccess}">checked</c:if>/>
         Only trigger when build changes from Failure to Success
       </label>
+    </div>
+    <div class="checkboxes-group">
       <label class="flagLabel">
         <input type="checkbox" name="fail" value="1" <c:if test="${model.fail}">checked</c:if>/>
         Trigger when build Fails
