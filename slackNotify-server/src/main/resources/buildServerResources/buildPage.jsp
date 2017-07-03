@@ -5,6 +5,7 @@
        buildSettingListUrl: "${buildSettingListUrl}",
        buildSettingEditUrl: "${buildSettingEditUrl}",
        buildSettingSaveUrl: "${buildSettingSaveUrl}",
+       buildSettingDeleteUrl: "${buildSettingDeleteUrl}"
     }
 </script>
 

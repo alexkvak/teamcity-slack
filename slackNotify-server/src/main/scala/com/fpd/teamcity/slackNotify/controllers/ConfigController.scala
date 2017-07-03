@@ -6,14 +6,14 @@ import com.fpd.teamcity.slackNotify._
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.servlet.view.RedirectView
 
-class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager) extends BaseController {
+class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager)
+  extends BaseController with SlackController {
   import Helpers._
 
   controllerManager.registerController(Resources.configPage.url, this)
 
-  override def doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
+  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val newConfig = for {
       oauthKey ← request.param("oauthKey")
     } yield {
@@ -26,7 +26,7 @@ class ConfigController(configManager: ConfigManager, controllerManager: WebContr
       }
     }
 
-    new ModelAndView(new RedirectView(createRedirect(option)))
+    redirectTo(createRedirect(option), response)
   }
 
   private def createRedirect[T](result: Option[T]): String = result.map(_ ⇒

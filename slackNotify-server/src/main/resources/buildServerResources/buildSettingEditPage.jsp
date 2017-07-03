@@ -21,5 +21,5 @@
     <button class="btn btn_primary submitButton">Save</button>
     <button type="button" class="btn cancel closeDialog">Cancel</button>
   </div>
-  <input type="hidden" name="key" value="${model.key}" />
+  <input type="hidden" name="key" value="${key}" />
 </div>

@@ -10,6 +10,7 @@
     <bean class="com.fpd.teamcity.slackNotify.pages.BuildSettingEditPage"/>
     <bean class="com.fpd.teamcity.slackNotify.controllers.ConfigController"/>
     <bean class="com.fpd.teamcity.slackNotify.controllers.BuildSettingsSave"/>
+    <bean class="com.fpd.teamcity.slackNotify.controllers.BuildSettingsDelete"/>
     <bean class="com.fpd.teamcity.slackNotify.ConfigManager"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackNotifier"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackGateway"/>
