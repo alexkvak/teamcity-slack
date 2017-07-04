@@ -21,7 +21,7 @@ jQuery(function ($) {
 
     BS.SlackNotifierDialog.saveBuildConfig = function () {
         var formData = $('#slackNotifier').serialize();
-        $.post(window.slackNotifierUrl.buildSettingSaveUrl, formData, function (data) {
+        $.post(window.slackNotifier.buildSettingSaveUrl, formData, function (data) {
             if ('' === data) {
                 loadBuildSettingsList();
                 BS.SlackNotifierDialog.close();
@@ -35,7 +35,7 @@ jQuery(function ($) {
 
     function loadBuildSettingsList() {
         BS.ProgressPopup.showProgress("ajaxContainer", "Loading...");
-        BS.ajaxUpdater("ajaxContainer", window.slackNotifierUrl.buildSettingListUrl, {
+        BS.ajaxUpdater("ajaxContainer", window.slackNotifier.buildSettingListUrl, {
             onSuccess: function () {
                 BS.ProgressPopup.hidePopup()
             }
@@ -43,7 +43,7 @@ jQuery(function ($) {
     }
 
     function buildSettingEdit(id) {
-        BS.ajaxRequest(window.slackNotifierUrl.buildSettingEditUrl + (id ? '?id=' + id : ''), {
+        BS.ajaxRequest(window.slackNotifier.buildSettingEditUrl + (id ? '?id=' + id : ''), {
             onSuccess: function (response) {
                 $('#slackNotifier').find('.modalDialogBody').html(response.responseText);
                 BS.SlackNotifierDialog.showCentered();
@@ -55,7 +55,7 @@ jQuery(function ($) {
         BS.confirmDialog.show({
             title: 'Delete notification settings',
             action: function () {
-                BS.ajaxRequest(window.slackNotifierUrl.buildSettingDeleteUrl + '?id=' + id, {
+                BS.ajaxRequest(window.slackNotifier.buildSettingDeleteUrl + '?id=' + id, {
                     onSuccess: function (response) {
                         if ('' === response.responseText) {
                             loadBuildSettingsList();
