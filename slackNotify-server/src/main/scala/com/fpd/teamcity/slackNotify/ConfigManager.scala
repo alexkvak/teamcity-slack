@@ -7,6 +7,7 @@ import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
+import org.json4s.ext.EnumNameSerializer
 import Helpers._
 
 import scala.util.Random
@@ -15,7 +16,7 @@ class ConfigManager(paths: ServerPaths) {
 
   import ConfigManager._
 
-  private implicit val formats = Serialization.formats(NoTypeHints)
+  private implicit val formats = Serialization.formats(NoTypeHints) + new EnumNameSerializer(BuildSettingFlag)
 
   val configFile = new File(s"${paths.getConfigDir}/slackNotify.json")
 
