@@ -14,4 +14,5 @@
     <bean class="com.fpd.teamcity.slackNotify.ConfigManager"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackNotifier"/>
     <bean class="com.fpd.teamcity.slackNotify.SlackGateway"/>
+    <bean class="com.fpd.teamcity.slackNotify.SlackServerAdapter"/>
 </beans>
