@@ -10,3 +10,12 @@
 .checkboxes-group {
     padding-top: 20px;
 }
+.options-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+.normal-column {
+    width: 15%;
+    max-width: 200px;
+}

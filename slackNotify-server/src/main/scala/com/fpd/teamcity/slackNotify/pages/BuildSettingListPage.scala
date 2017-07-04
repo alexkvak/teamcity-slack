@@ -8,6 +8,8 @@ import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
+import com.fpd.teamcity.slackNotify.Helpers._
+
 import scala.collection.JavaConverters._
 
 class BuildSettingListPage(controllerManager: WebControllerManager,
@@ -18,6 +20,6 @@ class BuildSettingListPage(controllerManager: WebControllerManager,
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingList.view)
-    new ModelAndView(view, Map("list" → config.buildSettingList.asJava).asJava)
+    new ModelAndView(view, Map("list" → config.buildSettingList(request.param("buildTypeId").get).asJava).asJava)
   }
 }

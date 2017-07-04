@@ -28,9 +28,11 @@ class ConfigManager(paths: ServerPaths) {
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
 
-  def buildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
+  def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
 
-  def buildSetting(id: String): Option[BuildSetting] = buildSettingList.get(id)
+  def buildSettingList(buildTypeId: String): BuildSettings = allBuildSettingList.filter(x ⇒ x._2.buildTypeId == buildTypeId)
+
+  def buildSetting(id: String): Option[BuildSetting] = allBuildSettingList.get(id)
 
   private[teamcity] def update(config: Config): Unit = this.config = Some(config)
 
@@ -62,7 +64,7 @@ class ConfigManager(paths: ServerPaths) {
       case Some(key) ⇒
         c.buildSettings.updated(key, setting)
       case _ ⇒
-        c.buildSettings + (nextKey(buildSettingList) → setting)
+        c.buildSettings + (nextKey(allBuildSettingList) → setting)
     }
 
     updateAndPersist(c.copy(buildSettings = newSettings))
@@ -89,7 +91,7 @@ object ConfigManager {
 
   type BuildSettings = Map[String, BuildSetting]
 
-  case class BuildSetting(branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty) {
+  case class BuildSetting(buildTypeId: String, branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty) {
     // Getters for JSP
     def getBranchMask: String = branchMask
     def getSlackChannel: String = slackChannel

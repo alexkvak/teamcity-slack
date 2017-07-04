@@ -36,7 +36,8 @@ class BuildSettingsSave(configManager: ConfigManager,
     val result = for {
       branchMask ← request.param("branchMask")
       slackChannel ← request.param("slackChannel")
-      result ← configManager.updateBuildSetting(BuildSetting(branchMask, slackChannel, collectFlags), request.param("key")) if Try(branchMask.r).isSuccess
+      buildTypeId ← request.param("buildTypeId")
+      result ← configManager.updateBuildSetting(BuildSetting(buildTypeId, branchMask, slackChannel, collectFlags), request.param("key")) if Try(branchMask.r).isSuccess
     } yield result
 
     ajaxView(result.filter(_ == true).map(_ ⇒ "") getOrElse "Something went wrong")

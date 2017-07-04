@@ -1,12 +1,12 @@
 <%@ include file="/include.jsp" %>
 
 <script type="text/javascript">
-    window.slackNotifierUrl = {
-       buildSettingListUrl: "${buildSettingListUrl}",
+    window.slackNotifier = {
+       buildSettingListUrl: "${buildSettingListUrl}?buildTypeId=${buildTypeId}",
        buildSettingEditUrl: "${buildSettingEditUrl}",
-       buildSettingSaveUrl: "${buildSettingSaveUrl}",
+       buildSettingSaveUrl: "${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
        buildSettingDeleteUrl: "${buildSettingDeleteUrl}"
-    }
+    };
 </script>
 
 <div class="buildSettingsList">
