@@ -18,7 +18,7 @@
         Trigger when build is Successful
       </label>
       <label class="flagLabel indented">
-        <input type="checkbox" name="failureToSuccess" value="1" <c:if test="${model.failureToSuccess}">checked</c:if>/>
+        <input type="checkbox" data-parent="success" name="failureToSuccess" value="1" <c:if test="${model.failureToSuccess}">checked</c:if>/>
         Only trigger when build changes from Failure to Success
       </label>
     </div>
@@ -28,7 +28,7 @@
         Trigger when build Fails
       </label>
       <label class="flagLabel indented">
-        <input type="checkbox" name="successToFailure" value="1" <c:if test="${model.successToFailure}">checked</c:if>/>
+        <input type="checkbox" data-parent="fail" name="successToFailure" value="1" <c:if test="${model.successToFailure}">checked</c:if>/>
         Only trigger when build changes from Success to Failure
       </label>
     </div>
