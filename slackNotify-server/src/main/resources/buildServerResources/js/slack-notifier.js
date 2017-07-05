@@ -33,6 +33,26 @@ jQuery(function ($) {
         return false;
     };
 
+    function initCheckboxes() {
+        function handleDependencies(element) {
+            checkboxes.filter('[data-parent=' + element.attr('name') + ']').prop('disabled', !element.prop('checked'))
+        }
+
+        var checkboxes = $('.editPane .checkboxes-group input[type=checkbox]');
+        checkboxes.on('click', function () {
+            handleDependencies($(this))
+        });
+
+        // disable all checkboxes which parent are unchecked
+        checkboxes.filter('[data-parent]').each(function () {
+            var element = $(this);
+            if (undefined !== element.data('parent') &&
+                (!checkboxes.filter('[name=' + element.data('parent') + ']').prop('checked'))) {
+                element.prop('disabled', true);
+            }
+        })
+    }
+
     function loadBuildSettingsList() {
         BS.ProgressPopup.showProgress("ajaxContainer", "Loading...");
         BS.ajaxUpdater("ajaxContainer", window.slackNotifier.buildSettingListUrl, {
@@ -47,6 +67,7 @@ jQuery(function ($) {
             onSuccess: function (response) {
                 $('#slackNotifier').find('.modalDialogBody').html(response.responseText);
                 BS.SlackNotifierDialog.showCentered();
+                initCheckboxes();
             }
         });
     }
