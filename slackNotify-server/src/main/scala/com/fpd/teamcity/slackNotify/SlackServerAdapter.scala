@@ -33,9 +33,7 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
       "failed"
     }
 
-    val project = sBuildServer.getProjectManager.findProjectById(build.getProjectId)
-
-    s"${project.getName} -> ${build.getFullName} -> #${build.getBuildId} $status"
+    s"${build.getFullName} #${build.getBuildId} $status"
   }
 
   override def buildFinished(build: SRunningBuild): Unit =
