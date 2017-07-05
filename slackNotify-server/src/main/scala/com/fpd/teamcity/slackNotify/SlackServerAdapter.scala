@@ -26,19 +26,23 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
   }
 
+  private def messageByFlags(build: SRunningBuild, flags: Set[BuildSettingFlag]): String = {
+    val status = if (flags.contains(BuildSettingFlag.success)) {
+      "succeeded"
+    } else {
+      "failed"
+    }
+
+    val project = sBuildServer.getProjectManager.findProjectById(build.getProjectId)
+
+    s"Build #${build.getBuildId} (${project.getName}) $status"
+  }
+
   override def buildFinished(build: SRunningBuild): Unit =
     calculateFlags(build, sBuildServer).foreach(flags ⇒ notify(build, flags))
 }
 
 object SlackServerAdapter {
-  private def messageByFlags(build: SRunningBuild, flags: Set[BuildSettingFlag]): String = {
-    if (flags.contains(BuildSettingFlag.success)) {
-      "success"
-    } else {
-      "failed"
-    }
-  }
-
   private def calculateFlags(implicit build: SRunningBuild, sBuildServer: SBuildServer) = {
     import BuildSettingFlag._
 
