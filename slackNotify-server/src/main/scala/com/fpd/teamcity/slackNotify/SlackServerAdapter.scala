@@ -24,7 +24,7 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
 
     settings.foreach { setting ⇒
-      val message = messageByFlags(build, setting.flags)
+      val message = generateMessage(build)
       gateway.sendMessage(SlackChannel(setting.slackChannel), message)
 
       // if build failed all committees should receive the message
@@ -36,8 +36,8 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
   }
 
-  private def messageByFlags(build: SRunningBuild, flags: Set[BuildSettingFlag]): String = {
-    val status = if (flags.contains(BuildSettingFlag.success)) {
+  private def generateMessage(build: SRunningBuild): String = {
+    val status = if (build.getBuildStatus.isSuccessful) {
       "succeeded"
     } else {
       "failed"
