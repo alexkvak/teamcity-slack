@@ -20,7 +20,7 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     def matchBranch(mask: String) = Option(build.getBranch).map(branch ⇒ mask.r.findFirstIn(branch.getName)).isDefined
 
     val settings = configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒
-      x.flags == flags && matchBranch(x.branchMask)
+      x.flags.intersect(flags).nonEmpty && matchBranch(x.branchMask)
     }
 
     settings.foreach { setting ⇒
