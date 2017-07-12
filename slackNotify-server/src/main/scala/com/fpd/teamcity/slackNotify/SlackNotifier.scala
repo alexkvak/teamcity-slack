@@ -2,6 +2,7 @@ package com.fpd.teamcity.slackNotify
 
 import java.util
 
+import com.fpd.teamcity.slackNotify.SlackGateway.SlackChannel
 import jetbrains.buildServer.notification.{NotificatorAdapter, NotificatorRegistry}
 import jetbrains.buildServer.serverSide.SRunningBuild
 import jetbrains.buildServer.users.{NotificatorPropertyKey, SUser}
@@ -15,7 +16,7 @@ class SlackNotifier(notificatorRegistry: NotificatorRegistry, gateway: SlackGate
 
   override def notifyBuildStarted(build: SRunningBuild, users: util.Set[SUser]): Unit = users.forEach { user ⇒
     Option(user.getPropertyValue(channelPropertyKey)).foreach { channel ⇒
-      gateway.sendMessage(channel, s"${build.getAgentName} started")
+      gateway.sendMessage(SlackChannel(channel), s"${build.getAgentName} started")
     }
   }
   override def getNotificatorType: String = notificatorType

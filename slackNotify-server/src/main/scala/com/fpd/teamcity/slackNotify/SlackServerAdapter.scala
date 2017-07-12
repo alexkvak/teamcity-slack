@@ -2,7 +2,9 @@ package com.fpd.teamcity.slackNotify
 
 import com.fpd.teamcity.slackNotify.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slackNotify.ConfigManager.BuildSettingFlag.BuildSettingFlag
+import com.fpd.teamcity.slackNotify.SlackGateway.{SlackChannel, SlackUser}
 import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
+
 import scala.collection.JavaConverters._
 
 class SlackServerAdapter(sBuildServer: SBuildServer,
@@ -22,7 +24,15 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
 
     settings.foreach { setting ⇒
-      gateway.sendMessage(setting.slackChannel, messageByFlags(build, setting.flags))
+      val message = messageByFlags(build, setting.flags)
+      gateway.sendMessage(SlackChannel(setting.slackChannel), message)
+
+      // if build failed all committees should receive the message
+      if (build.getBuildStatus.isFailed) {
+        val committees = build.getContainingChanges.asScala.flatMap(change ⇒ change.getCommitters.asScala).toSet
+        val emails = committees.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
+        emails.map(SlackUser).foreach(gateway.sendMessage(_, message))
+      }
     }
   }
 
