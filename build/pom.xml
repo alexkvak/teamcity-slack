@@ -2,22 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>slackNotify</artifactId>
-    <groupId>com.fpd.teamcity.slackNotify</groupId>
+    <artifactId>slackIntegration</artifactId>
+    <groupId>com.fpd.teamcity.slackIntegration</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>build</artifactId>
   <packaging>pom</packaging>
   <properties>
       <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
-      <teamcity.slackNotify.plugin.version>snapshot-${maven.build.timestamp}</teamcity.slackNotify.plugin.version>
-      <teamcity.slackNotify.plugin.vendorName>Plugin vendor name</teamcity.slackNotify.plugin.vendorName>
-      <teamcity.slackNotify.plugin.vendorUrl>Plugin vendor URL</teamcity.slackNotify.plugin.vendorUrl>
+      <teamcity.slackIntegration.plugin.version>snapshot-${maven.build.timestamp}</teamcity.slackIntegration.plugin.version>
+      <teamcity.slackIntegration.plugin.vendorName>Plugin vendor name</teamcity.slackIntegration.plugin.vendorName>
+      <teamcity.slackIntegration.plugin.vendorUrl>Plugin vendor URL</teamcity.slackIntegration.plugin.vendorUrl>
   </properties>
   <dependencies>
       <dependency>
-           <groupId>com.fpd.teamcity.slackNotify</groupId>
-           <artifactId>slackNotify-server</artifactId>
+           <groupId>com.fpd.teamcity.slackIntegration</groupId>
+           <artifactId>slackIntegration-server</artifactId>
            <version>1.0-SNAPSHOT</version>
       </dependency>
   </dependencies>
@@ -27,7 +27,7 @@
             <groupId>com.google.code.maven-replacer-plugin</groupId>
             <artifactId>replacer</artifactId>
             <version>1.5.2</version>
-            <executions>                
+            <executions>
                 <execution>
                     <phase>process-sources</phase>
                     <goals>
@@ -41,17 +41,17 @@
                 <replacements>
                     <replacement>
                         <token>@Version@</token>
-                        <value>${teamcity.slackNotify.plugin.version}</value>
+                        <value>${teamcity.slackIntegration.plugin.version}</value>
                     </replacement>
                     <replacement>
                         <token>@VendorName@</token>
-                        <value>${teamcity.slackNotify.plugin.vendorName}</value>
+                        <value>${teamcity.slackIntegration.plugin.vendorName}</value>
                     </replacement>
                     <replacement>
                         <token>@VendorURL@</token>
-                        <value>${teamcity.slackNotify.plugin.vendorUrl}</value>
+                        <value>${teamcity.slackIntegration.plugin.vendorUrl}</value>
                     </replacement>
-                </replacements>                        
+                </replacements>
             </configuration>
         </plugin>
         <plugin>
@@ -65,7 +65,7 @@
                   <goal>single</goal>
                 </goals>
                 <configuration>
-                  <finalName>slackNotify</finalName>
+                  <finalName>slackIntegration</finalName>
                   <outputDirectory>${project.parent.build.directory}</outputDirectory>
                   <appendAssemblyId>false</appendAssemblyId>
                   <descriptors>

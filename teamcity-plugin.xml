@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:schemas-jetbrains-com:teamcity-plugin-v1-xml">
   <info>
-    <name>Slack Notifier</name>
-    <display-name>Slack Notifier</display-name>
+    <name>Slack Integration</name>
+    <display-name>Slack Integration</display-name>
     <version>@Version@</version>
-    <description>Notifies slack team about build failures</description>
+    <description>Integration with slack</description>
     <download-url>https://alexkvak.com/</download-url>
     <email>Plugin author e-mail</email>
     <vendor>

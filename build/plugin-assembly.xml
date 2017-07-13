@@ -15,7 +15,7 @@
     <moduleSet>
        <useAllReactorProjects>true</useAllReactorProjects>
        <includes>
-           <include>com.fpd.teamcity.slackNotify:slackNotify-server</include>
+           <include>com.fpd.teamcity.slackIntegration:slackIntegration-server</include>
        </includes> 
        <binaries>
            <outputDirectory>server</outputDirectory>
