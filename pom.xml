@@ -79,6 +79,5 @@
   <modules>
     <module>slackIntegration-server</module>
     <module>build</module>
-    <module>test</module>
   </modules>
 </project>
