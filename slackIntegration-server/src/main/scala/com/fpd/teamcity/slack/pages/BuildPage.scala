@@ -1,9 +1,9 @@
-package com.fpd.teamcity.slackNotify.pages
+package com.fpd.teamcity.slack.pages
 
 import java.util
 import javax.servlet.http.HttpServletRequest
 
-import com.fpd.teamcity.slackNotify.{Resources, Strings}
+import com.fpd.teamcity.slack.{Resources, Strings}
 import jetbrains.buildServer.serverSide.{ProjectManager, SBuildType}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}

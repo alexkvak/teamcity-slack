@@ -1,8 +1,8 @@
-package com.fpd.teamcity.slackNotify.controllers
+package com.fpd.teamcity.slack.controllers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.fpd.teamcity.slackNotify.{Helpers, Resources}
+import com.fpd.teamcity.slack.{Helpers, Resources}
 import jetbrains.buildServer.controllers.{BaseController, SimpleView}
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.springframework.web.servlet.ModelAndView

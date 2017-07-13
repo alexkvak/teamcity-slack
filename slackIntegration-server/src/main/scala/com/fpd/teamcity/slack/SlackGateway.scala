@@ -1,4 +1,4 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slack
 
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import com.ullink.slack.simpleslackapi.replies.SlackMessageReply

@@ -1,9 +1,9 @@
-package com.fpd.teamcity.slackNotify.pages
+package com.fpd.teamcity.slack.pages
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.fpd.teamcity.slackNotify.controllers.SlackController
-import com.fpd.teamcity.slackNotify.{ConfigManager, Resources}
+import com.fpd.teamcity.slack.controllers.SlackController
+import com.fpd.teamcity.slack.{ConfigManager, Resources}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
@@ -17,7 +17,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
   controllerManager.registerController(Resources.buildSettingEdit.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    import com.fpd.teamcity.slackNotify.Helpers._
+    import com.fpd.teamcity.slack.Helpers._
 
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingEdit.view)
 
