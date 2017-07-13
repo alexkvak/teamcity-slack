@@ -1,8 +1,8 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slack
 
 import java.util
 
-import com.fpd.teamcity.slackNotify.SlackGateway.SlackChannel
+import com.fpd.teamcity.slack.SlackGateway.SlackChannel
 import jetbrains.buildServer.notification.{NotificatorAdapter, NotificatorRegistry}
 import jetbrains.buildServer.serverSide.SRunningBuild
 import jetbrains.buildServer.users.{NotificatorPropertyKey, SUser}

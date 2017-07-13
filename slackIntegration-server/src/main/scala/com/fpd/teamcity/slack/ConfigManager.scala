@@ -1,4 +1,4 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slack
 
 import java.io.{File, PrintWriter}
 

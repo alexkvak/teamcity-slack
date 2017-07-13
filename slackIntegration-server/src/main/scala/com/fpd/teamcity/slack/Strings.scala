@@ -1,4 +1,4 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slack
 
 object Strings {
   def label: String = "Slack Notifier"

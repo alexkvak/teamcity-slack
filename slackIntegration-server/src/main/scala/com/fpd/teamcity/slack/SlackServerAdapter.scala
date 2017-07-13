@@ -1,8 +1,8 @@
-package com.fpd.teamcity.slackNotify
+package com.fpd.teamcity.slack
 
-import com.fpd.teamcity.slackNotify.ConfigManager.BuildSettingFlag
-import com.fpd.teamcity.slackNotify.ConfigManager.BuildSettingFlag.BuildSettingFlag
-import com.fpd.teamcity.slackNotify.SlackGateway.{SlackChannel, SlackUser}
+import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
+import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
+import com.fpd.teamcity.slack.SlackGateway.{SlackChannel, SlackUser}
 import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
 
 import scala.collection.JavaConverters._
