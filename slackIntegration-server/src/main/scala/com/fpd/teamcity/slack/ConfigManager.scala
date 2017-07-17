@@ -18,7 +18,7 @@ class ConfigManager(paths: ServerPaths) {
 
   private implicit val formats = Serialization.formats(NoTypeHints) + new EnumNameSerializer(BuildSettingFlag)
 
-  val configFile = new File(s"${paths.getConfigDir}/slackNotify.json")
+  val configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
 
   private[teamcity] var config: Option[Config] = {
     if (configFile.exists()) {
