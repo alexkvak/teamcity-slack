@@ -33,16 +33,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.jetbrains.teamcity</groupId>
-            <artifactId>tests-support</artifactId>
-            <version>${teamcity-version}</version>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.12</artifactId>
+            <version>3.0.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.12</artifactId>
-            <version>3.0.1</version>
+            <groupId>org.scalamock</groupId>
+            <artifactId>scalamock-scalatest-support_2.12</artifactId>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
 

@@ -12,6 +12,15 @@
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
       <span><forms:textField className="mediumField textField" name="slackChannel" expandable="false" value="${model.slackChannel}"/></span>
     </div>
+    <div class="message-template">
+      <label class="tableLabel" for="messageTemplate">Message template:</label>
+      <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
+                             value="${model.messageTemplate}" defaultText="${defaultMessage}"/>
+      <div class="smallNote">
+        Supported variables are: {name}, {number}, {branch}, {status}, {mentions}, {changes}
+      </div>
+      </span>
+    </div>
     <div class="checkboxes-group">
       <label class="flagLabel">
         <input type="checkbox" name="success" value="1" <c:if test="${model.success}">checked</c:if>/>

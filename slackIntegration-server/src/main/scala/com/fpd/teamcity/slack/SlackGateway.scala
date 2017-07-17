@@ -2,7 +2,7 @@ package com.fpd.teamcity.slack
 
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import com.ullink.slack.simpleslackapi.replies.SlackMessageReply
-import com.ullink.slack.simpleslackapi.{SlackAttachment, SlackMessageHandle, SlackSession}
+import com.ullink.slack.simpleslackapi.{SlackAttachment ⇒ ApiSlackAttachment, SlackMessageHandle, SlackSession}
 
 import scala.language.implicitConversions
 import scala.util.Try
@@ -15,7 +15,9 @@ object SlackGateway {
 
   case class SlackChannel(name: String) extends Destination
 
-  case class SlackMessage(message: String, attachment: Option[SlackAttachment] = None)
+  case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None)
+
+  case class SlackAttachment(text: String, color: String)
 
   implicit def stringToSlackMessage(message: String): SlackMessage = SlackMessage(message)
 
@@ -25,6 +27,13 @@ object SlackGateway {
     // TODO: cache connection
     val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
     Try(session.connect()).map(_ ⇒ session).toOption
+  }
+
+  implicit def toApiSlackAttachment(attachment: SlackAttachment): ApiSlackAttachment = {
+    val apiSlackAttachment = new ApiSlackAttachment()
+    apiSlackAttachment.setText(attachment.text)
+    apiSlackAttachment.setColor(attachment.color)
+    apiSlackAttachment
   }
 }
 

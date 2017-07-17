@@ -6,6 +6,7 @@ import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.util.SessionUser
 
+import scala.language.implicitConversions
 import scala.util.Random
 
 object Helpers {
@@ -32,6 +33,8 @@ object Helpers {
   implicit class RichStatus(status: Status) {
     def isUnknown: Boolean = status.getPriority == Status.UNKNOWN.getPriority
   }
+
+  implicit def messageTemplateFromString(message: String): MessageBuilder = MessageBuilder(message)
 
   def checkPermission(request: HttpServletRequest): Boolean =
     Option(SessionUser.getUser(request)).exists(user ⇒ user.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
