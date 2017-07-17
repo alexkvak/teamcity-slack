@@ -5,7 +5,6 @@
        default-autowire="constructor">
     <bean class="com.fpd.teamcity.slack.pages.BuildPage"/>
     <bean class="com.fpd.teamcity.slack.pages.ConfigPage"/>
-    <bean class="com.fpd.teamcity.slack.pages.ProjectPage"/>
     <bean class="com.fpd.teamcity.slack.pages.BuildSettingListPage"/>
     <bean class="com.fpd.teamcity.slack.pages.BuildSettingEditPage"/>
     <bean class="com.fpd.teamcity.slack.controllers.ConfigController"/>
