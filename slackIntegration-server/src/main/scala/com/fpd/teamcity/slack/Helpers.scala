@@ -2,6 +2,7 @@ package com.fpd.teamcity.slack
 
 import javax.servlet.http.HttpServletRequest
 
+import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.util.SessionUser
 
@@ -26,6 +27,10 @@ object Helpers {
       }
       sb.toString
     }
+  }
+
+  implicit class RichStatus(status: Status) {
+    def isUnknown: Boolean = status.getPriority == Status.UNKNOWN.getPriority
   }
 
   def checkPermission(request: HttpServletRequest): Boolean =
