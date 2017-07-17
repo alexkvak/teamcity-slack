@@ -91,10 +91,11 @@ object ConfigManager {
 
   type BuildSettings = Map[String, BuildSetting]
 
-  case class BuildSetting(buildTypeId: String, branchMask: String, slackChannel: String, flags: Set[BuildSettingFlag] = Set.empty) {
+  case class BuildSetting(buildTypeId: String, branchMask: String, slackChannel: String, messageTemplate: String, flags: Set[BuildSettingFlag] = Set.empty) {
     // Getters for JSP
     def getBranchMask: String = branchMask
     def getSlackChannel: String = slackChannel
+    def getMessageTemplate: String = messageTemplate
     // Flags
     def getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
     def getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)

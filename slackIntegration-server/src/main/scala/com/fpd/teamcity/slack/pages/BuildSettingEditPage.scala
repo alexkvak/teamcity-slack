@@ -3,7 +3,7 @@ package com.fpd.teamcity.slack.pages
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.controllers.SlackController
-import com.fpd.teamcity.slack.{ConfigManager, Resources}
+import com.fpd.teamcity.slack.{ConfigManager, MessageBuilder, Resources}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
@@ -26,7 +26,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
       key ← request.param("id")
       model ← config.buildSetting(key)
     } yield {
-      new ModelAndView(view, Map("model" → model, "key" → key).asJava)
+      new ModelAndView(view, Map("model" → model, "key" → key, "defaultMessage" → MessageBuilder.defaultMessage).asJava)
     }) getOrElse {
       new ModelAndView(view)
     }
