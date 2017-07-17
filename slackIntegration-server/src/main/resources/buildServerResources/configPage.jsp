@@ -3,7 +3,7 @@
 <c:if test="${not empty error}">
     <b>Wrong credentials</b>
 </c:if>
-<form action="/app/slackNotify/config" method="post">
+<form action="/app/slackIntegration/config" method="post">
     <table class="runnerFormTable">
         <tbody>
             <tr class="groupingTitle">
