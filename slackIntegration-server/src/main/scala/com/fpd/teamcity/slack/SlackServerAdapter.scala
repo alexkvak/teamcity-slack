@@ -3,6 +3,7 @@ package com.fpd.teamcity.slack
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackGateway.{SlackChannel, SlackUser}
+import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
 
 import scala.collection.JavaConverters._
@@ -46,46 +47,51 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     s"${build.getFullName} #${build.getBuildId} $status"
   }
 
-  override def buildFinished(build: SRunningBuild): Unit =
-    calculateFlags(build, sBuildServer).foreach(flags ⇒ notify(build, flags))
+  override def buildFinished(build: SRunningBuild): Unit = {
+    val previousStatus = sBuildServer.getHistory.getEntriesBefore(build, false).asScala
+      .find(!_.isPersonal)
+      .map(_.getBuildStatus)
+      .getOrElse(Status.UNKNOWN)
+
+    val flags = calculateFlags(previousStatus, build.getBuildStatus)
+    if (flags.nonEmpty) {
+      notify(build, flags)
+    }
+  }
 }
 
 object SlackServerAdapter {
-  private def calculateFlags(implicit build: SRunningBuild, sBuildServer: SBuildServer) = {
+  def calculateFlags(previous: Status, current: Status): Set[BuildSettingFlag] = {
     import BuildSettingFlag._
 
-    val flags = collection.mutable.Set.empty[BuildSettingFlag]
+    def changed = statusChanged(previous, current)
 
-    if (build.getBuildStatus.isSuccessful) {
-      flags += success
-      if (statusChanged) {
-        flags += failureToSuccess
-      }
-    } else if (build.getBuildStatus.isFailed) {
-      flags += failure
-      if (statusChanged) {
-        flags += successToFailure
-      }
+    def applyIfChanged(flag1: BuildSettingFlag, flag2: BuildSettingFlag) = if (changed) {
+      Set(flag1, flag2)
+    } else {
+      Set(flag1)
     }
 
-    flags.size match {
-      case 0 ⇒ None
-      case _ ⇒ Some(flags.toSet)
+    if (current.isSuccessful) {
+      applyIfChanged(success, failureToSuccess)
+    } else if (current.isFailed) {
+      applyIfChanged(failure, successToFailure)
+    } else {
+      Set()
     }
   }
 
-  private def statusChanged(implicit build: SRunningBuild, sBuildServer: SBuildServer) = {
-    val previousStatus = sBuildServer.getHistory.getEntriesBefore(build, false).asScala.find(!_.isPersonal).map(_.getBuildStatus)
-    val current = build.getBuildStatus
+  def statusChanged(previous: Status, current: Status): Boolean = {
+    import Helpers._
 
-    previousStatus.forall { prev ⇒
-      if (prev.isSuccessful) {
-        current.isFailed
-      } else if (prev.isFailed) {
-        current.isSuccessful
-      } else {
-        true
-      }
+    if (previous.isSuccessful) {
+      current.isFailed
+    } else if (previous.isFailed) {
+      current.isSuccessful
+    } else if (previous.isUnknown) {
+      false
+    } else {
+      current.isSuccessful || (!previous.isUnknown && current.isUnknown)
     }
   }
 }
