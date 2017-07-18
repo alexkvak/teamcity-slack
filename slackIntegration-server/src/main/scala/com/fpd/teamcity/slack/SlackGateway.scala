@@ -25,12 +25,6 @@ object SlackGateway {
 
   type MessageSent = SlackMessageHandle[SlackMessageReply]
 
-  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = {
-    // TODO: cache connection
-    val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
-    Try(session.connect()).map(_ ⇒ session).toOption
-  }
-
   implicit def attachmentToSlackMessage(attachment: SlackAttachment): SlackMessage = {
     val apiSlackAttachment = new ApiSlackAttachment()
     apiSlackAttachment.setText(attachment.text)
@@ -44,7 +38,16 @@ class SlackGateway(val configManager: ConfigManager) {
 
   import SlackGateway._
 
+  var sessions = Map.empty[String, SlackSession]
+
   def session: Option[SlackSession] = configManager.config.flatMap(sessionByConfig)
+
+  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = sessions.get(config.oauthKey).orElse {
+    val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
+    val option = Try(session.connect()).map(_ ⇒ session).toOption
+    option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
+    option
+  }
 
   def sendMessage(destination: Destination, message: SlackMessage): Option[MessageSent] =
     if (message.isEmpty) None else sendMessageInternal(destination, message)
