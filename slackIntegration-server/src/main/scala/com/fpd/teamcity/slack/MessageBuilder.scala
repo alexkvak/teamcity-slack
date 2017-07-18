@@ -4,19 +4,20 @@ import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{SBuild, WebLinks}
 
-class MessageBuilder(template: String) {
+import scala.collection.JavaConverters._
+
+class MessageBuilder(build: SBuild, viewResultsUrl: String, nickByEmail: (String) ⇒ Option[String]) {
   import MessageBuilder._
 
-  def compile(build: SBuild, webLinks: WebLinks): SlackAttachment = {
-    compile(build, viewResultsUrl(build, webLinks))
-  }
-
-  def compile(build: SBuild, viewResultsUrl: String): SlackAttachment = {
+  def compile(template: String): SlackAttachment = {
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
 
     // TODO: implement
     def changes = ""
     def artifacts = ""
+    def mentions = if (build.getBuildStatus.isSuccessful) "" else {
+      committees(build).map(nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
+    }
 
     val text = """\{(\w+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ build.getFullName
@@ -26,6 +27,7 @@ class MessageBuilder(template: String) {
       case "changes" ⇒ changes
       case "artifacts" ⇒ artifacts
       case "link" ⇒ viewResultsUrl
+      case "mentions" ⇒ mentions
       case _ ⇒ m.group(0)
     })
 
@@ -42,9 +44,19 @@ object MessageBuilder {
       |Status: {status}
     """.stripMargin
 
-  def apply(template: String): MessageBuilder = new MessageBuilder(template)
+//  def apply(template: String): MessageBuilder = new MessageBuilder(template)
 
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
 
-  private def viewResultsUrl(build: SBuild, webLinks: WebLinks): String = webLinks.getViewResultsUrl(build)
+  def committees(build: SBuild): Vector[String] = {
+    val users = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
+    users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
+  }
 }
+
+class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway) {
+  private def nickByEmail(email: String): Option[String] = Option(gateway.session.get.findUserByEmail(email)).map(_.getUserName)
+
+  def createForBuild(build: SBuild) = new MessageBuilder(build, webLinks.getViewResultsUrl(build), nickByEmail)
+}
+

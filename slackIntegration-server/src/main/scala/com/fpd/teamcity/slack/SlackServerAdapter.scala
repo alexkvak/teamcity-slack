@@ -4,14 +4,14 @@ import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackGateway.{SlackChannel, SlackUser}
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild, WebLinks}
+import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
 
 import scala.collection.JavaConverters._
 
 class SlackServerAdapter(sBuildServer: SBuildServer,
-                         webLinks: WebLinks,
                          configManager: ConfigManager,
-                         gateway: SlackGateway
+                         gateway: SlackGateway,
+                         messageBuilderFactory: MessageBuilderFactory
                         ) extends BuildServerAdapter {
 
   import SlackServerAdapter._
@@ -27,11 +27,11 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
       x.flags.intersect(flags).nonEmpty && matchBranch(x.branchMask)
     }
 
-    lazy val committees = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
-    lazy val emails = committees.view.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0).force
+    lazy val emails = MessageBuilder.committees(build)
+    lazy val messageBuilder = messageBuilderFactory.createForBuild(build)
 
     settings.foreach { setting ⇒
-      val attachment = MessageBuilder(setting.messageTemplate).compile(build, webLinks)
+      val attachment = messageBuilder.compile(setting.messageTemplate)
       gateway.sendMessage(SlackChannel(setting.slackChannel), attachment)
 
       // if build failed all committees should receive the message
@@ -41,16 +41,6 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
         }
       }
     }
-  }
-
-  private def generateMessage(build: SRunningBuild): String = {
-    val status = if (build.getBuildStatus.isSuccessful) {
-      "succeeded"
-    } else {
-      "failed"
-    }
-
-    s"${build.getFullName} #${build.getBuildId} $status"
   }
 
   override def buildFinished(build: SRunningBuild): Unit = {
