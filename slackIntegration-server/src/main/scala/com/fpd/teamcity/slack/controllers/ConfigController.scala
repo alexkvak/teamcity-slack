@@ -7,7 +7,11 @@ import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
 
-class ConfigController(configManager: ConfigManager, controllerManager: WebControllerManager)
+class ConfigController(
+                        configManager: ConfigManager,
+                        controllerManager: WebControllerManager,
+                        slackGateway: SlackGateway
+                      )
   extends BaseController with SlackController {
   import Helpers._
 
@@ -21,7 +25,7 @@ class ConfigController(configManager: ConfigManager, controllerManager: WebContr
     }
 
     val option = newConfig map { config ⇒
-      SlackGateway.sessionByConfig(config).map { _ ⇒
+      slackGateway.sessionByConfig(config).map { _ ⇒
         configManager.updateAndPersist(config)
       }
     }

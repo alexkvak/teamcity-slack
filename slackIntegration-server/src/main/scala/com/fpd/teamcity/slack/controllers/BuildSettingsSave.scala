@@ -5,7 +5,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag}
 import com.fpd.teamcity.slack.Helpers._
-import com.fpd.teamcity.slack.{ConfigManager, Resources}
+import com.fpd.teamcity.slack.{ConfigManager, Resources, SlackGateway}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
@@ -14,6 +14,7 @@ import scala.util.Try
 
 class BuildSettingsSave(configManager: ConfigManager,
                         controllerManager: WebControllerManager,
+                        slackGateway: SlackGateway,
                         implicit val descriptor: PluginDescriptor
                        )
   extends BaseController with SlackController {
@@ -21,7 +22,7 @@ class BuildSettingsSave(configManager: ConfigManager,
   controllerManager.registerController(Resources.buildSettingSave.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    def collectFlags = {
+    def flags = {
       val keyToFlag = Map(
         "success" → BuildSettingFlag.success,
         "failureToSuccess" → BuildSettingFlag.failureToSuccess,
@@ -34,11 +35,19 @@ class BuildSettingsSave(configManager: ConfigManager,
     }
 
     val result = for {
-      branchMask ← request.param("branchMask")
-      slackChannel ← request.param("slackChannel")
-      buildTypeId ← request.param("buildTypeId")
-      messageTemplate ← request.param("messageTemplate")
-      result ← configManager.updateBuildSetting(BuildSetting(buildTypeId, branchMask, slackChannel, messageTemplate, collectFlags), request.param("key")) if Try(branchMask.r).isSuccess
+      // preparing params
+      branch ← request.param("branchMask")
+      channel ← request.param("slackChannel")
+      buildId ← request.param("buildTypeId")
+      message ← request.param("messageTemplate")
+
+      // check channel availability
+      config ← configManager.config
+      session ← slackGateway.sessionByConfig(config)
+      _ ← Option(session.findChannelById(channel))
+
+      // store build setting
+      result ← configManager.updateBuildSetting(BuildSetting(buildId, branch, channel, message, flags), request.param("key")) if Try(branch.r).isSuccess
     } yield result
 
     ajaxView(result.filter(_ == true).map(_ ⇒ "") getOrElse "Something went wrong")
