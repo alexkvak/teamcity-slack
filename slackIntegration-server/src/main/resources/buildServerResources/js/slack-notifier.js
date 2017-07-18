@@ -13,6 +13,8 @@ jQuery(function ($) {
         buildSettingEdit($(this).closest('tr').data('id'));
     }).on('click', '.js-delete', function () {
         buildSettingDelete($(this).closest('tr').data('id'));
+    }).on('click', '.js-try', function () {
+        buildSettingTry($(this).closest('tr').data('id'));
     });
 
     $('#mainContent').on('click', '.closeDialog', function () {
@@ -68,6 +70,19 @@ jQuery(function ($) {
                 $('#slackNotifier').find('.modalDialogBody').html(response.responseText);
                 BS.SlackNotifierDialog.showCentered();
                 initCheckboxes();
+            }
+        });
+    }
+
+    function buildSettingTry(id) {
+        BS.DialogWithProgress.showProgress('Sending...');
+        BS.ajaxRequest(window.slackNotifier.buildSettingTryUrl + '?id=' + id, {
+            onSuccess: function (response) {
+                BS.DialogWithProgress.hideProgress();
+                BS.confirmDialog.show({
+                    'title': 'Message sent',
+                    'text': response.responseText
+                });
             }
         });
     }

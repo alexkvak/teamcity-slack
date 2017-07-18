@@ -1,39 +1,49 @@
 package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
-import jetbrains.buildServer.serverSide.SRunningBuild
+import jetbrains.buildServer.messages.Status
+import jetbrains.buildServer.serverSide.{SBuild, WebLinks}
 
 class MessageBuilder(template: String) {
-  def compile(build: SRunningBuild): SlackAttachment = {
-    def status = if (build.getBuildStatus.isSuccessful) {
-      "succeeded"
-    } else {
-      "failed"
-    }
+  import MessageBuilder._
+
+  def compile(build: SBuild, webLinks: WebLinks): SlackAttachment = {
+    compile(build, viewResultsUrl(build, webLinks))
+  }
+
+  def compile(build: SBuild, viewResultsUrl: String): SlackAttachment = {
+    def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
+    def linkToBuild = s"<$viewResultsUrl|Open>"
 
     // TODO: implement
-    def mentions = ""
+    def changes = ""
+    def artifacts = ""
 
-    val text = """\{(\w+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
+    val text = """\{(\w+)\}""".r.replaceAllIn(template, _.group(1) match {
       case "name" ⇒ build.getFullName
-      case "number" ⇒ build.getBuildId.toString
-      case "branch" ⇒ build.getBranch.getName
+      case "number" ⇒ build.getBuildNumber
+      case "branch" ⇒ build.getBranch.getDisplayName
       case "status" ⇒ status
-      case "mentions" ⇒ mentions
+      case "changes" ⇒ changes
+      case "artifacts" ⇒ artifacts
     })
 
-    // TODO: add link to build page
-    SlackAttachment(text.trim, build.getBuildStatus.getHtmlColor)
+    SlackAttachment(text.trim + "\n" + linkToBuild, statusColor(build.getBuildStatus))
   }
 }
 
 object MessageBuilder {
+  lazy val statusNormalColor = "#02c456"
+
   def defaultMessage: String =
     """{name} - {number}
       |Branch: {branch}
       |Status: {status}
-      |{mentions}
     """.stripMargin
 
   def apply(template: String): MessageBuilder = new MessageBuilder(template)
+
+  private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
+
+  private def viewResultsUrl(build: SBuild, webLinks: WebLinks): String = webLinks.getViewResultsUrl(build)
 }

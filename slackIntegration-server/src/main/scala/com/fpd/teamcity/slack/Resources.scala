@@ -14,6 +14,7 @@ object Resources {
   lazy val buildSettingEdit = Page("/app/slackIntegration/buildSettingEdit.html", "buildSettingEditPage.jsp")
   lazy val buildSettingSave = Action("/app/slackIntegration/buildSettingSave.html")
   lazy val buildSettingDelete = Action("/app/slackIntegration/buildSettingDelete.html")
+  lazy val buildSettingTry = Action("/app/slackIntegration/buildSettingTry.html")
   lazy val configPage = Page("/app/slackIntegration/config", "configPage.jsp")
   lazy val ajaxView = View("ajaxView.jsp")
 }

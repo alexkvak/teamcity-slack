@@ -15,7 +15,9 @@ object SlackGateway {
 
   case class SlackChannel(name: String) extends Destination
 
-  case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None)
+  case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None) {
+    def isEmpty: Boolean = message.isEmpty && (attachment.isEmpty || attachment.get.text.isEmpty)
+  }
 
   case class SlackAttachment(text: String, color: String)
 
@@ -29,11 +31,12 @@ object SlackGateway {
     Try(session.connect()).map(_ ⇒ session).toOption
   }
 
-  implicit def toApiSlackAttachment(attachment: SlackAttachment): ApiSlackAttachment = {
+  implicit def attachmentToSlackMessage(attachment: SlackAttachment): SlackMessage = {
     val apiSlackAttachment = new ApiSlackAttachment()
     apiSlackAttachment.setText(attachment.text)
     apiSlackAttachment.setColor(attachment.color)
-    apiSlackAttachment
+
+    SlackMessage("", Some(apiSlackAttachment))
   }
 }
 
@@ -43,7 +46,10 @@ class SlackGateway(val configManager: ConfigManager) {
 
   def session: Option[SlackSession] = configManager.config.flatMap(sessionByConfig)
 
-  def sendMessage(destination: Destination, message: SlackMessage): Option[MessageSent] = session.flatMap { x ⇒
+  def sendMessage(destination: Destination, message: SlackMessage): Option[MessageSent] =
+    if (message.isEmpty) None else sendMessageInternal(destination, message)
+
+  private def sendMessageInternal(destination: Destination, message: SlackMessage): Option[MessageSent] = session.flatMap { x ⇒
     destination match {
       case SlackChannel(channel) ⇒ Option(x.findChannelByName(channel)).map { channel ⇒
         x.sendMessage(channel, message.message, message.attachment.orNull)

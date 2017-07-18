@@ -25,5 +25,6 @@ class BuildPage(manager: WebControllerManager, projectManager: ProjectManager, d
     model.put("buildSettingEditUrl", Resources.buildSettingEdit.url)
     model.put("buildSettingSaveUrl", Resources.buildSettingSave.url)
     model.put("buildSettingDeleteUrl", Resources.buildSettingDelete.url)
+    model.put("buildSettingTryUrl", Resources.buildSettingTry.url)
   }
 }
