@@ -45,8 +45,6 @@ object MessageBuilder {
       |{mentions}
     """.stripMargin
 
-//  def apply(template: String): MessageBuilder = new MessageBuilder(template)
-
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
 
   def committees(build: SBuild): Vector[String] = {
