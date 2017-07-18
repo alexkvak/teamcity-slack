@@ -42,6 +42,7 @@ object MessageBuilder {
     """<{link}|{name} - {number}>
       |Branch: {branch}
       |Status: {status}
+      |{mentions}
     """.stripMargin
 
 //  def apply(template: String): MessageBuilder = new MessageBuilder(template)
