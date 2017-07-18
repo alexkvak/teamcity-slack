@@ -21,14 +21,13 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
 
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingEdit.view)
 
-    // TODO: optimize
-    (for {
+    val result = for {
       key ← request.param("id")
       model ← config.buildSetting(key)
     } yield {
       new ModelAndView(view, Map("model" → model, "key" → key, "defaultMessage" → MessageBuilder.defaultMessage).asJava)
-    }) getOrElse {
-      new ModelAndView(view)
     }
+
+    result getOrElse new ModelAndView(view)
   }
 }
