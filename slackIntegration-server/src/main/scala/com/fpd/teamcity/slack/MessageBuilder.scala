@@ -13,22 +13,23 @@ class MessageBuilder(template: String) {
 
   def compile(build: SBuild, viewResultsUrl: String): SlackAttachment = {
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
-    def linkToBuild = s"<$viewResultsUrl|Open>"
 
     // TODO: implement
     def changes = ""
     def artifacts = ""
 
-    val text = """\{(\w+)\}""".r.replaceAllIn(template, _.group(1) match {
+    val text = """\{(\w+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ build.getFullName
       case "number" ⇒ build.getBuildNumber
       case "branch" ⇒ build.getBranch.getDisplayName
       case "status" ⇒ status
       case "changes" ⇒ changes
       case "artifacts" ⇒ artifacts
+      case "link" ⇒ viewResultsUrl
+      case _ ⇒ m.group(0)
     })
 
-    SlackAttachment(text.trim + "\n" + linkToBuild, statusColor(build.getBuildStatus))
+    SlackAttachment(text.trim, statusColor(build.getBuildStatus))
   }
 }
 
@@ -36,7 +37,7 @@ object MessageBuilder {
   lazy val statusNormalColor = "#02c456"
 
   def defaultMessage: String =
-    """{name} - {number}
+    """<{link}|{name} - {number}>
       |Branch: {branch}
       |Status: {status}
     """.stripMargin
