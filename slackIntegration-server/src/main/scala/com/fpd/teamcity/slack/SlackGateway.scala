@@ -42,7 +42,7 @@ class SlackGateway(val configManager: ConfigManager) {
 
   def session: Option[SlackSession] = configManager.config.flatMap(sessionByConfig)
 
-  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = sessions.get(config.oauthKey).orElse {
+  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = sessions.get(config.oauthKey).filter(_.isConnected).orElse {
     val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
     val option = Try(session.connect()).map(_ ⇒ session).toOption
     option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
