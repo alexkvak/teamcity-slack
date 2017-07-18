@@ -34,8 +34,6 @@ object Helpers {
     def isUnknown: Boolean = status.getPriority == Status.UNKNOWN.getPriority
   }
 
-  implicit def messageTemplateFromString(message: String): MessageBuilder = MessageBuilder(message)
-
   def checkPermission(request: HttpServletRequest): Boolean =
     Option(SessionUser.getUser(request)).exists(user ⇒ user.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
 }

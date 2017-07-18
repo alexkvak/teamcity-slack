@@ -4,9 +4,9 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.Helpers._
 import com.fpd.teamcity.slack.SlackGateway.SlackChannel
-import com.fpd.teamcity.slack.{ConfigManager, MessageBuilder, Resources, SlackGateway}
+import com.fpd.teamcity.slack._
 import jetbrains.buildServer.controllers.BaseController
-import jetbrains.buildServer.serverSide.{BuildHistory, WebLinks}
+import jetbrains.buildServer.serverSide.BuildHistory
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
@@ -14,9 +14,9 @@ import scala.collection.JavaConverters._
 
 class BuildSettingsTry(buildHistory: BuildHistory,
                        configManager: ConfigManager,
-                       webLinks: WebLinks,
                        gateway: SlackGateway,
                        controllerManager: WebControllerManager,
+                       messageBuilderFactory: MessageBuilderFactory,
                        implicit val descriptor: PluginDescriptor
                       )
   extends BaseController with SlackController {
@@ -28,7 +28,7 @@ class BuildSettingsTry(buildHistory: BuildHistory,
       id ← request.param("id")
       setting ← configManager.buildSetting(id)
       build ← buildHistory.getEntries(false).asScala.find(_.getBuildTypeId == setting.buildTypeId)
-      _ ← gateway.sendMessage(SlackChannel(setting.slackChannel), MessageBuilder(setting.messageTemplate).compile(build, webLinks))
+      _ ← gateway.sendMessage(SlackChannel(setting.slackChannel), messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate))
     } yield {
       s"Message sent to #${setting.slackChannel}"
     }
