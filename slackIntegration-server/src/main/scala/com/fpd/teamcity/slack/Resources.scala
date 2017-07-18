@@ -2,7 +2,6 @@ package com.fpd.teamcity.slack
 
 object Resources {
 
-  // TODO: inherit case classes
   case class View(view: String)
 
   case class Action(url: String)
