@@ -44,7 +44,7 @@ class BuildSettingsSave(configManager: ConfigManager,
       // check channel availability
       config ← configManager.config
       session ← slackGateway.sessionByConfig(config)
-      _ ← Option(session.findChannelById(channel))
+      _ ← Option(session.findChannelByName(channel))
 
       // store build setting
       result ← configManager.updateBuildSetting(BuildSetting(buildId, branch, channel, message, flags), request.param("key")) if Try(branch.r).isSuccess
