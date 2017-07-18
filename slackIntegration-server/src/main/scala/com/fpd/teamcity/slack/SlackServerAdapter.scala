@@ -4,11 +4,12 @@ import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackGateway.{SlackChannel, SlackUser}
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
+import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild, WebLinks}
 
 import scala.collection.JavaConverters._
 
 class SlackServerAdapter(sBuildServer: SBuildServer,
+                         webLinks: WebLinks,
                          configManager: ConfigManager,
                          gateway: SlackGateway
                         ) extends BuildServerAdapter {
@@ -18,21 +19,26 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
   sBuildServer.addListener(this)
 
   private def notify(build: SRunningBuild, flags: Set[BuildSettingFlag]): Unit = {
-    def matchBranch(mask: String) = Option(build.getBranch).map(branch ⇒ mask.r.findFirstIn(branch.getName)).isDefined
+    def matchBranch(mask: String) = Option(build.getBranch).exists { branch ⇒
+      mask.r.findFirstIn(branch.getName).isDefined
+    }
 
     val settings = configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒
       x.flags.intersect(flags).nonEmpty && matchBranch(x.branchMask)
     }
 
+    lazy val committees = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
+    lazy val emails = committees.view.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0).force
+
     settings.foreach { setting ⇒
-      val message = generateMessage(build)
-      gateway.sendMessage(SlackChannel(setting.slackChannel), message)
+      val attachment = MessageBuilder(setting.messageTemplate).compile(build, webLinks)
+      gateway.sendMessage(SlackChannel(setting.slackChannel), attachment)
 
       // if build failed all committees should receive the message
       if (build.getBuildStatus.isFailed) {
-        val committees = build.getContainingChanges.asScala.flatMap(change ⇒ change.getCommitters.asScala).toSet
-        val emails = committees.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
-        emails.map(SlackUser).foreach(gateway.sendMessage(_, message))
+        emails.foreach { email ⇒
+          gateway.sendMessage(SlackUser(email), attachment)
+        }
       }
     }
   }

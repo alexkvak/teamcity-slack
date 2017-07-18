@@ -4,6 +4,7 @@
     window.slackNotifier = {
        buildSettingListUrl: "${buildSettingListUrl}?buildTypeId=${buildTypeId}",
        buildSettingEditUrl: "${buildSettingEditUrl}",
+       buildSettingTryUrl: "${buildSettingTryUrl}",
        buildSettingSaveUrl: "${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
        buildSettingDeleteUrl: "${buildSettingDeleteUrl}"
     };

@@ -29,8 +29,11 @@
                     </ul>
                 </td>
                 <td>
-                    <a href="#" class="js-edit">Edit</a>
-                    <a href="#" class="js-delete">Remove</a>
+                    <ul class="options-list">
+                        <li><a href="#" class="js-edit">Edit</a></li>
+                        <li><a href="#" class="js-delete">Remove</a></li>
+                        <li><a href="#" class="js-try">Try it</a></li>
+                    </ul>
                 </td>
             </tr>
         </c:forEach>
