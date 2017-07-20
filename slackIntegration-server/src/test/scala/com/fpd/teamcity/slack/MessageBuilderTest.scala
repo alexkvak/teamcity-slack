@@ -99,15 +99,40 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
+  "MessageBuilder.compile" should "compile template with changes placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.FAILURE
+    build.getContainingChanges _ when() returns mockChanges
+
+    val messageTemplate = """{name}
+                            |{changes}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        | 5 files by name1: Did some changes
+        | 1 files by name2: Did another changes
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
     val vcsModification2 = stub[SVcsModification]
     val user1 = stub[SUser]
     val user2 = stub[SUser]
     user1.getEmail _ when() returns "nick1"
+    user1.getUsername _ when() returns "name1"
     user2.getEmail _ when() returns "nick2"
+    user2.getUsername _ when() returns "name2"
     vcsModification1.getCommitters _ when() returns Set(user1).asJava
-    vcsModification2.getCommitters _ when() returns Set(user1, user2).asJava
+    vcsModification2.getCommitters _ when() returns Set(user2).asJava
+    vcsModification1.getDescription _ when() returns "Did some changes"
+    vcsModification1.getChangeCount _ when() returns 5
+    vcsModification2.getDescription _ when() returns "Did another changes"
+    vcsModification2.getChangeCount _ when() returns 1
 
     List(vcsModification1, vcsModification2).asJava
   }
