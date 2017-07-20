@@ -63,7 +63,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
-      s"""Full name
+      """Full name
         |{unknown}
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
@@ -94,7 +94,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
-      s"""Full name
+      """Full name
         |@nick1 @nick2
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
@@ -112,9 +112,28 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
-      s"""Full name
+      """Full name
         | 5 files by name1: Did some changes
         | 1 files by name2: Did another changes
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
+  "MessageBuilder.compile" should "compile template with artifacts placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.FAILURE
+    build.getContainingChanges _ when() returns mockChanges
+
+    val messageTemplate = """{name}
+                            |{artifacts}
+                          """.stripMargin
+
+    val downloadUrl = "http://my.teamcity/download/artifacts.zip"
+    messageBuilder(downloadArtifactsUrl = downloadUrl).compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        |<$downloadUrl|Download all artifacts>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
@@ -139,5 +158,6 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 }
 
 object MessageBuilderTest {
-  def messageBuilder(viewResultsUrl: String = "")(implicit build: SBuild) = new MessageBuilder(build, viewResultsUrl, x ⇒ Some(x))
+  def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "")(implicit build: SBuild) =
+    new MessageBuilder(build, (_) ⇒ viewResultsUrl, x ⇒ Some(x), (_) ⇒ downloadArtifactsUrl)
 }

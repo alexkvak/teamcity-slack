@@ -6,14 +6,18 @@ import jetbrains.buildServer.serverSide.{SBuild, WebLinks}
 
 import scala.collection.JavaConverters._
 
-class MessageBuilder(build: SBuild, viewResultsUrl: String, nickByEmail: (String) ⇒ Option[String]) {
+class MessageBuilder(
+                      build: SBuild,
+                      viewResultsUrl: (SBuild) ⇒ String,
+                      nickByEmail: (String) ⇒ Option[String],
+                      downloadArtifactsUrl: (SBuild) ⇒ String
+                    ) {
   import MessageBuilder._
 
   def compile(template: String): SlackAttachment = {
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
 
-    // TODO: implement
-    def artifacts = ""
+    def artifacts = s"<${downloadArtifactsUrl(build)}|Download all artifacts>"
 
     def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getUsername).getOrElse("unknown")
@@ -33,7 +37,7 @@ class MessageBuilder(build: SBuild, viewResultsUrl: String, nickByEmail: (String
       case "status" ⇒ status
       case "changes" ⇒ changes
       case "artifacts" ⇒ artifacts
-      case "link" ⇒ viewResultsUrl
+      case "link" ⇒ viewResultsUrl(build)
       case "mentions" ⇒ mentions
       case _ ⇒ m.group(0)
     })
@@ -63,6 +67,6 @@ object MessageBuilder {
 class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway) {
   private def nickByEmail(email: String): Option[String] = Option(gateway.session.get.findUserByEmail(email)).map(_.getUserName)
 
-  def createForBuild(build: SBuild) = new MessageBuilder(build, webLinks.getViewResultsUrl(build), nickByEmail)
+  def createForBuild(build: SBuild) = new MessageBuilder(build, webLinks.getViewResultsUrl, nickByEmail, webLinks.getDownloadAllArtefactsUrl)
 }
 
