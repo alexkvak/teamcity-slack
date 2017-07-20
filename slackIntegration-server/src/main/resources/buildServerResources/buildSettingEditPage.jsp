@@ -17,7 +17,7 @@
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
                              value="${model.messageTemplate}" defaultText="${defaultMessage}"/>
       <div class="smallNote">
-        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions} <!-- , {artifacts}, {changes} -->
+        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes} <!-- , {artifacts}, {changes} -->
       </div>
       </span>
     </div>

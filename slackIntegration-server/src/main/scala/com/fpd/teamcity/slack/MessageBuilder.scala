@@ -13,8 +13,15 @@ class MessageBuilder(build: SBuild, viewResultsUrl: String, nickByEmail: (String
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
 
     // TODO: implement
-    def changes = ""
     def artifacts = ""
+
+    def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
+      val name = change.getCommitters.asScala.headOption.map(_.getUsername).getOrElse("unknown")
+      val filesCount = change.getChangeCount
+
+      s" $filesCount files by $name: ${change.getDescription}"
+    } mkString "\n"
+
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
       committees(build).map(nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
     }
