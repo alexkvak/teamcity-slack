@@ -3,7 +3,7 @@ package com.fpd.teamcity.slack
 import java.util.concurrent.TimeUnit
 
 import com.ullink.slack.simpleslackapi.impl.{SlackChatConfiguration, SlackSessionFactory}
-import com.ullink.slack.simpleslackapi.replies.SlackMessageReply
+import com.ullink.slack.simpleslackapi.replies.{GenericSlackReply, SlackMessageReply, SlackReply}
 import com.ullink.slack.simpleslackapi.{SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
 
 import scala.concurrent.duration._
@@ -67,7 +67,7 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
         handle.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS))
         handle
       }
-      logResult(destination, Await.result(future, networkTimeout seconds))
+      processResult(destination, Await.result(future, networkTimeout seconds))
     }
 
   private def sendMessageInternal(destination: Destination, message: SlackMessage): Option[MessageSent] = session.flatMap { x ⇒
@@ -81,7 +81,7 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
     }
   }
 
-  private def logResult(destination: Destination, result: Option[MessageSent]): Option[MessageSent] = {
+  private def processResult(destination: Destination, result: Option[MessageSent]): Option[MessageSent] = {
     val dest = destination match {
       case SlackChannel(channel) ⇒ s"channel #$channel"
       case SlackUser(email) ⇒ s"user $email"
@@ -89,10 +89,23 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
     result match {
       case Some(sent) if sent.getReply != null ⇒
-        logger.log(s"Message sent to $dest")
+        parseReplyError(sent.getReply) match {
+          case Some(error) ⇒
+            logger.log(s"Message to $dest wasn't sent. Reason: $error")
+            None
+          case _ ⇒
+            logger.log(s"Message sent to $dest")
+            result
+        }
       case _ ⇒
         logger.log(s"Message to $dest wasn't sent. Reason: timeout")
+        None
     }
-    result
+
+  }
+
+  private def parseReplyError(reply: SlackReply): Option[String] = reply match {
+    case genericReply: GenericSlackReply ⇒
+      Some(genericReply.getPlainAnswer.toJSONString)
   }
 }
