@@ -101,11 +101,11 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
         logger.log(s"Message to $dest wasn't sent. Reason: timeout")
         None
     }
-
   }
 
-  private def parseReplyError(reply: SlackReply): Option[String] = reply match {
-    case genericReply: GenericSlackReply ⇒
-      Some(genericReply.getPlainAnswer.toJSONString)
-  }
+  //noinspection TypeCheckCanBeMatch
+  private def parseReplyError(reply: SlackReply): Option[String] =
+    if (reply.isInstanceOf[GenericSlackReply] && !reply.asInstanceOf[GenericSlackReply].getPlainAnswer.get("ok").asInstanceOf[Boolean]) {
+      Some(reply.asInstanceOf[GenericSlackReply].getPlainAnswer.toJSONString)
+  } else None
 }
