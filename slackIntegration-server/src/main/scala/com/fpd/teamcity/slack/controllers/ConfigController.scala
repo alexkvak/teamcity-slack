@@ -1,5 +1,6 @@
 package com.fpd.teamcity.slack.controllers
 
+import java.net.URLEncoder
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack._
@@ -14,28 +15,33 @@ class ConfigController(
                       )
   extends BaseController with SlackController {
   import Helpers._
+  import ConfigController._
 
   controllerManager.registerController(Resources.configPage.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    val newConfig = for {
-      oauthKey ← request.param("oauthKey")
-    } yield {
-      ConfigManager.Config(oauthKey)
+    val either = request.param("oauthKey") match {
+      case Some(oauthKey) ⇒
+        val newConfig = ConfigManager.Config(oauthKey)
+
+        val result = slackGateway.sessionByConfig(newConfig).map { _ ⇒
+          configManager.updateAuthKey(oauthKey)
+        }
+
+        result match {
+          case Some(x) if x ⇒ Left(x)
+          case Some(_) ⇒ Right("Unable to create session by config")
+        }
+      case None ⇒ Right("Param oauthKey is missing")
     }
 
-    val option = newConfig map { config ⇒
-      slackGateway.sessionByConfig(config).map { _ ⇒
-        configManager.updateAndPersist(config)
-      }
-    }
-
-    redirectTo(createRedirect(option), response)
+    redirectTo(createRedirect(either), response)
   }
+}
 
-  private def createRedirect[T](result: Option[T]): String = result.map(_ ⇒
-    s"/admin/admin.html?item=${Strings.tabId}"
-  ).getOrElse(
-    s"/admin/admin.html?item=${Strings.tabId}&error=1"
-  )
+object ConfigController {
+  private def createRedirect(either: Either[Boolean, String]): String = either match {
+    case Left(_) ⇒ s"/admin/admin.html?item=${Strings.tabId}"
+    case Right(error) ⇒ s"/admin/admin.html?item=${Strings.tabId}&error=${URLEncoder.encode(error, "UTF-8")}"
+  }
 }

@@ -18,13 +18,13 @@ class ConfigManager(paths: ServerPaths) {
 
   private implicit val formats = Serialization.formats(NoTypeHints) + new EnumNameSerializer(BuildSettingFlag)
 
-  val configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
+  lazy val configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
 
-  private[teamcity] var config: Option[Config] = {
-    if (configFile.exists()) {
-      parse(configFile).extractOpt[Config]
-    } else None
-  }
+  private[teamcity] var config: Option[Config] = readConfig
+
+  protected def readConfig: Option[Config] = if (configFile.exists()) {
+    parse(configFile).extractOpt[Config]
+  } else None
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
 
@@ -34,10 +34,12 @@ class ConfigManager(paths: ServerPaths) {
 
   def buildSetting(id: String): Option[BuildSetting] = allBuildSettingList.get(id)
 
-  private[teamcity] def update(config: Config): Unit = this.config = Some(config)
+  private def updateAndPersist(newConfig: Config): Boolean = {
+    this.config = Some(newConfig)
+    persist(newConfig)
+  }
 
-  def updateAndPersist(newConfig: Config): Boolean = synchronized {
-    update(newConfig)
+  def persist(newConfig: Config): Boolean = synchronized {
     val out = new PrintWriter(configFile, "UTF-8")
     try {
       writePretty(config, out)
@@ -49,16 +51,6 @@ class ConfigManager(paths: ServerPaths) {
     true
   }
 
-  @annotation.tailrec
-  private def nextKey(map: BuildSettings): String = {
-    val key = Random.randomAlphaNumericString(5)
-    if (map.contains(key)) {
-      nextKey(map)
-    } else {
-      key
-    }
-  }
-
   def updateBuildSetting(setting: BuildSetting, keyOption: Option[String]): Option[Boolean] = config.map { c ⇒
     val newSettings = keyOption match {
       case Some(key) ⇒
@@ -68,6 +60,11 @@ class ConfigManager(paths: ServerPaths) {
     }
 
     updateAndPersist(c.copy(buildSettings = newSettings))
+  }
+
+  def updateAuthKey(authKey: String): Boolean = config match {
+    case Some(c) ⇒ updateAndPersist(c.copy(authKey))
+    case None ⇒ updateAndPersist(Config(authKey))
   }
 
   def removeBuildSetting(key: String): Option[Boolean] = config.map { c ⇒
@@ -105,4 +102,13 @@ object ConfigManager {
 
   case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)
 
+  @annotation.tailrec
+  private def nextKey(map: BuildSettings): String = {
+    val key = Random.randomAlphaNumericString(5)
+    if (map.contains(key)) {
+      nextKey(map)
+    } else {
+      key
+    }
+  }
 }
