@@ -35,21 +35,33 @@ class BuildSettingsSave(configManager: ConfigManager,
     }
 
     val result = for {
-      // preparing params
+    // preparing params
       branch ← request.param("branchMask")
       channel ← request.param("slackChannel")
       buildId ← request.param("buildTypeId")
       message ← request.param("messageTemplate")
 
-      // check channel availability
       config ← configManager.config
-      session ← slackGateway.sessionByConfig(config)
-      _ ← Option(session.findChannelByName(channel))
-
+    } yield {
       // store build setting
-      result ← configManager.updateBuildSetting(BuildSetting(buildId, branch, channel, message, flags), request.param("key")) if Try(branch.r).isSuccess
-    } yield result
+      def updateConfig() = configManager.updateBuildSetting(
+        BuildSetting(buildId, branch, channel, message, flags),
+        request.param("key")
+      ).map(_ ⇒ "").getOrElse("")
 
-    ajaxView(result.filter(_ == true).map(_ ⇒ "") getOrElse "Something went wrong")
+      // check channel availability
+      slackGateway.sessionByConfig(config) match {
+        case Some(session) ⇒
+          Option(session.findChannelByName(channel)) match {
+            case Some(_) if Try(branch.r).isSuccess ⇒ updateConfig()
+            case Some(_) ⇒ s"Unable to compile regular expression $branch"
+            case None ⇒ s"Unable to find channel with name $channel"
+          }
+        case _ ⇒
+          "Unable to create session by config"
+      }
+    }
+
+    ajaxView(result getOrElse "Unknown error")
   }
 }
