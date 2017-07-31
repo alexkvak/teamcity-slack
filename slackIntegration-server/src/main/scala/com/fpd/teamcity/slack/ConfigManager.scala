@@ -74,6 +74,8 @@ class ConfigManager(paths: ServerPaths) {
   def details: Map[String, Option[String]] = Map(
     "oauthKey" → oauthKey
   )
+
+  def isAvailable: Boolean = config.exists(_.oauthKey.length > 0)
 }
 
 object ConfigManager {
