@@ -30,7 +30,8 @@ class ConfigController(
 
         result match {
           case Some(x) if x ⇒ Left(x)
-          case Some(_) ⇒ Right("Unable to create session by config")
+          case Some(_) ⇒ Right("Failed to update OAuth Access Token")
+          case None ⇒ Right("Unable to create session by config")
         }
       case None ⇒ Right("Param oauthKey is missing")
     }
