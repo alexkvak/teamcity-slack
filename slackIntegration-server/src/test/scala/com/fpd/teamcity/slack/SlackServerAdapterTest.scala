@@ -1,13 +1,17 @@
 package com.fpd.teamcity.slack
 
+import java.util.Collections
+
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackServerAdapter._
 import jetbrains.buildServer.messages.Status
+import jetbrains.buildServer.serverSide.{BuildHistory, SBuildServer, SFinishedBuild, SRunningBuild}
+import org.scalamock.scalatest.MockFactory
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-class SlackServerAdapterTest extends FlatSpec with Matchers {
+class SlackServerAdapterTest extends FlatSpec with MockFactory with Matchers {
   "SlackServerAdapter.statusChanged" should "work properly" in {
     forAll(data) { (previous: Status, current: Status, changed: Boolean) ⇒
       statusChanged(previous, current) shouldEqual changed
@@ -50,5 +54,21 @@ class SlackServerAdapterTest extends FlatSpec with Matchers {
         (Status.UNKNOWN, Status.ERROR, Set(failure)),
         (Status.UNKNOWN, Status.NORMAL, Set(success))
       )
+  }
+
+  "SlackServerAdapter.buildFinished" should "call notify with success flag" in new CommonMocks {
+    val buildServer: SBuildServer = stub[SBuildServer]
+    val adapter = new SlackServerAdapter(buildServer, manager, stub[SlackGateway], stub[MessageBuilderFactory])
+
+    val buildHistory: BuildHistory = stub[BuildHistory]
+    val build: SRunningBuild = stub[SRunningBuild]
+
+    buildHistory.getEntriesBefore _ when(build, false) returns Collections.emptyList[SFinishedBuild]
+    buildServer.getHistory _ when() returns buildHistory
+    build.getBuildStatus _ when() returns Status.NORMAL
+
+    adapter.buildFinished(build)
+
+    adapter.send _ verify (build, Set(BuildSettingFlag.success))
   }
 }

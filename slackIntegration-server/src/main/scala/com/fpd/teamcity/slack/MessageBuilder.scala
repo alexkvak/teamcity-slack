@@ -13,6 +13,7 @@ class MessageBuilder(
                       downloadArtifactsUrl: (SBuild) ⇒ String
                     ) {
   import MessageBuilder._
+  import Helpers._
 
   def compile(template: String): SlackAttachment = {
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
@@ -27,7 +28,7 @@ class MessageBuilder(
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
-      committees(build).map(nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
+      build.committees.map(nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
     }
 
     val text = """\{(\w+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
@@ -57,11 +58,6 @@ object MessageBuilder {
     """.stripMargin
 
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
-
-  def committees(build: SBuild): Vector[String] = {
-    val users = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
-    users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
-  }
 }
 
 class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway) {

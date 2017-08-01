@@ -3,9 +3,11 @@ package com.fpd.teamcity.slack
 import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.messages.Status
+import jetbrains.buildServer.serverSide.SBuild
 import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.web.util.SessionUser
 
+import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Random
 
@@ -36,4 +38,12 @@ object Helpers {
 
   def checkPermission(request: HttpServletRequest): Boolean =
     Option(SessionUser.getUser(request)).exists(user ⇒ user.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
+
+  implicit class RichBuild(build: SBuild) {
+    def committees: Vector[String] = {
+      val users = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
+      users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
+    }
+  }
+
 }
