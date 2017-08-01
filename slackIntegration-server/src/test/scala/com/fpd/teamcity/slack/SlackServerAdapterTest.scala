@@ -55,20 +55,4 @@ class SlackServerAdapterTest extends FlatSpec with MockFactory with Matchers {
         (Status.UNKNOWN, Status.NORMAL, Set(success))
       )
   }
-
-  "SlackServerAdapter.buildFinished" should "call notify with success flag" in new CommonMocks {
-    val buildServer: SBuildServer = stub[SBuildServer]
-    val adapter = new SlackServerAdapter(buildServer, manager, stub[SlackGateway], stub[MessageBuilderFactory])
-
-    val buildHistory: BuildHistory = stub[BuildHistory]
-    val build: SRunningBuild = stub[SRunningBuild]
-
-    buildHistory.getEntriesBefore _ when(build, false) returns Collections.emptyList[SFinishedBuild]
-    buildServer.getHistory _ when() returns buildHistory
-    build.getBuildStatus _ when() returns Status.NORMAL
-
-    adapter.buildFinished(build)
-
-    adapter.send _ verify (build, Set(BuildSettingFlag.success))
-  }
 }
