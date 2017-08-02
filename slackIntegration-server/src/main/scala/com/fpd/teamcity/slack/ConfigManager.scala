@@ -100,6 +100,23 @@ object ConfigManager {
     def getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
     def getFail: Boolean = flags.contains(BuildSettingFlag.failure)
     def getSuccessToFailure: Boolean = flags.contains(BuildSettingFlag.successToFailure)
+
+    /**
+      * Removes success flag if failureToSuccess is set
+      * and failure flag if successToFailure is set
+      *
+      * @return
+      */
+    def pureFlags: Set[BuildSettingFlag] = {
+      var pure = flags
+      if (flags.contains(BuildSettingFlag.failureToSuccess)) {
+        pure = pure - BuildSettingFlag.success
+      }
+      if (flags.contains(BuildSettingFlag.successToFailure)) {
+        pure = pure - BuildSettingFlag.failure
+      }
+      pure
+    }
   }
 
   case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)
