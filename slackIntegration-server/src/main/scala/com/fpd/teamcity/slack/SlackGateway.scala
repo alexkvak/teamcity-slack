@@ -33,6 +33,7 @@ object SlackGateway {
     val apiSlackAttachment = new ApiSlackAttachment()
     apiSlackAttachment.setText(attachment.text)
     apiSlackAttachment.setColor(attachment.color)
+    apiSlackAttachment.addMarkdownIn("text")
 
     SlackMessage("", Some(apiSlackAttachment))
   }
