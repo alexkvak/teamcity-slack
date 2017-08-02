@@ -17,7 +17,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
   controllerManager.registerController(Resources.buildSettingEdit.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    import com.fpd.teamcity.slack.Helpers._
+    import com.fpd.teamcity.slack.Helpers.Implicits._
 
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingEdit.view)
 

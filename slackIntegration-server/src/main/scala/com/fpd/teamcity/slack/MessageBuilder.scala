@@ -13,7 +13,7 @@ class MessageBuilder(
                       downloadArtifactsUrl: (SBuild) ⇒ String
                     ) {
   import MessageBuilder._
-  import Helpers._
+  import Helpers.Implicits._
 
   def compile(template: String): SlackAttachment = {
     def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"

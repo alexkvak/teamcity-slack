@@ -52,7 +52,7 @@ object SlackServerAdapter {
   }
 
   def statusChanged(previous: Status, current: Status): Boolean = {
-    import Helpers._
+    import Helpers.Implicits._
 
     if (previous.isSuccessful) {
       current.isFailed

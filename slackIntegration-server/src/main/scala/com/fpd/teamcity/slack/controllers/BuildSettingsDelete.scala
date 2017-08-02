@@ -2,7 +2,7 @@ package com.fpd.teamcity.slack.controllers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.fpd.teamcity.slack.Helpers._
+import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.{ConfigManager, Resources}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
