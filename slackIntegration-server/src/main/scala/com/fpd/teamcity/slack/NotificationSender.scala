@@ -35,7 +35,7 @@ trait NotificationSender {
 
   def prepareSettings(build: SBuild, flags: Set[BuildSettingFlag]): Iterable[BuildSetting] = {
     def matchBranch(mask: String) = Option(build.getBranch).exists { branch ⇒
-      mask.r.findFirstIn(branch.getName).isDefined
+      mask.r.findFirstIn(branch.getDisplayName).isDefined
     }
 
     configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒

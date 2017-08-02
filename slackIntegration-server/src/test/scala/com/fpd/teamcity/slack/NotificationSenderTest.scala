@@ -15,7 +15,7 @@ class NotificationSenderTest extends FlatSpec with MockFactory with Matchers {
 
     private val build = stub[SBuild]
     private val branch = stub[Branch]
-    branch.getName _ when() returns setting.branchMask
+    branch.getDisplayName _ when() returns setting.branchMask
     build.getBuildTypeId _ when() returns setting.buildTypeId
     build.getBranch _ when() returns branch
 
