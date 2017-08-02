@@ -35,6 +35,6 @@ trait NotificationSender {
 
   def prepareSettings(build: SBuild, flags: Set[BuildSettingFlag]): Iterable[BuildSetting] =
     configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒
-      x.flags.intersect(flags).nonEmpty && build.matchBranch(x.branchMask)
+      x.pureFlags.intersect(flags).nonEmpty && build.matchBranch(x.branchMask)
     }
 }
