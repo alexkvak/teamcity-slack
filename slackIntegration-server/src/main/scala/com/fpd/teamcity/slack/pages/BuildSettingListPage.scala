@@ -8,7 +8,7 @@ import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
-import com.fpd.teamcity.slack.Helpers._
+import com.fpd.teamcity.slack.Helpers.Implicits._
 
 import scala.collection.JavaConverters._
 

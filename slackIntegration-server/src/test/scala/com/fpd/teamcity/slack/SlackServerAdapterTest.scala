@@ -1,15 +1,12 @@
 package com.fpd.teamcity.slack
 
-import java.util.Collections
-
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackServerAdapter._
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{BuildHistory, SBuildServer, SFinishedBuild, SRunningBuild}
 import org.scalamock.scalatest.MockFactory
-import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.{FlatSpec, Matchers}
 
 class SlackServerAdapterTest extends FlatSpec with MockFactory with Matchers {
   "SlackServerAdapter.statusChanged" should "work properly" in {

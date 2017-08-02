@@ -11,7 +11,7 @@ trait NotificationSender {
   val gateway: SlackGateway
   val messageBuilderFactory: MessageBuilderFactory
 
-  import Helpers._
+  import Helpers.Implicits._
 
   def send(build: SBuild, flags: Set[BuildSettingFlag]): Unit = {
     val settings = prepareSettings(build, flags)
@@ -33,13 +33,8 @@ trait NotificationSender {
     }
   }
 
-  def prepareSettings(build: SBuild, flags: Set[BuildSettingFlag]): Iterable[BuildSetting] = {
-    def matchBranch(mask: String) = Option(build.getBranch).exists { branch ⇒
-      mask.r.findFirstIn(branch.getDisplayName).isDefined
-    }
-
+  def prepareSettings(build: SBuild, flags: Set[BuildSettingFlag]): Iterable[BuildSetting] =
     configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒
-      x.flags.intersect(flags).nonEmpty && matchBranch(x.branchMask)
+      x.flags.intersect(flags).nonEmpty && build.matchBranch(x.branchMask)
     }
-  }
 }

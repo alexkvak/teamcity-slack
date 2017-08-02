@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag}
-import com.fpd.teamcity.slack.Helpers._
+import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.{ConfigManager, Resources, SlackGateway}
 import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}

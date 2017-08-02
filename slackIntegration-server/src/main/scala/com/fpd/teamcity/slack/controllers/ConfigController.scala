@@ -14,7 +14,7 @@ class ConfigController(
                         slackGateway: SlackGateway
                       )
   extends BaseController with SlackController {
-  import Helpers._
+  import Helpers.Implicits._
   import ConfigController._
 
   controllerManager.registerController(Resources.configPage.url, this)

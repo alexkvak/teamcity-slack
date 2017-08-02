@@ -18,7 +18,7 @@ class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: P
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest): Unit = {
     import collection.JavaConverters._
-    import com.fpd.teamcity.slack.Helpers._
+    import com.fpd.teamcity.slack.Helpers.Implicits._
 
     model.putAll(extension.details.mapValues(_.getOrElse("")).asJava)
     model.put("error", request.param("error").getOrElse(""))

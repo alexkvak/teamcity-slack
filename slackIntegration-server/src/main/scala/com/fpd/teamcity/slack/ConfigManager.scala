@@ -8,7 +8,7 @@ import org.json4s.native.JsonMethods._
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 import org.json4s.ext.EnumNameSerializer
-import Helpers._
+import Helpers.Implicits._
 
 import scala.util.Random
 
