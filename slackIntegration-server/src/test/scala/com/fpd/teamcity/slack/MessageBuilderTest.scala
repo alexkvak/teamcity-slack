@@ -1,5 +1,7 @@
 package com.fpd.teamcity.slack
 
+import java.io.File
+
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{Branch, SBuild}
@@ -127,7 +129,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getContainingChanges _ when() returns mockChanges
 
     val messageTemplate = """{name}
-                            |{artifacts}
+                            |{allArtifactsDownloadUrl}
                           """.stripMargin
 
     val downloadUrl = "http://my.teamcity/download/artifacts.zip"
@@ -135,6 +137,48 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""Full name
         |<$downloadUrl|Download all artifacts>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
+  "MessageBuilder.compile" should "compile template with artifactsRelUrl placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getContainingChanges _ when() returns mockChanges
+    build.getArtifactsDirectory _ when() returns new File("/full/artifacts/path/my/build/folder/")
+
+    val messageTemplate = """{name}
+                            |{artifactsRelUrl}
+                          """.stripMargin
+
+
+    messageBuilder(artifactsPath = "/full/artifacts/path/").compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        |my/build/folder
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+  }
+
+  "MessageBuilder.compile" should "compile template with parameter placeholders" in {
+    implicit val build = stub[SBuild]
+
+    val teamcityParam = "teamcity.param"
+    val teamcityParamValue = "teamcity.param.value"
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getContainingChanges _ when() returns mockChanges
+
+    val messageTemplate = s"""{name}
+                            |{% $teamcityParam%}
+                          """.stripMargin
+
+
+    messageBuilder(params = Map(teamcityParam → teamcityParamValue)).compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        |$teamcityParamValue
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
   private def mockChanges = {
@@ -157,7 +201,15 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
   }
 }
 
-object MessageBuilderTest {
-  def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "")(implicit build: SBuild) =
-    new MessageBuilder(build, (_) ⇒ viewResultsUrl, x ⇒ Some(x), (_) ⇒ downloadArtifactsUrl)
+object MessageBuilderTest extends MockFactory {
+  def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "", artifactsPath: String = "", params: Map[String, String] = Map.empty)(implicit build: SBuild) = {
+    val context = stub[MessageBuilderContext]
+    context.getArtifactsPath _ when() returns artifactsPath
+    context.getViewResultsUrl _ when() returns (_ ⇒ viewResultsUrl)
+    context.getDownloadAllArtifactsUrl _ when() returns (_ ⇒ downloadArtifactsUrl)
+    context.nickByEmail _ when() returns (x ⇒ Some(x))
+    context.getBuildParameter _ when() returns ((_, name) ⇒ params.get(name))
+
+    new MessageBuilder(build, context)
+  }
 }
