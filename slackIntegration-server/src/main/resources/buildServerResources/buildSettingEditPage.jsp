@@ -6,7 +6,7 @@
     <div class="group">
       <label class="tableLabel" for="branchMask">Branch:</label>
       <span><forms:textField className="mediumField textField" name="branchMask" expandable="false" value="${model.branchMask}"/></span>
-      <div class="smallNote">Regular expressions allowed</div>
+      <div class="smallNote">Regular expressions are allowed</div>
     </div>
     <div class="group">
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
@@ -17,10 +17,19 @@
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
                              value="${model.messageTemplate}" defaultText="${defaultMessage}"/>
       <div class="smallNote">
-        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes}, {allArtifactsDownloadUrl}, {artifactsRelUrl}<br>
+        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes}, {artifactLinks}, {allArtifactsDownloadUrl}, {artifactsRelUrl}<br>
         You can also use project and build parameters, e.g. {%my.awesome.teamcity.param%}
       </div>
       </span>
+    </div>
+    <div class="group">
+      <label class="tableLabel" for="artifactsMask">Artifacts mask:</label>
+      <span><forms:textField className="mediumField textField" name="artifactsMask" expandable="false" value="${model.artifactsMask}"/></span>
+      <div class="smallNote">Regular expressions are allowed</div>
+    </div>
+    <div class="group">
+      <label class="tableLabel" for="deepLookup">Lookup artifacts deep into:</label>
+      <input type="checkbox" name="deepLookup" value="1" <c:if test="${model.deepLookup}">checked</c:if>/>
     </div>
     <div class="checkboxes-group">
       <label class="flagLabel">

@@ -28,7 +28,7 @@ class BuildSettingsTry(buildHistory: BuildHistory,
       id ← request.param("id")
       setting ← configManager.buildSetting(id)
       build ← buildHistory.getEntries(false).asScala.find(_.getBuildTypeId == setting.buildTypeId)
-      _ ← gateway.sendMessage(SlackChannel(setting.slackChannel), messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate))
+      _ ← gateway.sendMessage(SlackChannel(setting.slackChannel), messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
     } yield {
       s"Message sent to #${setting.slackChannel}"
     }

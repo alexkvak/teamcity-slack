@@ -40,12 +40,13 @@ class BuildSettingsSave(configManager: ConfigManager,
       channel ← request.param("slackChannel")
       buildId ← request.param("buildTypeId")
       message ← request.param("messageTemplate")
+      artifactsMask ← request.param("artifactsMask")
 
       config ← configManager.config
     } yield {
       // store build setting
       def updateConfig() = configManager.updateBuildSetting(
-        BuildSetting(buildId, branch, channel, message, flags),
+        BuildSetting(buildId, branch, channel, message, flags, artifactsMask, request.param("deepLookup").isDefined),
         request.param("key")
       ).map(_ ⇒ "").getOrElse("")
 
@@ -53,8 +54,9 @@ class BuildSettingsSave(configManager: ConfigManager,
       slackGateway.sessionByConfig(config) match {
         case Some(session) ⇒
           Option(session.findChannelByName(channel)) match {
-            case Some(_) if Try(branch.r).isSuccess ⇒ updateConfig()
-            case Some(_) ⇒ s"Unable to compile regular expression $branch"
+            case Some(_) if Try(branch.r).isFailure ⇒ s"Unable to compile regular expression $branch"
+            case Some(_) if Try(artifactsMask.r).isFailure ⇒ s"Unable to compile regular expression $artifactsMask"
+            case Some(_) ⇒ updateConfig()
             case None ⇒ s"Unable to find channel with name $channel"
           }
         case _ ⇒

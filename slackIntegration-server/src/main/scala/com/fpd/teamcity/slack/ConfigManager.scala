@@ -27,6 +27,7 @@ class ConfigManager(paths: ServerPaths) {
   } else None
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
+  def publicUrl: Option[String] = config.flatMap(_.publicUrl)
 
   def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
 
@@ -62,9 +63,9 @@ class ConfigManager(paths: ServerPaths) {
     updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
-  def updateAuthKey(authKey: String): Boolean = config match {
-    case Some(c) ⇒ updateAndPersist(c.copy(authKey))
-    case None ⇒ updateAndPersist(Config(authKey))
+  def update(authKey: String, pubUrl: String): Boolean = config match {
+    case Some(c) ⇒ updateAndPersist(c.copy(authKey, publicUrl = Some(pubUrl)))
+    case None ⇒ updateAndPersist(Config(authKey, publicUrl = Some(pubUrl)))
   }
 
   def removeBuildSetting(key: String): Option[Boolean] = config.map { c ⇒
@@ -72,7 +73,8 @@ class ConfigManager(paths: ServerPaths) {
   }
 
   def details: Map[String, Option[String]] = Map(
-    "oauthKey" → oauthKey
+    "oauthKey" → oauthKey,
+    "publicUrl" → publicUrl
   )
 
   def isAvailable: Boolean = config.exists(_.oauthKey.length > 0)
@@ -90,11 +92,20 @@ object ConfigManager {
 
   type BuildSettings = Map[String, BuildSetting]
 
-  case class BuildSetting(buildTypeId: String, branchMask: String, slackChannel: String, messageTemplate: String, flags: Set[BuildSettingFlag] = Set.empty) {
+  case class BuildSetting(buildTypeId: String,
+                          branchMask: String,
+                          slackChannel: String,
+                          messageTemplate: String,
+                          flags: Set[BuildSettingFlag] = Set.empty,
+                          artifactsMask: String = "",
+                          deepLookup: Boolean = false
+                         ) {
     // Getters for JSP
     def getBranchMask: String = branchMask
     def getSlackChannel: String = slackChannel
     def getMessageTemplate: String = messageTemplate
+    def getArtifactsMask: String = artifactsMask
+    def getDeepLookup: Boolean = deepLookup
     // Flags
     def getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
     def getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
@@ -119,7 +130,7 @@ object ConfigManager {
     }
   }
 
-  case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty)
+  case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty, publicUrl: Option[String] = None)
 
   @annotation.tailrec
   private def nextKey(map: BuildSettings): String = {
