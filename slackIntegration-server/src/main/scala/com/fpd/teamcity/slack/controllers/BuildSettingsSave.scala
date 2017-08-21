@@ -34,19 +34,20 @@ class BuildSettingsSave(configManager: ConfigManager,
       keys.foldLeft(Set.empty[BuildSettingFlag])((acc, flag) ⇒ acc + keyToFlag(flag))
     }
 
+    val artifactsMask = request.param("artifactsMask")
+
     val result = for {
     // preparing params
       branch ← request.param("branchMask")
       channel ← request.param("slackChannel")
       buildId ← request.param("buildTypeId")
       message ← request.param("messageTemplate")
-      artifactsMask ← request.param("artifactsMask")
 
       config ← configManager.config
     } yield {
       // store build setting
       def updateConfig() = configManager.updateBuildSetting(
-        BuildSetting(buildId, branch, channel, message, flags, artifactsMask, request.param("deepLookup").isDefined),
+        BuildSetting(buildId, branch, channel, message, flags, artifactsMask.getOrElse(""), request.param("deepLookup").isDefined),
         request.param("key")
       ).map(_ ⇒ "").getOrElse("")
 
@@ -55,7 +56,7 @@ class BuildSettingsSave(configManager: ConfigManager,
         case Some(session) ⇒
           Option(session.findChannelByName(channel)) match {
             case Some(_) if Try(branch.r).isFailure ⇒ s"Unable to compile regular expression $branch"
-            case Some(_) if Try(artifactsMask.r).isFailure ⇒ s"Unable to compile regular expression $artifactsMask"
+            case Some(_) if artifactsMask.isDefined && Try(artifactsMask.get.r).isFailure ⇒ s"Unable to compile regular expression ${artifactsMask.get}"
             case Some(_) ⇒ updateConfig()
             case None ⇒ s"Unable to find channel with name $channel"
           }
