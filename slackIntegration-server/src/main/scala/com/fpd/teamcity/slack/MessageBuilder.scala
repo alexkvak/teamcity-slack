@@ -1,5 +1,6 @@
 package com.fpd.teamcity.slack
 
+import com.fpd.teamcity.slack.MessageBuilder._
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{SBuild, ServerPaths, WebLinks}
@@ -7,7 +8,6 @@ import jetbrains.buildServer.serverSide.{SBuild, ServerPaths, WebLinks}
 import scala.collection.JavaConverters._
 
 class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
-  import MessageBuilder._
   import Helpers.Implicits._
 
   def compile(template: String): SlackAttachment = {
@@ -61,24 +61,24 @@ object MessageBuilder {
     """.stripMargin
 
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
+
+  case class MessageBuilderContext(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths) {
+    def getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
+
+    def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
+
+    def nickByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getUserName)
+
+    def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
+
+    def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
+      Option(build.getBuildType.getParameter(name).getValue)
+  }
 }
 
 class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths) {
-  private val context = new MessageBuilderContext(webLinks, gateway, paths)
+  private val context = MessageBuilderContext(webLinks, gateway, paths)
 
   def createForBuild(build: SBuild) = new MessageBuilder(build, context)
-}
-
-class MessageBuilderContext(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths) {
-  def getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
-
-  def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
-
-  def nickByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getUserName)
-
-  def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
-
-  def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
-    Option(build.getBuildType.getParameter(name).getValue)
 }
 

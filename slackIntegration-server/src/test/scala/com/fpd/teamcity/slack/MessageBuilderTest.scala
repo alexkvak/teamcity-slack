@@ -202,6 +202,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 }
 
 object MessageBuilderTest extends MockFactory {
+  import MessageBuilder._
   def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "", artifactsPath: String = "", params: Map[String, String] = Map.empty)(implicit build: SBuild) = {
     val context = stub[MessageBuilderContext]
     context.getArtifactsPath _ when() returns artifactsPath
