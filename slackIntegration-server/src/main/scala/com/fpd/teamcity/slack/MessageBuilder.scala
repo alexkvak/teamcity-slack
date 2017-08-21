@@ -28,7 +28,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
       build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT_WITH_ARCHIVES_CONTENT).iterateArtifacts((artifact: BuildArtifact) ⇒ {
         if (artifact.isFile && compiledMask.findFirstIn(artifact.getName).isDefined) {
-          links += publicUrl + "/" + artifact.getName
+          links += s"$publicUrl$artifactsRelUrl/${artifact.getName}"
         }
 
         if (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.get.deepLookup)) Continuation.CONTINUE else Continuation.SKIP_CHILDREN
