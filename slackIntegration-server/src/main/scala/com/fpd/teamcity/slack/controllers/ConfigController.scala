@@ -20,21 +20,22 @@ class ConfigController(
   controllerManager.registerController(Resources.configPage.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    val either = request.param("oauthKey") match {
-      case Some(oauthKey) ⇒
-        val newConfig = ConfigManager.Config(oauthKey)
+    val result = for {
+      oauthKey ← request.param("oauthKey")
+      publicUrl ← request.param("publicUrl")
+    } yield {
+      val newConfig = ConfigManager.Config(oauthKey)
 
-        val result = slackGateway.sessionByConfig(newConfig).map { _ ⇒
-          configManager.updateAuthKey(oauthKey)
-        }
-
-        result match {
-          case Some(x) if x ⇒ Left(x)
-          case Some(_) ⇒ Right("Failed to update OAuth Access Token")
-          case None ⇒ Right("Unable to create session by config")
-        }
-      case None ⇒ Right("Param oauthKey is missing")
+      slackGateway.sessionByConfig(newConfig).map { _ ⇒
+        configManager.update(oauthKey, publicUrl)
+      } match {
+        case Some(x) if x ⇒ Left(x)
+        case Some(_) ⇒ Right("Failed to update OAuth Access Token")
+        case None ⇒ Right("Unable to create session by config")
+      }
     }
+
+    val either = result.getOrElse(Right("Param oauthKey is missing"))
 
     redirectTo(createRedirect(either), response)
   }

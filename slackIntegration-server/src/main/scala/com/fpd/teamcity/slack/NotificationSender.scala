@@ -21,7 +21,7 @@ trait NotificationSender {
     val sendPersonal = build.getBuildStatus.isFailed
 
     settings.foreach { setting ⇒
-      val attachment = messageBuilder.compile(setting.messageTemplate)
+      val attachment = messageBuilder.compile(setting.messageTemplate, Some(setting))
       gateway.sendMessage(SlackChannel(setting.slackChannel), attachment)
 
       // if build failed all committees should receive the message

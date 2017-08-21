@@ -181,6 +181,8 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
+//  TODO: artifactLinks test
+
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
     val vcsModification2 = stub[SVcsModification]
