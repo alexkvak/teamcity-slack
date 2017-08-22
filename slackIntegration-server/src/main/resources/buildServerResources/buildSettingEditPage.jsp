@@ -17,7 +17,7 @@
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
                              value="${model.messageTemplate}" defaultText="${defaultMessage}"/>
       <div class="smallNote">
-        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes}, {artifactLinks}, {allArtifactsDownloadUrl}, {artifactsRelUrl}<br>
+        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes}, {reason}, {artifactLinks}, {allArtifactsDownloadUrl}, {artifactsRelUrl}<br>
         You can also use project and build parameters, e.g. {%my.awesome.teamcity.param%}
       </div>
       </span>
