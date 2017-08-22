@@ -3,6 +3,7 @@ package com.fpd.teamcity.slack
 import java.io.File
 
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
+import jetbrains.buildServer.BuildProblemData
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{Branch, SBuild}
 import jetbrains.buildServer.users.SUser
@@ -120,6 +121,25 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
+  "MessageBuilder.compile" should "compile template with reason placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.FAILURE
+    val reasons = List("some reason 1", "some reason 2")
+    build.getFailureReasons _ when() returns mockReasons(reasons)
+
+    val messageTemplate = """{name}
+                            |Reason: {reason}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        |Reason: ${reasons.mkString("\n")}
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
   "MessageBuilder.compile" should "compile template with artifacts placeholders" in {
     implicit val build = stub[SBuild]
 
@@ -201,6 +221,8 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     List(vcsModification1, vcsModification2).asJava
   }
+
+  private def mockReasons(reasons: List[String]) = reasons.map(reason ⇒ BuildProblemData.createBuildProblem("identity", "custom", reason)).asJava
 }
 
 object MessageBuilderTest extends MockFactory {
