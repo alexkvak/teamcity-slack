@@ -48,7 +48,9 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
     }
 
-    def reason = if (build.getFailureReasons.isEmpty) "Unknown" else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n")
+    def reason = if (build.getBuildStatus.isSuccessful) "" else {
+      "Reason: " + (if (build.getFailureReasons.isEmpty) "Unknown" else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n"))
+    }
 
     val text = """\{([\s\w._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ build.getFullName
