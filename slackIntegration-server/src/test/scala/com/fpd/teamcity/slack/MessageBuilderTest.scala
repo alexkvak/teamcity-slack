@@ -131,13 +131,30 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getFailureReasons _ when() returns mockReasons(reasons)
 
     val messageTemplate = """{name}
-                            |Reason: {reason}
+                            |{reason}
                           """.stripMargin
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |Reason: ${reasons.mkString("\n")}
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
+  "MessageBuilder.compile" should "compile template without reason placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+    val reasons = List("some reason 1", "some reason 2")
+    build.getFailureReasons _ when() returns mockReasons(reasons)
+
+    val messageTemplate = """{name}
+                            |{reason}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      "Full name", MessageBuilder.statusNormalColor)
   }
 
   "MessageBuilder.compile" should "compile template with artifacts placeholders" in {
