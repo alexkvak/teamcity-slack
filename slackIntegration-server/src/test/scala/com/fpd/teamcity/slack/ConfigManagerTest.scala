@@ -7,7 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class ConfigManagerTest extends FlatSpec with MockFactory with Matchers {
   "updateBuildSetting" should "preserve build settings when changing API key" in new CommonMocks {
     val key = "SomeKey"
-    manager.update(key, "")
+    manager.update(key, "", personalEnabled = true)
     manager.oauthKey shouldEqual Some(key)
 
     val buildSetting = BuildSetting("", "", "", "{name}", Set.empty)

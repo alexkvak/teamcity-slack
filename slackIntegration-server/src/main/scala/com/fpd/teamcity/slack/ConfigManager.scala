@@ -28,6 +28,7 @@ class ConfigManager(paths: ServerPaths) {
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
   def publicUrl: Option[String] = config.flatMap(_.publicUrl)
+  def personalEnabled: Option[Boolean] = config.flatMap(_.personalEnabled)
 
   def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
 
@@ -63,9 +64,9 @@ class ConfigManager(paths: ServerPaths) {
     updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
-  def update(authKey: String, pubUrl: String): Boolean = config match {
-    case Some(c) ⇒ updateAndPersist(c.copy(authKey, publicUrl = Some(pubUrl)))
-    case None ⇒ updateAndPersist(Config(authKey, publicUrl = Some(pubUrl)))
+  def update(authKey: String, pubUrl: String, personalEnabled: Boolean): Boolean = config match {
+    case Some(c) ⇒ updateAndPersist(c.copy(authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled)))
+    case None ⇒ updateAndPersist(Config(authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled)))
   }
 
   def removeBuildSetting(key: String): Option[Boolean] = config.map { c ⇒
@@ -74,7 +75,8 @@ class ConfigManager(paths: ServerPaths) {
 
   def details: Map[String, Option[String]] = Map(
     "oauthKey" → oauthKey,
-    "publicUrl" → publicUrl
+    "publicUrl" → publicUrl,
+    "personalEnabled" → personalEnabled.filter(x ⇒ x).map(_ ⇒ "1")
   )
 
   def isAvailable: Boolean = config.exists(_.oauthKey.length > 0)
@@ -130,7 +132,11 @@ object ConfigManager {
     }
   }
 
-  case class Config(oauthKey: String, buildSettings: BuildSettings = Map.empty, publicUrl: Option[String] = None)
+  case class Config(oauthKey: String,
+                    buildSettings: BuildSettings = Map.empty,
+                    publicUrl: Option[String] = None,
+                    personalEnabled: Option[Boolean] = Some(true)
+                   )
 
   @annotation.tailrec
   private def nextKey(map: BuildSettings): String = {

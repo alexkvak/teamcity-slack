@@ -26,6 +26,14 @@
                     <input type="text" id="publicUrl" name="publicUrl" value="${publicUrl}" class="longField">
                 </td>
             </tr>
+            <tr>
+                <td colspan="2">
+                    <label>
+                        <input type="checkbox" id="personalEnabled" name="personalEnabled" value="1" <c:if test="${not empty personalEnabled}">checked</c:if>>
+                        Personal notifications enabled
+                    </label>
+                </td>
+            </tr>
         </tbody>
     </table>
     <input type="submit" class="btn btn-default" value="Submit">
