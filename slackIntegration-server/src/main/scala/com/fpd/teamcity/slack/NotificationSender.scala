@@ -18,7 +18,7 @@ trait NotificationSender {
 
     lazy val emails = build.committees
     lazy val messageBuilder = messageBuilderFactory.createForBuild(build)
-    val sendPersonal = build.getBuildStatus.isFailed
+    lazy val sendPersonal = shouldSendPersonal(build)
 
     settings.foreach { setting ⇒
       val attachment = messageBuilder.compile(setting.messageTemplate, Some(setting))
@@ -32,6 +32,8 @@ trait NotificationSender {
       }
     }
   }
+
+  def shouldSendPersonal(build: SBuild): Boolean = build.getBuildStatus.isFailed && configManager.personalEnabled.exists(x ⇒ x)
 
   def prepareSettings(build: SBuild, flags: Set[BuildSettingFlag]): Iterable[BuildSetting] =
     configManager.buildSettingList(build.getBuildTypeId).values.filter { x ⇒

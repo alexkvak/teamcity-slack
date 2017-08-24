@@ -2,6 +2,7 @@ package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag, Config}
+import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{Branch, SBuild}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
@@ -46,6 +47,29 @@ class NotificationSenderTest extends FlatSpec with MockFactory with Matchers {
     def settingFlags = Set(BuildSettingFlag.failure)
 
     sender.prepareSettings(build, Set(BuildSettingFlag.failure)).toSet shouldEqual Set(setting)
+  }
+
+  "NotificationSender.shouldSendPersonal" should "return true" in new Context {
+    def settingFlags = Set(BuildSettingFlag.failure)
+    manager.setConfig(manager.config.get.copy(personalEnabled = Some(true)))
+    build.getBuildStatus _ when() returns Status.FAILURE
+
+    sender.shouldSendPersonal(build) shouldEqual true
+  }
+
+  "NotificationSender.shouldSendPersonal" should "return false when personalEnabled is false" in new Context {
+    def settingFlags = Set(BuildSettingFlag.failure)
+    manager.setConfig(manager.config.get.copy(personalEnabled = Some(false)))
+    build.getBuildStatus _ when() returns Status.FAILURE
+
+    sender.shouldSendPersonal(build) shouldEqual false
+  }
+
+  "NotificationSender.shouldSendPersonal" should "return false when build is success" in new Context {
+    def settingFlags = Set(BuildSettingFlag.failure)
+    build.getBuildStatus _ when() returns Status.NORMAL
+
+    sender.shouldSendPersonal(build) shouldEqual false
   }
 
   class NotificationSenderStub(val configManager: ConfigManager,
