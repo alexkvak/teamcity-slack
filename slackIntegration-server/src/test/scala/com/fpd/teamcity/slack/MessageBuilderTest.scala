@@ -231,9 +231,9 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     user2.getDescriptiveName _ when() returns "name2"
     vcsModification1.getCommitters _ when() returns Set(user1).asJava
     vcsModification2.getCommitters _ when() returns Set(user2).asJava
-    vcsModification1.getDescription _ when() returns "Did some changes"
+    vcsModification1.getDescription _ when() returns "Did some changes\n"
     vcsModification1.getChangeCount _ when() returns 5
-    vcsModification2.getDescription _ when() returns "Did another changes"
+    vcsModification2.getDescription _ when() returns "Did another changes\n"
     vcsModification2.getChangeCount _ when() returns 1
 
     List(vcsModification1, vcsModification2).asJava
