@@ -38,10 +38,8 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     } else ""
 
     def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
-      val name = change.getCommitters.asScala.headOption.map(_.getUsername).getOrElse("unknown")
-      val filesCount = change.getChangeCount
-
-      s" $filesCount files by $name: ${change.getDescription}"
+      val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse("unknown")
+      s"${change.getDescription} [$name]"
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
