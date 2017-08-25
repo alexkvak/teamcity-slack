@@ -116,8 +116,8 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
-        | 5 files by name1: Did some changes
-        | 1 files by name2: Did another changes
+        |Did some changes [name1]
+        |Did another changes [name2]
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
@@ -226,9 +226,9 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     val user1 = stub[SUser]
     val user2 = stub[SUser]
     user1.getEmail _ when() returns "nick1"
-    user1.getUsername _ when() returns "name1"
+    user1.getDescriptiveName _ when() returns "name1"
     user2.getEmail _ when() returns "nick2"
-    user2.getUsername _ when() returns "name2"
+    user2.getDescriptiveName _ when() returns "name2"
     vcsModification1.getCommitters _ when() returns Set(user1).asJava
     vcsModification2.getCommitters _ when() returns Set(user2).asJava
     vcsModification1.getDescription _ when() returns "Did some changes"
