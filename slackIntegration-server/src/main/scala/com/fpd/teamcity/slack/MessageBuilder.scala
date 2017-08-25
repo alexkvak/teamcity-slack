@@ -39,11 +39,11 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
     def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse("unknown")
-      s"${change.getDescription.trim} [$name]"
+      s"- ${change.getDescription.trim} [$name]"
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
-      build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"@U$x" }.mkString(" ")
+      build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"<@$x>" }.mkString(" ")
     }
 
     def reason = if (build.getBuildStatus.isSuccessful) "" else {

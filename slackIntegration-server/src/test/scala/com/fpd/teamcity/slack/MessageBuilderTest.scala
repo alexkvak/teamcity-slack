@@ -50,7 +50,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
         |Status: failed
-        |@Unick1 @Unick2
+        |<@nick1> <@nick2>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
@@ -98,7 +98,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
-        |@Unick1 @Unick2
+        |<@nick1> <@nick2>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
@@ -116,8 +116,8 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
-        |Did some changes [name1]
-        |Did another changes [name2]
+        |- Did some changes [name1]
+        |- Did another changes [name2]
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
