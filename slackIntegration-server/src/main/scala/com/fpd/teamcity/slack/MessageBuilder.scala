@@ -43,7 +43,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
-      build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"@$x" }.mkString(" ")
+      build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"@U$x" }.mkString(" ")
     }
 
     def reason = if (build.getBuildStatus.isSuccessful) "" else {
