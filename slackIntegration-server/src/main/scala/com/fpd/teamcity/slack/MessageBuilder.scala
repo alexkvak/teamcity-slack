@@ -38,7 +38,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     } else ""
 
     def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
-      val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse("unknown")
+      val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse(change.getUserName)
       s"- ${change.getDescription.trim} [$name]"
     } mkString "\n"
 
