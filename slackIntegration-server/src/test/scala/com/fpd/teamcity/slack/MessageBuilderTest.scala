@@ -218,6 +218,24 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
+  "MessageBuilder.compile" should "compile template with changes placeholders with non-teamcity committer" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.FAILURE
+    build.getContainingChanges _ when() returns mockUnknownChange
+
+    val messageTemplate = """{name}
+                            |{changes}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      """Full name
+        |- Did some changes [user@unknown.com]
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
 //  TODO: artifactLinks test
 
   private def mockChanges = {
@@ -237,6 +255,15 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     vcsModification2.getChangeCount _ when() returns 1
 
     List(vcsModification1, vcsModification2).asJava
+  }
+
+  private def mockUnknownChange = {
+    val vcsModification = stub[SVcsModification]
+    vcsModification.getCommitters _ when() returns Set.empty[SUser].asJava
+    vcsModification.getDescription _ when() returns "Did some changes\n"
+    vcsModification.getUserName _ when() returns "user@unknown.com"
+
+    List(vcsModification).asJava
   }
 
   private def mockReasons(reasons: List[String]) = reasons.map(reason ⇒ BuildProblemData.createBuildProblem("identity", "custom", reason)).asJava
