@@ -116,7 +116,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
-        |- Did some changes [name1]
+        |- Did some changes Second line [name1]
         |- Did another changes [name2]
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
@@ -249,7 +249,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     user2.getDescriptiveName _ when() returns "name2"
     vcsModification1.getCommitters _ when() returns Set(user1).asJava
     vcsModification2.getCommitters _ when() returns Set(user2).asJava
-    vcsModification1.getDescription _ when() returns "Did some changes\n"
+    vcsModification1.getDescription _ when() returns "Did some changes\nSecond line"
     vcsModification1.getChangeCount _ when() returns 5
     vcsModification2.getDescription _ when() returns "Did another changes\n"
     vcsModification2.getChangeCount _ when() returns 1

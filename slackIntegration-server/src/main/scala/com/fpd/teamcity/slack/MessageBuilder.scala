@@ -39,7 +39,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
     def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse(change.getUserName)
-      s"- ${change.getDescription.trim} [$name]"
+      s"- ${change.getDescription.replace("\n", " ").trim} [$name]"
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
