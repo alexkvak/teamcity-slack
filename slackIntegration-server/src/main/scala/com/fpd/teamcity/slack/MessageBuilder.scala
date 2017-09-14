@@ -43,7 +43,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
-      build.committees.map(context.nickByEmail).collect { case Some(x) ⇒ s"<@$x>" }.mkString(" ")
+      build.committees.map(context.userByEmail).collect { case Some(x) ⇒ s"<@$x>" }.mkString(" ")
     }
 
     def reason = if (build.getBuildStatus.isSuccessful) "" else {
@@ -91,7 +91,7 @@ object MessageBuilder {
 
     def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
 
-    def nickByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getUserName)
+    def userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
 
     def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
 
