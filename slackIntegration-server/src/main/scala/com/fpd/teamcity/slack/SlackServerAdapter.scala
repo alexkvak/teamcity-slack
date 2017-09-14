@@ -36,11 +36,7 @@ object SlackServerAdapter {
 
     def changed = statusChanged(previous, current)
 
-    def applyIfChanged(flag1: BuildSettingFlag, flag2: BuildSettingFlag) = if (changed) {
-      Set(flag1, flag2)
-    } else {
-      Set(flag1)
-    }
+    def applyIfChanged(flag1: BuildSettingFlag, flag2: BuildSettingFlag) = if (changed) Set(flag1, flag2) else Set(flag1)
 
     if (current.isSuccessful) {
       applyIfChanged(success, failureToSuccess)
