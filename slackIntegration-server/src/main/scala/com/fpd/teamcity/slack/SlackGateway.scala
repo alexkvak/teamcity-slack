@@ -20,7 +20,7 @@ object SlackGateway {
   case class SlackChannel(name: String) extends Destination
 
   case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None) {
-    def isEmpty: Boolean = message.isEmpty && attachment.isEmpty
+    lazy val isEmpty: Boolean = message.isEmpty && attachment.isEmpty
   }
 
   case class SlackAttachment(text: String, color: String)

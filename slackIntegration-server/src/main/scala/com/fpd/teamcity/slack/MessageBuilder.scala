@@ -87,15 +87,15 @@ object MessageBuilder {
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
 
   case class MessageBuilderContext(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths, configManager: ConfigManager) {
-    def getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
+    lazy val getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
 
-    def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
+    lazy val getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
 
-    def userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
+    lazy val userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
 
-    def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
+    lazy val getArtifactsPath: String = paths.getArtifactsDirectory.getPath
 
-    def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
+    lazy val getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
       Option(build.getBuildType.getParameter(name).getValue)
   }
 }
