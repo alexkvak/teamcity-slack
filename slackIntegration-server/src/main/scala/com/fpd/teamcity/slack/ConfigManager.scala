@@ -105,16 +105,16 @@ object ConfigManager {
                           deepLookup: Boolean = false
                          ) {
     // Getters for JSP
-    def getBranchMask: String = branchMask
-    def getSlackChannel: String = slackChannel
-    def getMessageTemplate: String = messageTemplate
-    def getArtifactsMask: String = artifactsMask
-    def getDeepLookup: Boolean = deepLookup
+    lazy val getBranchMask: String = branchMask
+    lazy val getSlackChannel: String = slackChannel
+    lazy val getMessageTemplate: String = messageTemplate
+    lazy val getArtifactsMask: String = artifactsMask
+    lazy val getDeepLookup: Boolean = deepLookup
     // Flags
-    def getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
-    def getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
-    def getFail: Boolean = flags.contains(BuildSettingFlag.failure)
-    def getSuccessToFailure: Boolean = flags.contains(BuildSettingFlag.successToFailure)
+    lazy val getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
+    lazy val getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
+    lazy val getFail: Boolean = flags.contains(BuildSettingFlag.failure)
+    lazy val getSuccessToFailure: Boolean = flags.contains(BuildSettingFlag.successToFailure)
 
     /**
       * Removes success flag if failureToSuccess is set
@@ -122,7 +122,7 @@ object ConfigManager {
       *
       * @return
       */
-    def pureFlags: Set[BuildSettingFlag] = {
+    lazy val pureFlags: Set[BuildSettingFlag] = {
       var pure = flags
       if (flags.contains(BuildSettingFlag.failureToSuccess)) {
         pure = pure - BuildSettingFlag.success
