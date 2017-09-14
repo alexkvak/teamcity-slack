@@ -29,7 +29,7 @@ class ConfigController(
       slackGateway.sessionByConfig(newConfig).map { _ ⇒
         configManager.update(oauthKey, publicUrl, request.param("personalEnabled").isDefined)
       } match {
-        case Some(x) if x ⇒ Left(x)
+        case Some(true) ⇒ Left(true)
         case Some(_) ⇒ Right("Failed to update OAuth Access Token")
         case None ⇒ Right("Unable to create session by config")
       }

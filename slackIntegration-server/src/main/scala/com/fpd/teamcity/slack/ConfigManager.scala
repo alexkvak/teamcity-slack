@@ -32,7 +32,9 @@ class ConfigManager(paths: ServerPaths) {
 
   def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
 
-  def buildSettingList(buildTypeId: String): BuildSettings = allBuildSettingList.filter(x ⇒ x._2.buildTypeId == buildTypeId)
+  def buildSettingList(buildTypeId: String): BuildSettings = allBuildSettingList.filter {
+    case (_, setting) ⇒ setting.buildTypeId == buildTypeId
+  }
 
   def buildSetting(id: String): Option[BuildSetting] = allBuildSettingList.get(id)
 

@@ -29,7 +29,7 @@ class BuildSettingsSave(configManager: ConfigManager,
         "fail" → BuildSettingFlag.failure,
         "successToFailure" → BuildSettingFlag.successToFailure
       )
-      val keys = keyToFlag.keys.filter(key ⇒ request.param(key).isDefined)
+      val keys: Iterable[String] = keyToFlag.keys.flatMap(request.param)
 
       keys.foldLeft(Set.empty[BuildSettingFlag])((acc, flag) ⇒ acc + keyToFlag(flag))
     }
