@@ -276,7 +276,7 @@ object MessageBuilderTest extends MockFactory {
     context.getArtifactsPath _ when() returns artifactsPath
     context.getViewResultsUrl _ when() returns (_ ⇒ viewResultsUrl)
     context.getDownloadAllArtifactsUrl _ when() returns (_ ⇒ downloadArtifactsUrl)
-    context.nickByEmail _ when() returns (x ⇒ Some(x))
+    context.userByEmail _ when() returns (x ⇒ Some(x))
     context.getBuildParameter _ when() returns ((_, name) ⇒ params.get(name))
 
     new MessageBuilder(build, context)
