@@ -2,7 +2,6 @@ package com.fpd.teamcity.slack.controllers
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
-import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag}
 import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.{ConfigManager, Resources, SlackGateway}
@@ -29,9 +28,8 @@ class BuildSettingsSave(configManager: ConfigManager,
         "fail" → BuildSettingFlag.failure,
         "successToFailure" → BuildSettingFlag.successToFailure
       )
-      val keys: Iterable[String] = keyToFlag.keys.flatMap(request.param)
-
-      keys.foldLeft(Set.empty[BuildSettingFlag])((acc, flag) ⇒ acc + keyToFlag(flag))
+      val keys = keyToFlag.keys.filter(key ⇒ request.param(key).isDefined)
+      keys.map(keyToFlag).toSet
     }
 
     val artifactsMask = request.param("artifactsMask")
