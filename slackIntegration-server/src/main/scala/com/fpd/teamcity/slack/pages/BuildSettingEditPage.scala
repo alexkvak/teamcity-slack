@@ -25,9 +25,9 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
       key ← request.param("id")
       model ← config.buildSetting(key)
     } yield {
-      new ModelAndView(view, Map("model" → model, "key" → key, "defaultMessage" → MessageBuilder.defaultMessage).asJava)
+      new ModelAndView(view, Map("model" → model, "key" → key).asJava)
     }
 
-    result getOrElse new ModelAndView(view)
+    result getOrElse new ModelAndView(view, Map("defaultMessage" → MessageBuilder.defaultMessage).asJava)
   }
 }
