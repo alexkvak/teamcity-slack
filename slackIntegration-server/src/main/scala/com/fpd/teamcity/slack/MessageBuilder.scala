@@ -77,7 +77,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 object MessageBuilder {
   lazy val statusNormalColor = "#02c456"
 
-  def defaultMessage: String =
+  lazy val defaultMessage: String =
     """<{link}|{name} - {number}>
       |Branch: {branch}
       |Status: {status}
