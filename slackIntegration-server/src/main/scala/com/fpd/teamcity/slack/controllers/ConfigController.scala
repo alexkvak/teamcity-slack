@@ -22,9 +22,9 @@ class ConfigController(
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val result = for {
       oauthKey ← request.param("oauthKey")
-      publicUrl ← request.param("publicUrl")
     } yield {
       val newConfig = ConfigManager.Config(oauthKey)
+      val publicUrl = request.param("publicUrl").getOrElse("")
 
       slackGateway.sessionByConfig(newConfig).map { _ ⇒
         configManager.update(oauthKey, publicUrl, request.param("personalEnabled").isDefined)
