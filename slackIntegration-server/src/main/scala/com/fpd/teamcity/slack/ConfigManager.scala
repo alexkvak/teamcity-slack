@@ -18,7 +18,7 @@ class ConfigManager(paths: ServerPaths) {
 
   private implicit val formats = Serialization.formats(NoTypeHints) + new EnumNameSerializer(BuildSettingFlag)
 
-  lazy val configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
+  private def configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
 
   private[teamcity] var config: Option[Config] = readConfig
 
