@@ -28,6 +28,8 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
       send(build, flags)
     }
   }
+
+  override def buildInterrupted(build: SRunningBuild): Unit = send(build, Set(BuildSettingFlag.canceled))
 }
 
 object SlackServerAdapter {

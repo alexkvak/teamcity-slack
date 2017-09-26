@@ -89,7 +89,7 @@ object ConfigManager {
   object BuildSettingFlag extends Enumeration {
     type BuildSettingFlag = Value
 
-    val success, failureToSuccess, failure, successToFailure = Value
+    val success, failureToSuccess, failure, successToFailure, canceled = Value
   }
 
   import BuildSettingFlag._
@@ -115,6 +115,7 @@ object ConfigManager {
     lazy val getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
     lazy val getFail: Boolean = flags.contains(BuildSettingFlag.failure)
     lazy val getSuccessToFailure: Boolean = flags.contains(BuildSettingFlag.successToFailure)
+    lazy val getCanceled: Boolean = flags.contains(BuildSettingFlag.canceled)
 
     /**
       * Removes success flag if failureToSuccess is set

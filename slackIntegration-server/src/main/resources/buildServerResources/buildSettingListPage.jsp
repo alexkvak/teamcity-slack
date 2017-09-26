@@ -20,12 +20,13 @@
                 <td>${item.value.slackChannel}</td>
                 <td>
                     <ul class="options-list">
-                        <li><c:if test="${item.value.success}">Trigger when build is Successful</c:if></li>
+                        <li><c:if test="${item.value.success}">Trigger when build is successful</c:if></li>
                         <li><c:if
                             test="${item.value.failureToSuccess}">Only trigger when build changes from Failure to Success</c:if></li>
-                        <li><c:if test="${item.value.fail}">Trigger when build Fails</c:if></li>
+                        <li><c:if test="${item.value.fail}">Trigger when build is failed</c:if></li>
                         <li><c:if
                             test="${item.value.successToFailure}">Only trigger when build changes from Success to Failure</c:if></li>
+                        <li><c:if test="${item.value.canceled}">Trigger when build is canceled</c:if></li>
                     </ul>
                 </td>
                 <td>

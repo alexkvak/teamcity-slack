@@ -17,8 +17,7 @@
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
                              value="${model.messageTemplate}" defaultText="${defaultMessage}"/>
       <div class="smallNote">
-        Supported variables are: {name}, {number}, {branch}, {status}, {link}, {mentions}, {changes}, {reason}, {artifactLinks}, {allArtifactsDownloadUrl}, {artifactsRelUrl}<br>
-        You can also use project and build parameters, e.g. {%my.awesome.teamcity.param%}
+        See supported variables <a href="https://github.com/alexkvak/teamcity-slack/blob/master/README.md#message-placeholders" target="_blank">here</a>.
       </div>
       </span>
     </div>
@@ -34,7 +33,7 @@
     <div class="checkboxes-group">
       <label class="flagLabel">
         <input type="checkbox" name="success" value="1" <c:if test="${model.success}">checked</c:if>/>
-        Trigger when build is Successful
+        Trigger when build is successful
       </label>
       <label class="flagLabel indented">
         <input type="checkbox" data-parent="success" name="failureToSuccess" value="1" <c:if test="${model.failureToSuccess}">checked</c:if>/>
@@ -44,11 +43,17 @@
     <div class="checkboxes-group">
       <label class="flagLabel">
         <input type="checkbox" name="fail" value="1" <c:if test="${model.fail}">checked</c:if>/>
-        Trigger when build Fails
+        Trigger when build is failed
       </label>
       <label class="flagLabel indented">
         <input type="checkbox" data-parent="fail" name="successToFailure" value="1" <c:if test="${model.successToFailure}">checked</c:if>/>
         Only trigger when build changes from Success to Failure
+      </label>
+    </div>
+    <div class="checkboxes-group">
+      <label class="flagLabel">
+        <input type="checkbox" name="canceled" value="1" <c:if test="${model.canceled}">checked</c:if>/>
+        Trigger when build is canceled
       </label>
     </div>
   </div>
