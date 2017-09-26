@@ -15,7 +15,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
   import Helpers.Implicits._
 
   def compile(template: String, setting: Option[BuildSetting] = None): SlackAttachment = {
-    def status = if (build.getBuildStatus.isSuccessful) "succeeded" else "failed"
+    def status = if (build.getBuildStatus.isSuccessful) "succeeded" else if (build.getBuildStatus.isFailed) "failed" else "canceled"
 
     def artifacts = s"<${context.getDownloadAllArtifactsUrl(build)}|Download all artifacts>"
 
@@ -82,20 +82,20 @@ object MessageBuilder {
       |Branch: {branch}
       |Status: {status}
       |{mentions}
-    """.stripMargin
+    """.stripMargin.trim
 
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
 
   case class MessageBuilderContext(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths, configManager: ConfigManager) {
-    lazy val getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
+    def getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
 
-    lazy val getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
+    def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
 
-    lazy val userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
+    def userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
 
-    lazy val getArtifactsPath: String = paths.getArtifactsDirectory.getPath
+    def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
 
-    lazy val getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
+    def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
       Option(build.getBuildType.getParameter(name).getValue)
   }
 }

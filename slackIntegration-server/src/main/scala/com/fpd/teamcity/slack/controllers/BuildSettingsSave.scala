@@ -26,7 +26,8 @@ class BuildSettingsSave(configManager: ConfigManager,
         "success" → BuildSettingFlag.success,
         "failureToSuccess" → BuildSettingFlag.failureToSuccess,
         "fail" → BuildSettingFlag.failure,
-        "successToFailure" → BuildSettingFlag.successToFailure
+        "successToFailure" → BuildSettingFlag.successToFailure,
+        "canceled" → BuildSettingFlag.canceled
       )
       val keys = keyToFlag.keys.filter(key ⇒ request.param(key).isDefined)
       keys.map(keyToFlag).toSet

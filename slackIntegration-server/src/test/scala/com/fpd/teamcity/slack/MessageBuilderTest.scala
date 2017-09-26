@@ -236,6 +236,23 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
 
+  "MessageBuilder.compile" should "compile template for canceled build" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.UNKNOWN
+
+    val messageTemplate = """{name}
+                            |{status}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      """Full name
+        |canceled
+      """.stripMargin.trim, Status.UNKNOWN.getHtmlColor)
+  }
+
 //  TODO: artifactLinks test
 
   private def mockChanges = {
