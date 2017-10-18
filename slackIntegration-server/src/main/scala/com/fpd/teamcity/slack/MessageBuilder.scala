@@ -19,7 +19,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
     def artifacts = s"<${context.getDownloadAllArtifactsUrl(build)}|Download all artifacts>"
 
-    lazy val artifactsRelUrl = build.getArtifactsDirectory.getPath.stripPrefix(context.getArtifactsPath)
+    lazy val artifactsRelUrl = build.getArtifactsDirectory.getPath.stripPrefix(context.getArtifactsPath).stripPrefix("/")
 
     def artifactLinks = if (setting.isDefined && !setting.get.artifactsMask.isEmpty) {
       val links = ArrayBuffer.empty[String]
@@ -28,7 +28,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
       build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT_WITH_ARCHIVES_CONTENT).iterateArtifacts((artifact: BuildArtifact) ⇒ {
         if (artifact.isFile && compiledMask.findFirstIn(artifact.getName).isDefined) {
-          links += s"$publicUrl/${artifact.getRelativePath}"
+          links += s"$publicUrl/$artifactsRelUrl/${artifact.getRelativePath}"
         }
 
         if (!artifact.isArchive && (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.get.deepLookup)))
