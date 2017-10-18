@@ -279,8 +279,8 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
     messageBuilder().compile(messageTemplate, Some(BuildSetting("", "", "art", "", artifactsMask = ".*"))) shouldEqual SlackAttachment(
       s"""Full name
-        |${artifactsPublicUrl}artifact.txt
-        |${artifactsPublicUrl}folder/artifact2.txt
+        |${artifactsPublicUrl}directory/artifact.txt
+        |${artifactsPublicUrl}directory/folder/artifact2.txt
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
