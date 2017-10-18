@@ -2,9 +2,11 @@ package com.fpd.teamcity.slack
 
 import java.io.File
 
+import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import jetbrains.buildServer.BuildProblemData
 import jetbrains.buildServer.messages.Status
+import jetbrains.buildServer.serverSide.artifacts.{BuildArtifact, BuildArtifacts, BuildArtifactsViewMode}
 import jetbrains.buildServer.serverSide.{Branch, SBuild}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.vcs.SVcsModification
@@ -253,7 +255,34 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, Status.UNKNOWN.getHtmlColor)
   }
 
-//  TODO: artifactLinks test
+  "MessageBuilder.compile" should "compile template with artifactLinks placeholder" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getArtifactsDirectory _ when() returns new File("directory")
+
+    val artifactsViewer = stub[BuildArtifacts]
+    build.getArtifacts _ when BuildArtifactsViewMode.VIEW_DEFAULT_WITH_ARCHIVES_CONTENT returns artifactsViewer
+    val artifacts = Seq(
+      new TestBuildArtifact("artifact.txt", "artifact.txt", true),
+      new TestBuildArtifact("artifact2.txt", "folder/artifact2.txt", true)
+    )
+    artifactsViewer.iterateArtifacts _ when * onCall { processor: BuildArtifacts.BuildArtifactsProcessor ⇒
+      artifacts.foreach(processor.processBuildArtifact)
+    }
+
+    val messageTemplate = """{name}
+                            |{artifactLinks}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate, Some(BuildSetting("", "", "art", "", artifactsMask = ".*"))) shouldEqual SlackAttachment(
+      s"""Full name
+        |${artifactsPublicUrl}artifact.txt
+        |${artifactsPublicUrl}folder/artifact2.txt
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+  }
 
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
@@ -288,6 +317,9 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
 
 object MessageBuilderTest extends MockFactory {
   import MessageBuilder._
+
+  private val artifactsPublicUrl = "https://team.city/download/"
+
   def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "", artifactsPath: String = "", params: Map[String, String] = Map.empty)(implicit build: SBuild) = {
     val context = stub[MessageBuilderContext]
     context.getArtifactsPath _ when() returns artifactsPath
@@ -295,7 +327,30 @@ object MessageBuilderTest extends MockFactory {
     context.getDownloadAllArtifactsUrl _ when() returns (_ ⇒ downloadArtifactsUrl)
     context.userByEmail _ when() returns (x ⇒ Some(x))
     context.getBuildParameter _ when() returns ((_, name) ⇒ params.get(name))
+    context.artifactsPublicUrl _ when() returns Some(artifactsPublicUrl)
 
     new MessageBuilder(build, context)
+  }
+
+  class TestBuildArtifact(name: String, relativePath: String, file: Boolean) extends BuildArtifact {
+    override def isArchive = false
+
+    override def isFile = file
+
+    override def isContainer = ???
+
+    override def getInputStream = ???
+
+    override def getChildren = ???
+
+    override def getSize = ???
+
+    override def getTimestamp = ???
+
+    override def isDirectory = !file
+
+    override def getName = name
+
+    override def getRelativePath = relativePath
   }
 }

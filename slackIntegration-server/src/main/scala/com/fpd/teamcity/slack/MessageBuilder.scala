@@ -19,19 +19,22 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
     def artifacts = s"<${context.getDownloadAllArtifactsUrl(build)}|Download all artifacts>"
 
-    def artifactsRelUrl = build.getArtifactsDirectory.getPath.stripPrefix(context.getArtifactsPath)
+    lazy val artifactsRelUrl = build.getArtifactsDirectory.getPath.stripPrefix(context.getArtifactsPath)
 
     def artifactLinks = if (setting.isDefined && !setting.get.artifactsMask.isEmpty) {
       val links = ArrayBuffer.empty[String]
       val compiledMask = setting.get.artifactsMask.r
-      val publicUrl = context.configManager.publicUrl.getOrElse("").reverse.dropWhile(_ == '/').reverse
+      val publicUrl = context.artifactsPublicUrl.getOrElse("").reverse.dropWhile(_ == '/').reverse
 
       build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT_WITH_ARCHIVES_CONTENT).iterateArtifacts((artifact: BuildArtifact) ⇒ {
         if (artifact.isFile && compiledMask.findFirstIn(artifact.getName).isDefined) {
-          links += s"$publicUrl$artifactsRelUrl/${artifact.getName}"
+          links += s"$publicUrl/${artifact.getRelativePath}"
         }
 
-        if (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.get.deepLookup)) Continuation.CONTINUE else Continuation.SKIP_CHILDREN
+        if (!artifact.isArchive && (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.get.deepLookup)))
+          Continuation.CONTINUE
+        else
+          Continuation.SKIP_CHILDREN
       })
 
       links.mkString("\n")
@@ -94,6 +97,8 @@ object MessageBuilder {
     def userByEmail: (String) ⇒ Option[String] = email ⇒ Option(gateway.session.get.findUserByEmail(email)).map(_.getId)
 
     def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
+
+    def artifactsPublicUrl: Option[String] = configManager.publicUrl
 
     def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
       Option(build.getBuildType.getParameter(name).getValue)
