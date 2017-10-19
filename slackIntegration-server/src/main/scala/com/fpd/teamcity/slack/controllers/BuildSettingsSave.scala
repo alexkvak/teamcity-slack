@@ -4,19 +4,19 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag}
 import com.fpd.teamcity.slack.Helpers.Implicits._
-import com.fpd.teamcity.slack.{ConfigManager, Resources, SlackGateway}
-import jetbrains.buildServer.controllers.BaseController
+import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources, SlackGateway}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
 import scala.util.Try
 
-class BuildSettingsSave(configManager: ConfigManager,
+class BuildSettingsSave(val configManager: ConfigManager,
                         controllerManager: WebControllerManager,
                         slackGateway: SlackGateway,
+                        val permissionManager: PermissionManager,
                         implicit val descriptor: PluginDescriptor
                        )
-  extends BaseController with SlackController {
+  extends SlackController {
 
   controllerManager.registerController(Resources.buildSettingSave.url, this)
 
@@ -66,4 +66,7 @@ class BuildSettingsSave(configManager: ConfigManager,
 
     ajaxView(result getOrElse "Unknown error")
   }
+
+  override protected def checkPermission(request: HttpServletRequest): Boolean =
+    request.param("buildTypeId").exists(permissionManager.buildAccessPermitted(request, _))
 }

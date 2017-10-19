@@ -4,18 +4,18 @@ import java.net.URLEncoder
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack._
-import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
 
 class ConfigController(
                         configManager: ConfigManager,
                         controllerManager: WebControllerManager,
+                        val permissionManager: PermissionManager,
                         slackGateway: SlackGateway
                       )
-  extends BaseController with SlackController {
-  import Helpers.Implicits._
+  extends SlackController {
   import ConfigController._
+  import Helpers.Implicits._
 
   controllerManager.registerController(Resources.configPage.url, this)
 

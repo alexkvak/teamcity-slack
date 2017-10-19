@@ -2,9 +2,9 @@ package com.fpd.teamcity.slack.pages
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
+import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.controllers.SlackController
-import com.fpd.teamcity.slack.{ConfigManager, MessageBuilder, Resources}
-import jetbrains.buildServer.controllers.BaseController
+import com.fpd.teamcity.slack.{ConfigManager, MessageBuilder, PermissionManager, Resources}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
@@ -12,8 +12,9 @@ import scala.collection.JavaConverters._
 
 class BuildSettingEditPage(controllerManager: WebControllerManager,
                            descriptor: PluginDescriptor,
+                           val permissionManager: PermissionManager,
                            config: ConfigManager
-                          ) extends BaseController with SlackController {
+                          ) extends SlackController {
   controllerManager.registerController(Resources.buildSettingEdit.url, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
@@ -30,4 +31,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
 
     result getOrElse new ModelAndView(view, Map("defaultMessage" → MessageBuilder.defaultMessage).asJava)
   }
+
+  override protected def checkPermission(request: HttpServletRequest): Boolean =
+    request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
 }
