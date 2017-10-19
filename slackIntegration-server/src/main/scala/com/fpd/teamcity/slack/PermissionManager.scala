@@ -3,7 +3,7 @@ package com.fpd.teamcity.slack
 import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.serverSide.ProjectManager
-import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.{Permission, RoleEntry}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.web.util.SessionUser
 
@@ -36,11 +36,15 @@ class PermissionManager(
     Some(projectManager.findProjectId(buildTypeId)).exists(isProjectAdmin(user, _))
 
   private def isProjectAdmin(user: SUser, projectId: String): Boolean = {
-    lazy val parents = projectManager.findProjectById(projectId).getProjectPath.asScala.map(_.getProjectId)
+    lazy val parentProjects = projectManager.findProjectById(projectId).getProjectPath.asScala.map(_.getProjectId)
 
-    user.getRoles.asScala.exists { entry ⇒
-      entry.getRole.getId == "PROJECT_ADMIN" && parents.contains(entry.getScope.getProjectId)
-    }
+    lazy val directRoles = user.getRoles.asScala
+    lazy val parentRoles = user.getParentHolders.asScala.flatMap(_.getRoles.asScala)
+
+    def projectAdmin(entry: RoleEntry): Boolean =
+      entry.getRole.getId == "PROJECT_ADMIN" && parentProjects.contains(entry.getScope.getProjectId)
+
+    directRoles.exists(projectAdmin) || parentRoles.exists(projectAdmin)
   }
 }
 
