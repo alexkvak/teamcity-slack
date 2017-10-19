@@ -17,7 +17,7 @@ class PermissionManager(
 
   import PermissionManager._
 
-  def accessPermitted(request: Request): Boolean = configManager.isAvailable && isAdmin(request)
+  def accessPermitted(request: Request): Boolean = isAdmin(request)
 
   def settingAccessPermitted(request: Request, settingId: String): Boolean = configManager.isAvailable &&
     (isAdmin(request) || request.exists(settingIdPermitted(_, settingId)))

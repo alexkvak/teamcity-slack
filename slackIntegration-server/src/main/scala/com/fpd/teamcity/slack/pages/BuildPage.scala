@@ -28,7 +28,8 @@ class BuildPage(
   addCssFile(descriptor.getPluginResourcesPath("css/slack-notifier.css"))
   addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier.js"))
 
-  override def isAvailable(request: HttpServletRequest): Boolean =  permissionManager.buildAccessPermitted(request, getBuildType(request).getInternalId)
+  override def isAvailable(request: HttpServletRequest): Boolean =
+    permissionManager.buildAccessPermitted(request, getBuildType(request).getInternalId)
 
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest, buildType: SBuildType, user: SUser): Unit = {
     model.put("buildTypeId", buildType.getBuildTypeId)
