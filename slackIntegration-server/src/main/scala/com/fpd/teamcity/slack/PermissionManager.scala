@@ -34,14 +34,18 @@ class PermissionManager(
 
   private def buildTypeIdPermitted(user: SUser, buildTypeId: String): Boolean =
     Some(projectManager.findProjectId(buildTypeId)).exists(isProjectAdmin(user, _))
+
+  private def isProjectAdmin(user: SUser, projectId: String): Boolean = {
+    lazy val parents = projectManager.findProjectById(projectId).getProjectPath.asScala.map(_.getProjectId)
+
+    user.getRoles.asScala.exists { entry ⇒
+      entry.getRole.getId == "PROJECT_ADMIN" && parents.contains(entry.getScope.getProjectId)
+    }
+  }
 }
 
 object PermissionManager {
   type Request = HttpServletRequest
 
   implicit def requestToUser(request: HttpServletRequest): Option[SUser] = Option(SessionUser.getUser(request))
-
-  private def isProjectAdmin(user: SUser, projectId: String): Boolean = user.getRoles.asScala.exists { entry ⇒
-    entry.getRole.getId == "PROJECT_ADMIN" && entry.getScope.getProjectId == projectId
-  }
 }
