@@ -4,17 +4,12 @@ import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.SBuild
-import jetbrains.buildServer.serverSide.auth.Permission
-import jetbrains.buildServer.web.util.SessionUser
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Random
 
 object Helpers {
-  def checkPermission(request: HttpServletRequest): Boolean =
-    Option(SessionUser.getUser(request)).exists(user ⇒ user.isPermissionGrantedGlobally(Permission.CHANGE_SERVER_SETTINGS))
-
   object Implicits {
     implicit class RichHttpServletRequest(request: HttpServletRequest) {
       def param(key: String): Option[String] = Option(request.getParameter(key)).map(_.trim).filterNot(_.isEmpty)

@@ -5,7 +5,6 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.SlackGateway.SlackChannel
 import com.fpd.teamcity.slack._
-import jetbrains.buildServer.controllers.BaseController
 import jetbrains.buildServer.serverSide.BuildHistory
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
@@ -16,10 +15,11 @@ class BuildSettingsTry(buildHistory: BuildHistory,
                        configManager: ConfigManager,
                        gateway: SlackGateway,
                        controllerManager: WebControllerManager,
+                       val permissionManager: PermissionManager,
                        messageBuilderFactory: MessageBuilderFactory,
                        implicit val descriptor: PluginDescriptor
                       )
-  extends BaseController with SlackController {
+  extends SlackController {
 
   controllerManager.registerController(Resources.buildSettingTry.url, this)
 
@@ -35,4 +35,7 @@ class BuildSettingsTry(buildHistory: BuildHistory,
 
     ajaxView(result getOrElse "Something went wrong")
   }
+
+  override protected def checkPermission(request: HttpServletRequest): Boolean =
+    request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
 }

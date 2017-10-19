@@ -3,16 +3,23 @@ package com.fpd.teamcity.slack.pages
 import java.util
 import javax.servlet.http.HttpServletRequest
 
-import com.fpd.teamcity.slack.{ConfigManager, Resources, Strings}
+import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources, Strings}
 import jetbrains.buildServer.controllers.admin.AdminPage
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
-class ConfigPage(extension: ConfigManager, pagePlaces: PagePlaces, descriptor: PluginDescriptor)
-  extends AdminPage(
-    pagePlaces,
-    Strings.tabId,
-    descriptor.getPluginResourcesPath(ConfigPage.includeUrl),
-    Strings.label) with SlackExtension {
+class ConfigPage(
+                  extension: ConfigManager,
+                  pagePlaces: PagePlaces,
+                  descriptor: PluginDescriptor,
+                  val permissionManager: PermissionManager
+                )
+  extends
+    AdminPage(
+      pagePlaces,
+      Strings.tabId,
+      descriptor.getPluginResourcesPath(ConfigPage.includeUrl),
+      Strings.label)
+    with SlackExtension {
 
   register()
 

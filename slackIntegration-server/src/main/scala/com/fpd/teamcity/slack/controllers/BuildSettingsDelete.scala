@@ -3,16 +3,16 @@ package com.fpd.teamcity.slack.controllers
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.Helpers.Implicits._
-import com.fpd.teamcity.slack.{ConfigManager, Resources}
-import jetbrains.buildServer.controllers.BaseController
+import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
 class BuildSettingsDelete(configManager: ConfigManager,
                           controllerManager: WebControllerManager,
+                          val permissionManager: PermissionManager,
                           implicit val descriptor: PluginDescriptor
                          )
-  extends BaseController with SlackController {
+  extends SlackController {
 
   controllerManager.registerController(Resources.buildSettingDelete.url, this)
 
@@ -24,4 +24,7 @@ class BuildSettingsDelete(configManager: ConfigManager,
 
     ajaxView(result.filter(_ == true).map(_ ⇒ "") getOrElse "Something went wrong")
   }
+
+  override protected def checkPermission(request: HttpServletRequest): Boolean =
+    request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
 }
