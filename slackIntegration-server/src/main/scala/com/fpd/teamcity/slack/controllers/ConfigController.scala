@@ -27,7 +27,12 @@ class ConfigController(
       val publicUrl = request.param("publicUrl").getOrElse("")
 
       slackGateway.sessionByConfig(newConfig).map { _ ⇒
-        configManager.update(oauthKey, publicUrl, request.param("personalEnabled").isDefined)
+        configManager.update(
+          oauthKey,
+          publicUrl,
+          request.param("personalEnabled").isDefined,
+          request.param("enabled").isDefined
+        )
       } match {
         case Some(true) ⇒ Left(true)
         case Some(_) ⇒ Right("Failed to update OAuth Access Token")

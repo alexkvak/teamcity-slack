@@ -23,6 +23,8 @@ class ConfigPage(
 
   register()
 
+  addJsFile(descriptor.getPluginResourcesPath("js/slack-notifier-config.js"))
+
   override def fillModel(model: util.Map[String, AnyRef], request: HttpServletRequest): Unit = {
     import collection.JavaConverters._
     import com.fpd.teamcity.slack.Helpers.Implicits._

@@ -17,7 +17,7 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
 
   sBuildServer.addListener(this)
 
-  override def buildFinished(build: SRunningBuild): Unit = {
+  override def buildFinished(build: SRunningBuild): Unit = if (configManager.isAvailable) {
     val previousStatus = sBuildServer.getHistory.getEntriesBefore(build, false).asScala
       .find(!_.isPersonal)
       .map(_.getBuildStatus)
@@ -29,7 +29,8 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
   }
 
-  override def buildInterrupted(build: SRunningBuild): Unit = send(build, Set(BuildSettingFlag.canceled))
+  override def buildInterrupted(build: SRunningBuild): Unit = if (configManager.isAvailable)
+    send(build, Set(BuildSettingFlag.canceled))
 }
 
 object SlackServerAdapter {

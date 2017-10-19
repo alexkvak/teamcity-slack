@@ -28,6 +28,7 @@ class ConfigManager(paths: ServerPaths) {
 
   def oauthKey: Option[String] = config.map(_.oauthKey)
   def publicUrl: Option[String] = config.flatMap(_.publicUrl)
+  def enabled: Option[Boolean] = config.flatMap(_.enabled)
   def personalEnabled: Option[Boolean] = config.flatMap(_.personalEnabled)
 
   def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
@@ -66,9 +67,15 @@ class ConfigManager(paths: ServerPaths) {
     updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
-  def update(authKey: String, pubUrl: String, personalEnabled: Boolean): Boolean = config match {
-    case Some(c) ⇒ updateAndPersist(c.copy(authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled)))
-    case None ⇒ updateAndPersist(Config(authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled)))
+  def update(authKey: String, pubUrl: String, personalEnabled: Boolean, enabled: Boolean): Boolean = config match {
+    case Some(c) ⇒
+      updateAndPersist(c.copy(
+        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled), enabled = Some(enabled)
+      ))
+    case None ⇒
+      updateAndPersist(Config(
+        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled), enabled = Some(enabled)
+      ))
   }
 
   def removeBuildSetting(key: String): Option[Boolean] = config.map { c ⇒
@@ -78,10 +85,11 @@ class ConfigManager(paths: ServerPaths) {
   def details: Map[String, Option[String]] = Map(
     "oauthKey" → oauthKey,
     "publicUrl" → publicUrl,
+    "enabled" → enabled.filter(x ⇒ x).map(_ ⇒ "1"),
     "personalEnabled" → personalEnabled.filter(x ⇒ x).map(_ ⇒ "1")
   )
 
-  def isAvailable: Boolean = config.exists(_.oauthKey.length > 0)
+  def isAvailable: Boolean = config.exists(c ⇒ c.enabled.exists(b ⇒ b) && c.oauthKey.length > 0)
 }
 
 object ConfigManager {
@@ -138,7 +146,8 @@ object ConfigManager {
   case class Config(oauthKey: String,
                     buildSettings: BuildSettings = Map.empty,
                     publicUrl: Option[String] = None,
-                    personalEnabled: Option[Boolean] = Some(true)
+                    personalEnabled: Option[Boolean] = Some(true),
+                    enabled: Option[Boolean] = Some(true)
                    )
 
   @annotation.tailrec
