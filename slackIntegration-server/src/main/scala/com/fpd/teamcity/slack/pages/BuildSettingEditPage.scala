@@ -33,5 +33,5 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
   }
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =
-    request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
+    request.param("buildTypeId").exists(id ⇒ permissionManager.buildAccessPermitted(request, id))
 }
