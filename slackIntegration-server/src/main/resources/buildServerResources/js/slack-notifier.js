@@ -65,7 +65,7 @@ jQuery(function ($) {
     }
 
     function buildSettingEdit(id) {
-        BS.ajaxRequest(window.slackNotifier.buildSettingEditUrl + (id ? '?id=' + id : ''), {
+        BS.ajaxRequest(window.slackNotifier.buildSettingEditUrl + (id ? '&id=' + id : ''), {
             onSuccess: function (response) {
                 $('#slackNotifier').find('.modalDialogBody').html(response.responseText);
                 BS.SlackNotifierDialog.showCentered();
