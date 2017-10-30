@@ -4,7 +4,7 @@
   <parent>
     <artifactId>slackIntegration</artifactId>
     <groupId>com.fpd.teamcity.slackIntegration</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <artifactId>build</artifactId>
   <packaging>pom</packaging>
@@ -18,7 +18,7 @@
       <dependency>
            <groupId>com.fpd.teamcity.slackIntegration</groupId>
            <artifactId>slackIntegration-server</artifactId>
-           <version>1.0-SNAPSHOT</version>
+           <version>1.0.0</version>
       </dependency>
   </dependencies>
   <build>
