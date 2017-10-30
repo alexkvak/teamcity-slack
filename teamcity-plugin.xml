@@ -5,12 +5,11 @@
     <display-name>Slack Integration</display-name>
     <version>@Version@</version>
     <description>Integration with slack</description>
-    <download-url>https://alexkvak.com/</download-url>
-    <email>Plugin author e-mail</email>
+    <download-url>@VendorURL@</download-url>
+    <email>metalalisa@gmail.com</email>
     <vendor>
-      <name>Fast Plugin Dev</name>
+      <name>@VendorName@</name>
       <url>@VendorURL@</url>
-      <logo>Plugin vendor logo URL</logo>
     </vendor>
   </info>
   <deployment use-separate-classloader="true" />

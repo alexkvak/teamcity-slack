@@ -11,8 +11,8 @@
   <properties>
       <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
       <teamcity.slackIntegration.plugin.version>1.0.0</teamcity.slackIntegration.plugin.version>
-      <teamcity.slackIntegration.plugin.vendorName>Plugin vendor name</teamcity.slackIntegration.plugin.vendorName>
-      <teamcity.slackIntegration.plugin.vendorUrl>Plugin vendor URL</teamcity.slackIntegration.plugin.vendorUrl>
+      <teamcity.slackIntegration.plugin.vendorName>Alex Kvak</teamcity.slackIntegration.plugin.vendorName>
+      <teamcity.slackIntegration.plugin.vendorUrl>https://github.com/alexkvak</teamcity.slackIntegration.plugin.vendorUrl>
   </properties>
   <dependencies>
       <dependency>
