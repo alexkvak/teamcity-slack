@@ -1,5 +1,7 @@
 # TeamCity Slack plugin
 
+[![Build Status](https://travis-ci.org/alexkvak/teamcity-slack.svg?branch=master)](https://travis-ci.org/alexkvak/teamcity-slack)
+
 This plugin allows you to integrate your CI with Slack.
 
 The main feature is that you can specify not exact branch name but the [regexp branch mask](#build-configuration).
