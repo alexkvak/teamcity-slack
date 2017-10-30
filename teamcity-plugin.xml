@@ -3,7 +3,7 @@
   <info>
     <name>Slack Integration</name>
     <display-name>Slack Integration</display-name>
-    <version>@Version@</version>
+    <version>1.0.0</version>
     <description>Integration with slack</description>
     <download-url>https://alexkvak.com/</download-url>
     <email>Plugin author e-mail</email>
