@@ -1,0 +1,12 @@
+language: scala
+sudo: false
+script: mvn clean verify
+deploy:
+  provider: releases
+  api_key:
+    secure: YhCsjrcF9y3nlcYGIZ0FpfvTC+V4ULnd+tRsHLoA6QozWJmj1N1+Le9WNkbqONFtPF1HlufaYlhhYdxpCSiiDPIPjQhRsQGMK4hKXgiHeN3UyFo9m5cwn6dfUSwd8PCKnDw74D73F4XDr5bny5yrJ6vWP6C7uFlGKS7ex+r1xiX/AdECKp5Du3EBibhpGy1byJHShraMEFfp5lyQeQrCYb5f/IK8aqVHwrdti73+rYQ4L3M+RBiwI4k4WWG3BHZbHgz+cbHvU3gihk3QOss11x0r3ngTS2TDVEwIe8afhgI6PP9hYOUoxMVZ3hJlx2P1zeAxAS48ezaqnv91m/PNDUuDHZzUmHghfovWc1UcBBzbC7HSv9c8/c6cWQPq5EWs8tExsGgIQBCCl55qr3ovoOf7wtUW6SQ50MpftJ8qrm2x5LOFI28x/dj9pFcCdY71KZxDkFMsVCmi6a16O9dbx2I3swSoh6dxVxIoGqd9GTd37tScuUy3E7Bzz3YBk/xrhGK2inh9KtMfbiXQ6TT3bKAwYB67p31dDVfDAuYQtSkyRN7Dg82VgixdKqMrbjsSu4vDdBuo0vpUQG0WugocbW+TAJr/OFAWDcP5dVv+0BJYOaiUp8pwQ/YpZCcMBPCMUCC4DkVx9LKrLEAePA9BBrH/I6PKxc9oQuxhd/ua5fc=
+  file: $TRAVIS_BUILD_DIR/target/slackIntegration.zip
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
