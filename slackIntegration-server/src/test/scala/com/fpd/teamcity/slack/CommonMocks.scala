@@ -8,7 +8,8 @@ trait CommonMocks extends MockFactory {
   val manager = new ConfigManagerStub
 
   class ConfigManagerStub extends ConfigManager(new ServerPaths("")) {
-    override def persist(newConfig: Config): Boolean = true
+    override protected def backup(): Boolean = true
+    override protected def persist(): Boolean = true
 
     override protected def readConfig: Option[Config] = None
 

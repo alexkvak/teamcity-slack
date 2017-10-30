@@ -20,6 +20,8 @@ class ConfigManager(paths: ServerPaths) {
 
   private def configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
 
+  private def backupFile = new File(s"${paths.getConfigDir}/slackIntegration.json.bak")
+
   private[teamcity] var config: Option[Config] = readConfig
 
   protected def readConfig: Option[Config] = if (configFile.exists()) {
@@ -40,12 +42,17 @@ class ConfigManager(paths: ServerPaths) {
   def buildSetting(id: String): Option[BuildSetting] = allBuildSettingList.get(id)
 
   private def updateAndPersist(newConfig: Config): Boolean = {
+    backup()
     this.config = Some(newConfig)
-    persist(newConfig)
+    persist()
   }
 
-  def persist(newConfig: Config): Boolean = synchronized {
-    val out = new PrintWriter(configFile, "UTF-8")
+  protected def backup(): Boolean = writeConfig(backupFile)
+
+  protected def persist(): Boolean = writeConfig(configFile)
+
+  protected def writeConfig(file: File): Boolean = synchronized {
+    val out = new PrintWriter(file, "UTF-8")
     try {
       writePretty(config, out)
     }

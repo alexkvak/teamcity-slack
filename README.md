@@ -11,6 +11,8 @@ The second big thing is that your can compose your own messages using [template 
 
 And you can easily send notification without running the build with *Try it* feature.
 
+Plugin automatically backups its settings after each modification.
+
 ## Table of Contents
 1. [Install plugin](#install-plugin)
 2. [Build configuration](#build-configuration)
