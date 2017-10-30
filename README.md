@@ -97,3 +97,11 @@ In case you want to access build artifacts with third party web server (e.g. ngi
 Specify *Public artifacts URL* as root path served by your web server. 
 And *Artifacts mask* in [Build configuration](#build-configuration).
 All other will be done automatically.
+
+Sample nginx configuration:
+```
+location /art/ {
+    alias <teamcity-data-dir>/system/artifacts/;
+    autoindex on;
+}
+```
