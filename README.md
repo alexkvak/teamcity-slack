@@ -15,6 +15,10 @@ And you can easily send notification without running the build with *Try it* fea
 
 Plugin automatically backups its settings after each modification.
 
+![Successful build](_doc/build-success.png)
+![Failed build](_doc/build-fail.png)
+![Artifact links](_doc/artifact-links.png)
+
 ## Table of Contents
 1. [Install plugin](#install-plugin)
 2. [Build configuration](#build-configuration)
