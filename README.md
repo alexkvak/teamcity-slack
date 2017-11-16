@@ -53,6 +53,8 @@ Sample configuration:
 Notifications for branches captured by regular expression will be sent to slack channel.
 Message will be compiled according to template.
 
+**Note.** Please avoid using heading `#` in channel name.
+
 The build settings number is not limited, so you can set up notifications for feature branches 
 in one channel, and for release branches in another one.
 
