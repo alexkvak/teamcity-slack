@@ -39,7 +39,8 @@ Paste this token into **Administration -> Slack -> OAuth Access Token** field.
 
 That's it! Now you can open any build configuration home and choose **Slack** tab.
 
-By default personal notifications (private notifications) are disabled.
+By default personal notifications (private notifications) are disabled. 
+Personal notifications notify only about failed builds.
 
 ![Slack tab](_doc/slack-tab.png "Slack tab")
 Only admins and projects admins have rights to access these settings. 

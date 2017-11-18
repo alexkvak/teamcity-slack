@@ -38,7 +38,7 @@
                 <td colspan="2">
                     <label>
                         <input type="checkbox" id="personalEnabled" name="personalEnabled" value="1" <c:if test="${not empty personalEnabled}">checked</c:if>>
-                        Personal notifications enabled
+                        Personal notifications enabled (only if build fails)
                     </label>
                 </td>
             </tr>
