@@ -2,10 +2,9 @@ package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
+import com.fpd.teamcity.slack.Helpers.Implicits._
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
-
-import scala.collection.JavaConverters._
 
 class SlackServerAdapter(sBuildServer: SBuildServer,
                          val configManager: ConfigManager,
@@ -18,10 +17,7 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
   sBuildServer.addListener(this)
 
   override def buildFinished(build: SRunningBuild): Unit = if (configManager.isAvailable) {
-    val previousStatus = sBuildServer.getHistory.getEntriesBefore(build, false).asScala
-      .find(!_.isPersonal)
-      .map(_.getBuildStatus)
-      .getOrElse(Status.UNKNOWN)
+    val previousStatus = sBuildServer.findPreviousStatus(build)
 
     val flags = calculateFlags(previousStatus, build.getBuildStatus)
     if (flags.nonEmpty) {

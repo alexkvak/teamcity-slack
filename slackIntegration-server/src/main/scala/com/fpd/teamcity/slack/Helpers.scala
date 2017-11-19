@@ -3,7 +3,7 @@ package com.fpd.teamcity.slack
 import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.SBuild
+import jetbrains.buildServer.serverSide.{SBuild, SBuildServer, SFinishedBuild}
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -43,6 +43,22 @@ object Helpers {
 
       def matchBranch(mask: String): Boolean = Option(build.getBranch).exists { branch ⇒
         mask.r.findFirstIn(branch.getDisplayName).isDefined
+      }
+    }
+
+    implicit class RichBuildServer(sBuildServer: SBuildServer) {
+      def findPreviousStatus(build: SBuild): Status = {
+
+        def filterEntry(x: SFinishedBuild): Boolean = if (build.getBranch == null)
+          x.getBranch == null
+        else
+          Option(x.getBranch).exists(_.getDisplayName == build.getBranch.getDisplayName)
+
+        sBuildServer.getHistory.getEntriesBefore(build, false).asScala
+          .filter(filterEntry)
+          .find(!_.isPersonal)
+          .map(_.getBuildStatus)
+          .getOrElse(Status.UNKNOWN)
       }
     }
   }
