@@ -20,7 +20,10 @@ class BuildSettingsSave(val configManager: ConfigManager,
 
   controllerManager.registerController(Resources.buildSettingSave.url, this)
 
-  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
+  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView =
+    ajaxView(handleSave(request))
+
+  def handleSave(request: HttpServletRequest): String = {
     def flags = {
       val keyToFlag = Map(
         "success" → BuildSettingFlag.success,
@@ -64,7 +67,7 @@ class BuildSettingsSave(val configManager: ConfigManager,
       }
     }
 
-    ajaxView(result getOrElse "Unknown error")
+    result getOrElse "One or more required params are missing"
   }
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =
