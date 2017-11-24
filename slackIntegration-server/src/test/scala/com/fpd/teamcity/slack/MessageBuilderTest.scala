@@ -32,7 +32,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
-        |Status: succeeded
+        |Status: ${Strings.MessageBuilder.statusSucceeded}
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
@@ -51,7 +51,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
-        |Status: failed
+        |Status: ${Strings.MessageBuilder.statusFailed}
         |<@nick1> <@nick2>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor)
   }
@@ -281,6 +281,22 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""Full name
         |${artifactsPublicUrl}directory/artifact.txt
         |${artifactsPublicUrl}directory/folder/artifact2.txt
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+  }
+
+  "MessageBuilder.compile" should "compile template for build without branch" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBranch _ when() returns null
+    build.getBuildStatus _ when() returns Status.NORMAL
+
+    val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+      s"""<$viewResultsUrl|Full name - 2>
+                          |Branch: ${Strings.MessageBuilder.unknownBranch}
+                          |Status: ${Strings.MessageBuilder.statusSucceeded}
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 

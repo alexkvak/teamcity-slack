@@ -3,6 +3,7 @@ package com.fpd.teamcity.slack
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.MessageBuilder._
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
+import com.fpd.teamcity.slack.Strings.MessageBuilder._
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts.BuildArtifactsProcessor.Continuation
 import jetbrains.buildServer.serverSide.artifacts.{BuildArtifact, BuildArtifactsViewMode}
@@ -15,7 +16,8 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
   import Helpers.Implicits._
 
   def compile(template: String, setting: Option[BuildSetting] = None): SlackAttachment = {
-    def status = if (build.getBuildStatus.isSuccessful) "succeeded" else if (build.getBuildStatus.isFailed) "failed" else "canceled"
+    def status = if (build.getBuildStatus.isSuccessful) statusSucceeded
+    else if (build.getBuildStatus.isFailed) statusFailed else statusCanceled
 
     def artifacts = s"<${context.getDownloadAllArtifactsUrl(build)}|Download all artifacts>"
 
@@ -50,13 +52,13 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     }
 
     def reason = if (build.getBuildStatus.isSuccessful) "" else {
-      "Reason: " + (if (build.getFailureReasons.isEmpty) "Unknown" else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n"))
+      "Reason: " + (if (build.getFailureReasons.isEmpty) unknownReason else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n"))
     }
 
     val text = """\{([\s\w._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ build.getFullName
       case "number" ⇒ build.getBuildNumber
-      case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse("Unknown")
+      case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse(unknownBranch)
       case "status" ⇒ status
       case "changes" ⇒ changes
       case "allArtifactsDownloadUrl" ⇒ artifacts
