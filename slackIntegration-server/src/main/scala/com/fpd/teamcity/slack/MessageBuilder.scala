@@ -56,7 +56,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     val text = """\{([\s\w._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ build.getFullName
       case "number" ⇒ build.getBuildNumber
-      case "branch" ⇒ Some(build.getBranch).map(_.getDisplayName).getOrElse("Unknown")
+      case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse("Unknown")
       case "status" ⇒ status
       case "changes" ⇒ changes
       case "allArtifactsDownloadUrl" ⇒ artifacts
