@@ -25,11 +25,18 @@ class HelpersTest extends FlatSpec with MockFactory with Matchers {
       Table(
         ("branchName", "branchMask", "matches"), // First tuple defines column names
         // Subsequent tuples define the data
+        (Some(""), ".*", true),
         (Some("default"), "default", true),
         (Some("release-1099"), "release-\\d+", true),
         (Some("release-branch"), "release-\\d+", false),
         (None, "default", false)
       )
+  }
+
+  "RichBuild.branchMask" should "return correct value for empty branch" in {
+    val build = stub[SBuild]
+    build.getBranch _ when() returns null
+    build.matchBranch(".*") shouldEqual true
   }
 
   "RichBuildServer.findPreviousStatus" should "work properly" in {

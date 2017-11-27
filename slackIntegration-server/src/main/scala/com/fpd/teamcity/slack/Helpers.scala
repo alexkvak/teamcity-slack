@@ -41,9 +41,8 @@ object Helpers {
         users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
       }
 
-      def matchBranch(mask: String): Boolean = Option(build.getBranch).exists { branch ⇒
-        mask.r.findFirstIn(branch.getDisplayName).isDefined
-      }
+      def matchBranch(mask: String): Boolean =
+        mask.r.findFirstIn(Option(build.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
     }
 
     implicit class RichBuildServer(sBuildServer: SBuildServer) {
