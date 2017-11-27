@@ -4,6 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.ConfigManager.{BuildSetting, BuildSettingFlag}
 import com.fpd.teamcity.slack.Helpers.Implicits._
+import com.fpd.teamcity.slack.Strings.BuildSettingsController._
 import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources, SlackGateway}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
@@ -36,38 +37,49 @@ class BuildSettingsSave(val configManager: ConfigManager,
       keys.map(keyToFlag).toSet
     }
 
-    val artifactsMask = request.param("artifactsMask")
-
     val result = for {
     // preparing params
       branch ← request.param("branchMask")
-      channel ← request.param("slackChannel")
       buildId ← request.param("buildTypeId")
       message ← request.param("messageTemplate")
 
       config ← configManager.config
     } yield {
+      lazy val artifactsMask = request.param("artifactsMask")
+      val channel = request.param("slackChannel")
+      val notifyCommitter = request.param("notifyCommitter").isDefined
+
       // store build setting
       def updateConfig() = configManager.updateBuildSetting(
-        BuildSetting(buildId, branch, channel, message, flags, artifactsMask.getOrElse(""), request.param("deepLookup").isDefined),
+        BuildSetting(buildId, branch, channel.getOrElse(""), message, flags, artifactsMask.getOrElse(""), request.param("deepLookup").isDefined, notifyCommitter),
         request.param("key")
-      ).map(_ ⇒ "").getOrElse("")
+      )
 
       // check channel availability
-      slackGateway.sessionByConfig(config) match {
-        case Some(session) ⇒
-          Option(session.findChannelByName(channel)) match {
-            case Some(_) if Try(branch.r).isFailure ⇒ s"Unable to compile regular expression $branch"
-            case Some(_) if artifactsMask.isDefined && Try(artifactsMask.get.r).isFailure ⇒ s"Unable to compile regular expression ${artifactsMask.get}"
-            case Some(_) ⇒ updateConfig()
-            case None ⇒ s"Unable to find channel with name $channel"
-          }
-        case _ ⇒
-          "Unable to create session by config"
+      if (!channel.exists(_.nonEmpty) && !notifyCommitter) {
+        channelOrNotifyCommitterError
+      } else if (Try(branch.r).isFailure) {
+        compileBranchMaskError
+      } else if (artifactsMask.exists(s ⇒ Try(s.r).isFailure)) {
+        compileArtifactsMaskError
+      } else {
+        slackGateway.sessionByConfig(config) match {
+          case Some(session) ⇒
+            if (channel.exists(s ⇒ null == session.findChannelByName(s))) {
+              channelNotFoundError(channel.get)
+            } else {
+              updateConfig() match {
+                case Some(_) ⇒ ""
+                case _ ⇒ emptyConfigError
+              }
+            }
+          case _ ⇒
+            sessionByConfigError
+        }
       }
     }
 
-    result getOrElse "One or more required params are missing"
+    result getOrElse requirementsError
   }
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =

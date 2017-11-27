@@ -3,6 +3,7 @@ package com.fpd.teamcity.slack.controllers
 import javax.servlet.http.HttpServletRequest
 
 import com.fpd.teamcity.slack.ConfigManager.Config
+import com.fpd.teamcity.slack.Strings.BuildSettingsController._
 import com.fpd.teamcity.slack.{CommonMocks, PermissionManager, SlackGateway}
 import com.ullink.slack.simpleslackapi.{SlackChannel, SlackSession}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
@@ -15,12 +16,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
   import BuildSettingsSaveTest._
 
   "BuildSettingsSave.handleSave" should "save correct input values" in new Context {
-    val requestParams = Map(
-      "branchMask" → ".*",
-      "slackChannel" → "someChannel",
-      "buildTypeId" → "MyAwesomeBuildId",
-      "messageTemplate" → "Build was done"
-    )
+    val requestParams = correctRequestParams
     val request = stubRequest(requestParams)
 
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
@@ -38,9 +34,32 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     setting.branchMask shouldEqual requestParams("branchMask")
   }
 
+  "BuildSettingsSave.handleSave" should "save empty channel name and checked notify committers flag" in new Context {
+    val requestParams = correctRequestParams ++ Map(
+      "slackChannel" → "",
+      "notifyCommitter" → "1"
+    )
+    val request = stubRequest(requestParams)
+
+    session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
+    gateway.sessionByConfig _ when * returns Some(session)
+
+    buildSettingsSave.handleSave(request) shouldEqual ""
+
+    val settingList = manager.allBuildSettingList
+    settingList.size shouldEqual 1
+
+    val setting = settingList.head._2
+    setting.buildTypeId shouldEqual requestParams("buildTypeId")
+    setting.messageTemplate shouldEqual requestParams("messageTemplate")
+    setting.slackChannel shouldEqual requestParams("slackChannel")
+    setting.notifyCommitter shouldEqual true
+    setting.branchMask shouldEqual requestParams("branchMask")
+  }
+
   "BuildSettingsSave.handleSave" should "fail in case of missed required params" in new Context {
     forAll(data) { (requestParams: Map[String, String]) ⇒
-      buildSettingsSave.handleSave(stubRequest(requestParams)) shouldEqual "One or more required params are missing"
+      buildSettingsSave.handleSave(stubRequest(requestParams)) shouldEqual requirementsError
     }
 
     def data =
@@ -48,10 +67,16 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
         "requestParams", // First tuple defines column names
         // Subsequent tuples define the data
         Map("branchMask" → ".*"),
-        Map("slackChannel" → "someChannel"),
         Map("buildTypeId" → "MyAwesomeBuildId"),
         Map("messageTemplate" → "Build was done")
       )
+  }
+
+  "BuildSettingsSave.handleSave" should "fail in case of channel and notify committers are empty" in new Context {
+    val requestParams = correctRequestParams ++ Map("slackChannel" → "")
+    val request = stubRequest(requestParams)
+
+    buildSettingsSave.handleSave(request) shouldEqual channelOrNotifyCommitterError
   }
 
   "BuildSettingsSave.handleSave" should "fail in case of broken branch mask regular expression" in new Context {
@@ -61,7 +86,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
     gateway.sessionByConfig _ when * returns Some(session)
 
-    buildSettingsSave.handleSave(request) shouldEqual s"Unable to compile regular expression ${requestParams("branchMask")}"
+    buildSettingsSave.handleSave(request) shouldEqual compileBranchMaskError
   }
 
   "BuildSettingsSave.handleSave" should "fail in case of broken artifacts mask regular expression" in new Context {
@@ -71,7 +96,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
     gateway.sessionByConfig _ when * returns Some(session)
 
-    buildSettingsSave.handleSave(request) shouldEqual s"Unable to compile regular expression ${requestParams("artifactsMask")}"
+    buildSettingsSave.handleSave(request) shouldEqual compileArtifactsMaskError
   }
 
   "BuildSettingsSave.handleSave" should "fail in case of unknown channel" in new Context {
@@ -85,7 +110,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     val request = stubRequest(correctRequestParams)
     gateway.sessionByConfig _ when * returns None
 
-    buildSettingsSave.handleSave(request) shouldEqual "Unable to create session by config"
+    buildSettingsSave.handleSave(request) shouldEqual sessionByConfigError
   }
 }
 

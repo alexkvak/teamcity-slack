@@ -12,6 +12,10 @@
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
       <span><forms:textField className="mediumField textField" name="slackChannel" expandable="false" value="${model.slackChannel}"/></span>
     </div>
+    <div class="group notify-committer">
+      <label class="tableLabel" for="notifyCommitter">and/or notify committers:</label>
+      <input type="checkbox" name="notifyCommitter" id="notifyCommitter" value="1" <c:if test="${model.notifyCommitter}">checked</c:if>/>
+    </div>
     <div class="message-template">
       <label class="tableLabel" for="messageTemplate">Message template:</label>
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"
@@ -28,7 +32,7 @@
     </div>
     <div class="group">
       <label class="tableLabel" for="deepLookup">Lookup artifacts deep into:</label>
-      <input type="checkbox" name="deepLookup" value="1" <c:if test="${model.deepLookup}">checked</c:if>/>
+      <input type="checkbox" name="deepLookup" id="deepLookup" value="1" <c:if test="${model.deepLookup}">checked</c:if>/>
     </div>
     <div class="checkboxes-group">
       <label class="flagLabel">

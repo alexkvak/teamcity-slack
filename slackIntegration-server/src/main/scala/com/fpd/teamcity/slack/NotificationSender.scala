@@ -22,10 +22,15 @@ trait NotificationSender {
 
     settings.foreach { setting ⇒
       val attachment = messageBuilder.compile(setting.messageTemplate, Some(setting))
-      gateway.sendMessage(SlackChannel(setting.slackChannel), attachment)
+      if (setting.slackChannel.nonEmpty) {
+        gateway.sendMessage(SlackChannel(setting.slackChannel), attachment)
+      }
 
-      // if build failed all committees should receive the message
-      if (sendPersonal) {
+      /**
+        * if build fails all committees should receive the message
+        * if personal notification explicitly enabled in build settings let's notify all committees
+        */
+      if (setting.notifyCommitter || sendPersonal) {
         emails.foreach { email ⇒
           gateway.sendMessage(SlackUser(email), attachment)
         }

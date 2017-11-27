@@ -117,7 +117,8 @@ object ConfigManager {
                           messageTemplate: String,
                           flags: Set[BuildSettingFlag] = Set.empty,
                           artifactsMask: String = "",
-                          deepLookup: Boolean = false
+                          deepLookup: Boolean = false,
+                          notifyCommitter: Boolean = false
                          ) {
     // Getters for JSP
     lazy val getBranchMask: String = branchMask
@@ -125,6 +126,7 @@ object ConfigManager {
     lazy val getMessageTemplate: String = messageTemplate
     lazy val getArtifactsMask: String = artifactsMask
     lazy val getDeepLookup: Boolean = deepLookup
+    lazy val getNotifyCommitter: Boolean = notifyCommitter
     // Flags
     lazy val getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
     lazy val getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
