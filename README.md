@@ -51,7 +51,7 @@ Sample configuration:
 
 ![Edit settings](_doc/edit-settings.png "Edit settings")
 
-Notifications for branches captured by regular expression will be sent to slack channel.
+Notifications for branches captured by regular expression will be sent to slack channel or/and private chat.
 Message will be compiled according to template.
 
 **Note.** Please avoid using heading `#` in channel name.
