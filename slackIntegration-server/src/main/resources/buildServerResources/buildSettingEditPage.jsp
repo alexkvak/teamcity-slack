@@ -56,6 +56,12 @@
     </div>
     <div class="checkboxes-group">
       <label class="flagLabel">
+        <input type="checkbox" name="started" value="1" <c:if test="${model.started}">checked</c:if>/>
+        Trigger when build is started
+      </label>
+    </div>
+    <div class="checkboxes-group">
+      <label class="flagLabel">
         <input type="checkbox" name="canceled" value="1" <c:if test="${model.canceled}">checked</c:if>/>
         Trigger when build is canceled
       </label>

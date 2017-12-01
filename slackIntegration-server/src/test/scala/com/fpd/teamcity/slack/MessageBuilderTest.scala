@@ -23,6 +23,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     val branch = stub[Branch]
 
     build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 100
     build.getBuildNumber _ when() returns "2"
     build.getBranch _ when() returns branch
     branch.getDisplayName _ when() returns "default"
@@ -41,6 +42,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     val branch = stub[Branch]
 
     build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 100
     build.getBuildNumber _ when() returns "2"
     build.getBranch _ when() returns branch
     branch.getDisplayName _ when() returns "default"
@@ -242,6 +244,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     implicit val build = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 0
     build.getBuildNumber _ when() returns "2"
     build.getBuildStatus _ when() returns Status.UNKNOWN
 
@@ -250,15 +253,34 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
-      """Full name
-        |canceled
+      s"""Full name
+        |${Strings.MessageBuilder.statusCanceled}
       """.stripMargin.trim, Status.UNKNOWN.getHtmlColor)
+  }
+
+  "MessageBuilder.compile" should "compile template for started build" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 0
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+
+    val messageTemplate = """{name}
+                            |{status}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      s"""Full name
+        |${Strings.MessageBuilder.statusStarted}
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
   "MessageBuilder.compile" should "compile template with artifactLinks placeholder" in {
     implicit val build = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 100
     build.getBuildNumber _ when() returns "2"
     build.getBuildStatus _ when() returns Status.NORMAL
     build.getArtifactsDirectory _ when() returns new File("directory")
@@ -288,6 +310,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     implicit val build = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
+    build.getDuration _ when() returns 100
     build.getBuildNumber _ when() returns "2"
     build.getBranch _ when() returns null
     build.getBuildStatus _ when() returns Status.NORMAL

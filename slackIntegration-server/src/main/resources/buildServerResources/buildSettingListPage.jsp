@@ -26,6 +26,7 @@
                         <li><c:if test="${item.value.fail}">Trigger when build is failed</c:if></li>
                         <li><c:if
                             test="${item.value.successToFailure}">Only trigger when build changes from Success to Failure</c:if></li>
+                        <li><c:if test="${item.value.started}">Trigger when build is started</c:if></li>
                         <li><c:if test="${item.value.canceled}">Trigger when build is canceled</c:if></li>
                     </ul>
                 </td>

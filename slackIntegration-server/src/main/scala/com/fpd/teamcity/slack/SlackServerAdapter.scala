@@ -25,6 +25,9 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
   }
 
+  override def buildStarted(build: SRunningBuild): Unit = if (configManager.isAvailable)
+    send(build, Set(BuildSettingFlag.started))
+
   override def buildInterrupted(build: SRunningBuild): Unit = if (configManager.isAvailable)
     send(build, Set(BuildSettingFlag.canceled))
 }

@@ -16,8 +16,14 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
   import Helpers.Implicits._
 
   def compile(template: String, setting: Option[BuildSetting] = None): SlackAttachment = {
-    def status = if (build.getBuildStatus.isSuccessful) statusSucceeded
-    else if (build.getBuildStatus.isFailed) statusFailed else statusCanceled
+    def status = if (build.getDuration == 0) {
+      if (build.getBuildStatus.isSuccessful)
+        statusStarted
+      else
+        statusCanceled
+    }
+    else if (build.getBuildStatus.isSuccessful) statusSucceeded
+    else statusFailed
 
     def artifacts = s"<${context.getDownloadAllArtifactsUrl(build)}|Download all artifacts>"
 

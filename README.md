@@ -74,7 +74,7 @@ User defined build number.
 Branch display name, i.e. name to show to user. *Unknown* if not applicable.
 
 ###### {status}
-*succeeded* if build successful, *canceled* if canceled, *failed* otherwise.
+*succeeded* if build successful, *started* if started, *canceled* if canceled, *failed* otherwise.
 
 ###### {link}
 URL to view results page.
