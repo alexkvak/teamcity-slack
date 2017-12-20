@@ -1,11 +1,10 @@
 package com.fpd.teamcity.slack
 
-import javax.servlet.http.HttpServletRequest
-
+import com.fpd.teamcity.slack.Helpers.Implicits._
+import com.fpd.teamcity.slack.Helpers.Request
 import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.serverSide.auth.{Permission, RoleEntry}
 import jetbrains.buildServer.users.SUser
-import jetbrains.buildServer.web.util.SessionUser
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
@@ -14,8 +13,6 @@ class PermissionManager(
                          projectManager: ProjectManager,
                          configManager: ConfigManager
                        ) {
-
-  import PermissionManager._
 
   def accessPermitted(request: Request): Boolean = isAdmin(request)
 
@@ -46,10 +43,4 @@ class PermissionManager(
 
     directRoles.exists(projectAdmin) || parentRoles.exists(projectAdmin)
   }
-}
-
-object PermissionManager {
-  type Request = HttpServletRequest
-
-  implicit def requestToUser(request: HttpServletRequest): Option[SUser] = Option(SessionUser.getUser(request))
 }

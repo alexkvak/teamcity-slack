@@ -1,7 +1,9 @@
 package com.fpd.teamcity.slack.controllers
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
+import com.fpd.teamcity.slack.SlackGateway.{Destination, SlackChannel, SlackUser}
 import jetbrains.buildServer.serverSide.{Branch, BuildHistory, SFinishedBuild}
+import jetbrains.buildServer.users.SUser
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -63,5 +65,29 @@ class BuildSettingsTryTest extends FlatSpec with MockFactory with Matchers {
         (buildHistoryWithoutMatch, settingMatchDefault, None),
         (buildHistoryWithMatch2, settingMatchDefault, Some(buildDefault))
       )
+  }
+
+  "BuildSettingsTry.detectDestination" should "work" in {
+    forAll(data) { (setting: BuildSetting, user: SUser, expected: Option[Destination]) ⇒
+      BuildSettingsTry.detectDestination(setting, user) shouldEqual expected
+    }
+
+    def data = {
+      val buildTypeId = "MyBuildTypeId"
+      val email = "email@email.com"
+      val channelName = "general"
+      val branchName = "default"
+
+      val user = stub[SUser]
+      user.getEmail _ when() returns email
+
+      Table(
+        ("setting", "user", "expected"), // First tuple defines column names
+        // Subsequent tuples define the data
+        (BuildSetting(buildTypeId, branchName, "", ""), user, None),
+        (BuildSetting(buildTypeId, branchName, channelName, ""), user, Some(SlackChannel(channelName))),
+        (BuildSetting(buildTypeId, branchName, "", "", notifyCommitter = true), user, Some(SlackUser(email)))
+      )
+    }
   }
 }

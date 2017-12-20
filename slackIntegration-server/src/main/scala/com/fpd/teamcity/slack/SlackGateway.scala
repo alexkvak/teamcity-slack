@@ -15,9 +15,13 @@ object SlackGateway {
 
   sealed trait Destination
 
-  case class SlackUser(email: String) extends Destination
+  case class SlackUser(email: String) extends Destination {
+    override def toString: String = email
+  }
 
-  case class SlackChannel(name: String) extends Destination
+  case class SlackChannel(name: String) extends Destination {
+    override def toString: String = s"#$name"
+  }
 
   case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None) {
     lazy val isEmpty: Boolean = message.isEmpty && attachment.isEmpty

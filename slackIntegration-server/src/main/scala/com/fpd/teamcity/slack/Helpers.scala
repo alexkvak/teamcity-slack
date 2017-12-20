@@ -4,16 +4,22 @@ import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.{SBuild, SBuildServer, SFinishedBuild}
+import jetbrains.buildServer.users.SUser
+import jetbrains.buildServer.web.util.SessionUser
 
 import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 import scala.util.Random
 
 object Helpers {
+  type Request = HttpServletRequest
+
   object Implicits {
-    implicit class RichHttpServletRequest(request: HttpServletRequest) {
+    implicit class RichHttpServletRequest(request: Request) {
       def param(key: String): Option[String] = Option(request.getParameter(key)).map(_.trim).filterNot(_.isEmpty)
     }
+
+    implicit def requestToUser(request: Request): Option[SUser] = Option(SessionUser.getUser(request))
 
     implicit class RichRandom(random: Random) {
       def randomAlphaNumericString(length: Int): String = {

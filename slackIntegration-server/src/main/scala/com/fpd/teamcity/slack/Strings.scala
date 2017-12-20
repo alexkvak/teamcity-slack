@@ -24,4 +24,9 @@ object Strings {
     lazy val emptyConfigError = "Config is empty"
     lazy val requirementsError = "One or more required params are missing"
   }
+
+  object BuildSettingsTry {
+    lazy val unknownDestination = "Unable to detect destination"
+    def messageSent(destination: String) = s"Message sent to $destination"
+  }
 }
