@@ -43,7 +43,6 @@ object SlackGateway {
   }
 
   val networkTimeout = 10L
-  lazy val channelChatConfiguration: SlackChatConfiguration = SlackChatConfiguration.getConfiguration.withName(Strings.channelMessageOwner)
 }
 
 class SlackGateway(val configManager: ConfigManager, logger: Logger) {
@@ -74,6 +73,9 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       }
       processResult(destination, Await.result(future, networkTimeout seconds))
     }
+
+  private def channelChatConfiguration =
+    SlackChatConfiguration.getConfiguration.withName(configManager.senderName.getOrElse(Strings.channelMessageOwner))
 
   private def sendMessageInternal(destination: Destination, message: SlackMessage): Option[MessageSent] = session.flatMap { x ⇒
     destination match {

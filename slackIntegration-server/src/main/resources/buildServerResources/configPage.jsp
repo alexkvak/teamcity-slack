@@ -29,6 +29,13 @@
             </tr>
             <tr class="js-toggable">
                 <td>
+                    <label for="publicUrl">Sender name</label>
+                </td><td>
+                    <input type="text" id="senderName" name="senderName" value="${senderName}" class="longField">
+                </td>
+            </tr>
+            <tr class="js-toggable">
+                <td>
                     <label for="publicUrl">Public artifacts URL</label>
                 </td><td>
                     <input type="text" id="publicUrl" name="publicUrl" value="${publicUrl}" class="longField">
