@@ -13,6 +13,8 @@ import jetbrains.buildServer.web.util.SessionUser
 import org.springframework.web.servlet.ModelAndView
 
 import scala.collection.JavaConverters._
+import scala.language.postfixOps
+import scala.util.Try
 
 class BuildSettingsTry(buildHistory: BuildHistory,
                        configManager: ConfigManager,
@@ -29,23 +31,24 @@ class BuildSettingsTry(buildHistory: BuildHistory,
 
   controllerManager.registerController(Resources.buildSettingTry.url, this)
 
-  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
-    val result = for {
-      id ← request.param("id")
-      setting ← configManager.buildSetting(id)
-      build ← findPreviousBuild(buildHistory, setting)
-    } yield {
-      detectDestination(setting, SessionUser.getUser(request)) match {
-        case Some(dest) ⇒
-          gateway.sendMessage(dest, messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
-          messageSent(dest.toString)
-        case _ ⇒
-          unknownDestination
-      }
-    }
+  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = Try {
+    val id = request.param("id")
+      .getOrElse(throw HandlerException(emptyIdParam))
+    val setting = configManager.buildSetting(id)
+      .getOrElse(throw HandlerException(buildSettingNotFound))
+    val build = findPreviousBuild(buildHistory, setting)
+      .getOrElse(throw HandlerException(previousBuildNotFound))
 
-    ajaxView(result getOrElse "Something went wrong")
-  }
+    detectDestination(setting, SessionUser.getUser(request)) match {
+      case Some(dest) ⇒
+        gateway.sendMessage(dest, messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
+        messageSent(dest.toString)
+      case _ ⇒
+        throw HandlerException(unknownDestination)
+    }
+  } recover { case x: HandlerException ⇒ s"Error: ${x.getMessage}" } map {
+    ajaxView
+  } get
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =
     request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
@@ -63,4 +66,6 @@ object BuildSettingsTry {
     case _ ⇒
       None
   }
+
+  case class HandlerException(message: String) extends Exception(message)
 }

@@ -27,6 +27,9 @@ object Strings {
 
   object BuildSettingsTry {
     lazy val unknownDestination = "Unable to detect destination"
+    lazy val emptyIdParam = "Param id is empty"
+    lazy val buildSettingNotFound = "Build setting not found"
+    lazy val previousBuildNotFound = "Previous build not found"
     def messageSent(destination: String) = s"Message sent to $destination"
   }
 }
