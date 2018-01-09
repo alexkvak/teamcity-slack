@@ -33,7 +33,8 @@ Next upload `target/slackIntegration.zip` to TeamCity `data/plugins/` folder (re
 
 Go to [api.slack.com](https://api.slack.com/)
 * Create new app.
-* Got to Features - Incoming Webhooks and Activate Incoming Webhooks
+* Go to Features - Incoming Webhooks and Activate Incoming Webhooks
+* Go to Bot Users - Add Bot User
 * Now go to **OAuth & Permissions** and copy **Bot User OAuth Access Token**.
 
 Paste this token into **Administration -> Slack -> OAuth Access Token** field.

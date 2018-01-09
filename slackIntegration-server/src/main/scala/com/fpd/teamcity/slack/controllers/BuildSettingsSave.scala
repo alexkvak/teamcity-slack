@@ -9,7 +9,7 @@ import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources, Slac
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class BuildSettingsSave(val configManager: ConfigManager,
                         controllerManager: WebControllerManager,
@@ -65,7 +65,7 @@ class BuildSettingsSave(val configManager: ConfigManager,
         compileArtifactsMaskError
       } else {
         slackGateway.sessionByConfig(config) match {
-          case Some(session) ⇒
+          case Success(session) ⇒
             if (channel.exists(s ⇒ null == session.findChannelByName(s))) {
               channelNotFoundError(channel.get)
             } else {
@@ -74,8 +74,8 @@ class BuildSettingsSave(val configManager: ConfigManager,
                 case _ ⇒ emptyConfigError
               }
             }
-          case _ ⇒
-            sessionByConfigError
+          case Failure(e) ⇒
+            sessionByConfigError(e.getMessage)
         }
       }
     }

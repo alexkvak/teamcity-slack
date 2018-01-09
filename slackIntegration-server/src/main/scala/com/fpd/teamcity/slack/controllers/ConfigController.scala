@@ -4,8 +4,11 @@ import java.net.URLEncoder
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack._
+import com.fpd.teamcity.slack.Strings.ConfigController._
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
+
+import scala.util.{Failure, Success}
 
 class ConfigController(
                         configManager: ConfigManager,
@@ -36,13 +39,13 @@ class ConfigController(
           senderName
         )
       } match {
-        case Some(true) ⇒ Left(true)
-        case Some(_) ⇒ Right("Failed to update OAuth Access Token")
-        case None ⇒ Right("Unable to create session by config")
+        case Success(true) ⇒ Left(true)
+        case Success(_) ⇒ Right(oauthTokenUpdateFailed)
+        case Failure(e) ⇒ Right(sessionByConfigError(e.getMessage))
       }
     }
 
-    val either = result.getOrElse(Right("Param oauthKey is missing"))
+    val either = result.getOrElse(Right(oauthKeyParamMissing))
 
     redirectTo(createRedirect(either), response)
   }

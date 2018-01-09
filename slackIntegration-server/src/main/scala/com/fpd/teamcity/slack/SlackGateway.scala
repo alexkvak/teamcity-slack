@@ -9,7 +9,7 @@ import com.ullink.slack.simpleslackapi.{SlackMessageHandle, SlackSession, SlackA
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object SlackGateway {
 
@@ -51,13 +51,15 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
   var sessions = Map.empty[String, SlackSession]
 
-  def session: Option[SlackSession] = configManager.config.flatMap(sessionByConfig)
+  def session: Option[SlackSession] = configManager.config.flatMap(x ⇒ sessionByConfig(x).toOption)
 
-  def sessionByConfig(config: ConfigManager.Config): Option[SlackSession] = sessions.get(config.oauthKey).filter(_.isConnected).orElse {
-    val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
-    val option = Try(session.connect()).map(_ ⇒ session).toOption
-    option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
-    option
+  def sessionByConfig(config: ConfigManager.Config): Try[SlackSession] = sessions.get(config.oauthKey).filter(_.isConnected) match {
+    case Some(x) ⇒ Success(x)
+    case _ ⇒
+      val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
+      val option = Try(session.connect()).map(_ ⇒ session)
+      option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
+      option
   }
 
   def sendMessage(destination: Destination, message: SlackMessage): Option[MessageSent] =

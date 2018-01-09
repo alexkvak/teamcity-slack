@@ -11,6 +11,8 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.util.{Failure, Success}
+
 class BuildSettingsSaveTest extends FlatSpec with Matchers {
 
   import BuildSettingsSaveTest._
@@ -20,7 +22,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     val request = stubRequest(requestParams)
 
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
-    gateway.sessionByConfig _ when * returns Some(session)
+    gateway.sessionByConfig _ when * returns Success(session)
 
     buildSettingsSave.handleSave(request) shouldEqual ""
 
@@ -42,7 +44,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     val request = stubRequest(requestParams)
 
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
-    gateway.sessionByConfig _ when * returns Some(session)
+    gateway.sessionByConfig _ when * returns Success(session)
 
     buildSettingsSave.handleSave(request) shouldEqual ""
 
@@ -84,7 +86,7 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     val request = stubRequest(requestParams)
 
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
-    gateway.sessionByConfig _ when * returns Some(session)
+    gateway.sessionByConfig _ when * returns Success(session)
 
     buildSettingsSave.handleSave(request) shouldEqual compileBranchMaskError
   }
@@ -94,23 +96,24 @@ class BuildSettingsSaveTest extends FlatSpec with Matchers {
     val request = stubRequest(requestParams)
 
     session.findChannelByName _ when requestParams("slackChannel") returns stub[SlackChannel]
-    gateway.sessionByConfig _ when * returns Some(session)
+    gateway.sessionByConfig _ when * returns Success(session)
 
     buildSettingsSave.handleSave(request) shouldEqual compileArtifactsMaskError
   }
 
   "BuildSettingsSave.handleSave" should "fail in case of unknown channel" in new Context {
     val request = stubRequest(correctRequestParams)
-    gateway.sessionByConfig _ when * returns Some(session)
+    gateway.sessionByConfig _ when * returns Success(session)
 
     buildSettingsSave.handleSave(request) shouldEqual s"Unable to find channel with name ${correctRequestParams("slackChannel")}"
   }
 
   "BuildSettingsSave.handleSave" should "fail in case of failed session creation" in new Context {
     val request = stubRequest(correctRequestParams)
-    gateway.sessionByConfig _ when * returns None
+    val exception = new Exception("error")
+    gateway.sessionByConfig _ when * returns Failure(new Exception("error"))
 
-    buildSettingsSave.handleSave(request) shouldEqual sessionByConfigError
+    buildSettingsSave.handleSave(request) shouldEqual sessionByConfigError(exception.getMessage)
   }
 }
 

@@ -6,6 +6,8 @@ object Strings {
   def tabId: String = "Slack"
   lazy val channelMessageOwner = "TeamCity"
 
+  private def unableToCreateSessionByConfig(reason: String): String = s"Unable to create session by config: $reason"
+
   object MessageBuilder {
     lazy val unknownBranch = "Unknown"
     lazy val unknownReason = "Unknown"
@@ -19,10 +21,16 @@ object Strings {
     lazy val channelOrNotifyCommitterError = "Either specify Slack channel name or check Notify committer flag"
     lazy val compileBranchMaskError = "Unable to compile branch mask"
     lazy val compileArtifactsMaskError = "Unable to compile artifacts mask"
-    lazy val sessionByConfigError = "Unable to create session by config"
+    def sessionByConfigError(reason: String): String = unableToCreateSessionByConfig(reason)
     def channelNotFoundError(channel: String): String = s"Unable to find channel with name $channel"
     lazy val emptyConfigError = "Config is empty"
     lazy val requirementsError = "One or more required params are missing"
+  }
+
+  object ConfigController {
+    lazy val oauthTokenUpdateFailed = "Failed to update OAuth Access Token"
+    def sessionByConfigError(reason: String): String = unableToCreateSessionByConfig(reason)
+    lazy val oauthKeyParamMissing = "Param oauthKey is missing"
   }
 
   object BuildSettingsTry {
