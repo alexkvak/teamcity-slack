@@ -1,15 +1,17 @@
 package com.fpd.teamcity.slack
 
+import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
-import com.ullink.slack.simpleslackapi.impl.{SlackChatConfiguration, SlackSessionFactory}
-import com.ullink.slack.simpleslackapi.replies.{GenericSlackReply, SlackMessageReply, SlackReply}
-import com.ullink.slack.simpleslackapi.{SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
+import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
+import com.ullink.slack.simpleslackapi.replies.{ParsedSlackReply, SlackMessageReply}
+import com.ullink.slack.simpleslackapi.{SlackChatConfiguration, SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
+import jetbrains.buildServer.serverSide.TeamCityProperties
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 object SlackGateway {
 
@@ -43,6 +45,25 @@ object SlackGateway {
   }
 
   val networkTimeout = 10L
+
+  def getStringProperty(key: String): Option[String] = {
+    implicit class RichString(opt: Option[String]) {
+      def trimEmptyString: Option[String] = opt.map(_.trim).filterNot(_.isEmpty)
+    }
+
+    Try(Option(System.getProperty(key))).getOrElse(None)
+      .trimEmptyString
+      .orElse(
+        Option(TeamCityProperties.getPropertyOrNull(s"teamcity.$key"))
+      )
+      .trimEmptyString
+  }
+
+  def getIntProperty(key: String): Int =
+    Try(System.getProperty(key).toInt)
+      .getOrElse(
+        TeamCityProperties.getInteger(s"teamcity.$key")
+      )
 }
 
 class SlackGateway(val configManager: ConfigManager, logger: Logger) {
@@ -51,12 +72,26 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
   var sessions = Map.empty[String, SlackSession]
 
+  lazy private val proxyHost = getStringProperty("https.proxyHost")
+  lazy private val proxyPort = getIntProperty("https.proxyPort")
+  lazy private val proxyLogin = getStringProperty("https.proxyLogin")
+  lazy private val proxyPassword = getStringProperty("https.proxyPassword")
+
   def session: Option[SlackSession] = configManager.config.flatMap(x ⇒ sessionByConfig(x).toOption)
 
   def sessionByConfig(config: ConfigManager.Config): Try[SlackSession] = sessions.get(config.oauthKey).filter(_.isConnected) match {
     case Some(x) ⇒ Success(x)
     case _ ⇒
-      val session = SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
+      val session = if (proxyHost.isDefined)
+        SlackSessionFactory
+          .getSlackSessionBuilder(config.oauthKey)
+          .withAutoreconnectOnDisconnection(true)
+          .withConnectionHeartbeat(0, null)
+          .withProxy(Proxy.Type.HTTP, proxyHost.get, proxyPort, proxyLogin.orNull, proxyPassword.orNull)
+          .build()
+      else
+        SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
+
       val option = Try(session.connect()).map(_ ⇒ session)
       option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
       option
@@ -68,10 +103,14 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       None
     } else {
       implicit val ec = scala.concurrent.ExecutionContext.global
-      val future = Future {
-        val handle = sendMessageInternal(destination, message)
-        handle.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS))
+      val future = Future.fromTry {
+        val handle = Try(sendMessageInternal(destination, message))
+        handle.foreach(x ⇒ x.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS)))
         handle
+      }
+      future.onComplete {
+        case Failure(exception) ⇒ logger.log(exception.toString)
+        case _ ⇒
       }
       processResult(destination, Await.result(future, networkTimeout seconds))
     }
@@ -112,9 +151,8 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
     }
   }
 
-  //noinspection TypeCheckCanBeMatch
-  private def parseReplyError(reply: SlackReply): Option[String] =
-    if (reply.isInstanceOf[GenericSlackReply] && !reply.asInstanceOf[GenericSlackReply].getPlainAnswer.get("ok").asInstanceOf[Boolean]) {
-      Some(reply.asInstanceOf[GenericSlackReply].getPlainAnswer.toJSONString)
-  } else None
+  private def parseReplyError(reply: ParsedSlackReply): Option[String] =
+    if (!reply.isOk) {
+      Some(reply.getErrorMessage)
+    } else None
 }

@@ -32,14 +32,6 @@
                   </configuration>
               </plugin>
               <plugin>
-                  <groupId>org.jetbrains.teamcity</groupId>
-                  <artifactId>teamcity-sdk-maven-plugin</artifactId>
-                  <version>0.2</version>
-                  <configuration>
-                      <!-- <teamcityDir>/path/to/tc/distro</teamcityDir> -->
-                  </configuration>
-              </plugin>
-              <plugin>
                   <groupId>net.alchim31.maven</groupId>
                   <artifactId>scala-maven-plugin</artifactId>
                   <version>3.2.2</version>
