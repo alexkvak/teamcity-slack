@@ -28,3 +28,7 @@
 .notify-committer {
     padding-top: 10px;
 }
+
+label.tableLabel {
+    width: 15.5em;
+}
