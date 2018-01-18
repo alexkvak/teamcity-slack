@@ -6,6 +6,7 @@ import com.fpd.teamcity.slack.SlackGateway.{Destination, MessageSent, SlackChann
 import jetbrains.buildServer.serverSide.SBuild
 
 import scala.collection.mutable
+import scala.concurrent.Future
 
 trait NotificationSender {
 
@@ -15,16 +16,16 @@ trait NotificationSender {
 
   import Helpers.Implicits._
 
-  type SendResult = Map[String, Option[MessageSent]]
+  type SendResult = Vector[Future[MessageSent]]
 
-  def send(build: SBuild, flags: Set[BuildSettingFlag]): SendResult = {
+  def send(build: SBuild, flags: Set[BuildSettingFlag]): Future[Vector[MessageSent]] = {
     val settings = prepareSettings(build, flags)
 
     lazy val emails = build.committees
     lazy val messageBuilder = messageBuilderFactory.createForBuild(build)
     lazy val sendPersonal = shouldSendPersonal(build)
 
-    settings.foldLeft(Map(): SendResult) { (acc, setting) ⇒
+    val result = settings.foldLeft(Vector(): SendResult) { (acc, setting) ⇒
       val attachment = messageBuilder.compile(setting.messageTemplate, Some(setting))
       val destinations = mutable.Set.empty[Destination]
       if (build.isPersonal) {
@@ -49,8 +50,11 @@ trait NotificationSender {
         }
       }
 
-      acc ++ destinations.map(x ⇒ x.toString → gateway.sendMessage(x, attachment)).toMap
+      acc ++ destinations.toVector.map(x ⇒ gateway.sendMessage(x, attachment))
     }
+
+    implicit val ec = scala.concurrent.ExecutionContext.global
+    Future.sequence(result)
   }
 
   def shouldSendPersonal(build: SBuild): Boolean = build.getBuildStatus.isFailed && configManager.personalEnabled.exists(x ⇒ x)

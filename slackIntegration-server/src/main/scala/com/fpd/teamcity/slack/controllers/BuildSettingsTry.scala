@@ -13,8 +13,10 @@ import jetbrains.buildServer.web.util.SessionUser
 import org.springframework.web.servlet.ModelAndView
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class BuildSettingsTry(buildHistory: BuildHistory,
                        configManager: ConfigManager,
@@ -41,8 +43,11 @@ class BuildSettingsTry(buildHistory: BuildHistory,
 
     detectDestination(setting, SessionUser.getUser(request)) match {
       case Some(dest) ⇒
-        gateway.sendMessage(dest, messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
-        messageSent(dest.toString)
+        val future = gateway.sendMessage(dest, messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
+        Await.result(future, 10 seconds) match {
+          case Failure(error) ⇒ throw HandlerException(error.getMessage)
+          case _ ⇒ messageSent(dest.toString)
+        }
       case _ ⇒
         throw HandlerException(unknownDestination)
     }

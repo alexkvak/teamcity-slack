@@ -3,13 +3,13 @@ package com.fpd.teamcity.slack
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
+import com.fpd.teamcity.slack.Strings.SlackGateway._
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
 import com.ullink.slack.simpleslackapi.replies.{ParsedSlackReply, SlackMessageReply}
 import com.ullink.slack.simpleslackapi.{SlackChatConfiguration, SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
 import jetbrains.buildServer.serverSide.TeamCityProperties
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.{Failure, Success, Try}
 
@@ -33,7 +33,7 @@ object SlackGateway {
 
   implicit def stringToSlackMessage(message: String): SlackMessage = SlackMessage(message)
 
-  type MessageSent = SlackMessageHandle[SlackMessageReply]
+  type MessageSent = Try[SlackMessageHandle[SlackMessageReply]]
 
   implicit def attachmentToSlackMessage(attachment: SlackAttachment): SlackMessage = {
     val apiSlackAttachment = new ApiSlackAttachment()
@@ -64,6 +64,8 @@ object SlackGateway {
       .getOrElse(
         TeamCityProperties.getInteger(s"teamcity.$key")
       )
+
+  case class SendMessageError(message: String) extends Exception(message)
 }
 
 class SlackGateway(val configManager: ConfigManager, logger: Logger) {
@@ -97,57 +99,67 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       option
   }
 
-  def sendMessage(destination: Destination, message: SlackMessage): Option[MessageSent] =
+  def sendMessage(destination: Destination, message: SlackMessage): Future[MessageSent] =
     if (message.isEmpty) {
       logger.log("Empty message")
-      None
+      Future.successful(Failure(SendMessageError("Empty message")))
     } else {
       implicit val ec = scala.concurrent.ExecutionContext.global
-      val future = Future.fromTry {
-        val handle = Try(sendMessageInternal(destination, message))
-        handle.foreach(x ⇒ x.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS)))
+       Future {
+        val handle = sendMessageInternal(destination, message)
+        handle.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS))
         handle
-      }
-      future.onComplete {
-        case Failure(exception) ⇒ logger.log(exception.toString)
-        case _ ⇒
-      }
-      processResult(destination, Await.result(future, networkTimeout seconds))
+      } transform (
+         result ⇒ processResult(destination, result),
+         exception ⇒ {
+           logger.log(exception.toString)
+           exception
+         }
+       )
     }
 
   private def channelChatConfiguration =
     SlackChatConfiguration.getConfiguration.withName(configManager.senderName.getOrElse(Strings.channelMessageOwner))
 
-  private def sendMessageInternal(destination: Destination, message: SlackMessage): Option[MessageSent] = session.flatMap { x ⇒
-    destination match {
-      case SlackChannel(channel) ⇒ Option(x.findChannelByName(channel)).map { channel ⇒
-        x.sendMessage(channel, message.message, message.attachment.orNull, channelChatConfiguration)
+  private def sendMessageInternal(destination: Destination, message: SlackMessage): MessageSent = session match {
+    case Some(x) ⇒
+      destination match {
+        case SlackChannel(channelName) ⇒
+          Option(x.findChannelByName(channelName)) match {
+            case Some(channel) ⇒
+              Try(x.sendMessage(channel, message.message, message.attachment.orNull, channelChatConfiguration))
+            case _ ⇒
+              Failure(SendMessageError(channelNotFound(channelName)))
+          }
+        case SlackUser(email) ⇒
+          Option(x.findUserByEmail(email)) match {
+            case Some(user) ⇒
+              Try(x.sendMessageToUser(user, message.message, message.attachment.orNull))
+            case _ ⇒
+              Failure(SendMessageError(userNotFound(email)))
+        }
+        case _ ⇒
+          Failure(SendMessageError(unknownDestination))
       }
-      case SlackUser(email) ⇒ Option(x.findUserByEmail(email)).map { user ⇒
-        x.sendMessageToUser(user, message.message, message.attachment.orNull)
-      }
-    }
+    case _ ⇒
+      Failure(SendMessageError(emptySession))
   }
 
-  private def processResult(destination: Destination, result: Option[MessageSent]): Option[MessageSent] = {
-    val dest = destination match {
-      case SlackChannel(channel) ⇒ s"channel #$channel"
-      case SlackUser(email) ⇒ s"user $email"
-    }
-
+  private def processResult(destination: Destination, result: MessageSent): MessageSent = {
     result match {
-      case Some(sent) if sent.getReply != null ⇒
+      case Success(sent) if sent.getReply != null ⇒
         parseReplyError(sent.getReply) match {
           case Some(error) ⇒
-            logger.log(s"Message to $dest wasn't sent. Reason: $error")
-            None
+            val message = failedToSendToDestination(destination, error)
+            logger.log(message)
+            Failure(SendMessageError(message))
           case _ ⇒
-            logger.log(s"Message sent to $dest")
-            result
+            logger.log(messageSent(destination))
+            Success(sent)
         }
-      case _ ⇒
-        logger.log(s"Message to $dest wasn't sent. Reason: timeout")
-        None
+      case x @ Failure(reason) ⇒
+        logger.log(reason.getMessage)
+        x
     }
   }
 

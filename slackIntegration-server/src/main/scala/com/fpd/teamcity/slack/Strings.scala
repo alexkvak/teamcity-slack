@@ -1,5 +1,7 @@
 package com.fpd.teamcity.slack
 
+import com.fpd.teamcity.slack.SlackGateway.Destination
+
 object Strings {
   lazy val logCategory = "Slack Integration"
   def label: String = "Slack"
@@ -39,5 +41,14 @@ object Strings {
     lazy val buildSettingNotFound = "Build setting not found"
     lazy val previousBuildNotFound = "Previous build not found"
     def messageSent(destination: String) = s"Message sent to $destination"
+  }
+
+  object SlackGateway {
+    def failedToSendToDestination(destination: Destination, error: String) = s"Message to $destination wasn't sent. Reason: $error"
+    def messageSent(destination: Destination) = s"Message sent to $destination"
+    def channelNotFound(channel: String) = s"Channel #$channel not found"
+    def userNotFound(email: String) = s"User for $email not found"
+    lazy val unknownDestination = "Destination is unknown"
+    lazy val emptySession = "Unable to connect your Slack account. Please check auth credentials"
   }
 }
