@@ -46,11 +46,11 @@ object SlackGateway {
 
   val networkTimeout = 10L
 
-  def getStringProperty(key: String): Option[String] = {
-    implicit class RichString(opt: Option[String]) {
-      def trimEmptyString: Option[String] = opt.map(_.trim).filterNot(_.isEmpty)
-    }
+  implicit class RichString(val opt: Option[String]) extends AnyVal {
+    def trimEmptyString: Option[String] = opt.map(_.trim).filterNot(_.isEmpty)
+  }
 
+  def getStringProperty(key: String): Option[String] = {
     Try(Option(System.getProperty(key))).getOrElse(None)
       .trimEmptyString
       .orElse(

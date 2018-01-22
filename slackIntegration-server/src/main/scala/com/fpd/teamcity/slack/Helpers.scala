@@ -15,13 +15,13 @@ object Helpers {
   type Request = HttpServletRequest
 
   object Implicits {
-    implicit class RichHttpServletRequest(request: Request) {
+    implicit class RichHttpServletRequest(val request: Request) extends AnyVal {
       def param(key: String): Option[String] = Option(request.getParameter(key)).map(_.trim).filterNot(_.isEmpty)
     }
 
     implicit def requestToUser(request: Request): Option[SUser] = Option(SessionUser.getUser(request))
 
-    implicit class RichRandom(random: Random) {
+    implicit class RichRandom(val random: Random) extends AnyVal {
       def randomAlphaNumericString(length: Int): String = {
         val chars = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')
         randomStringFromCharList(length, chars)
@@ -37,11 +37,11 @@ object Helpers {
       }
     }
 
-    implicit class RichStatus(status: Status) {
+    implicit class RichStatus(val status: Status) extends AnyVal {
       def isUnknown: Boolean = status.getPriority == Status.UNKNOWN.getPriority
     }
 
-    implicit class RichBuild(build: SBuild) {
+    implicit class RichBuild(val build: SBuild) extends AnyVal {
       def committees: Vector[String] = {
         val users = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
         users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
@@ -51,7 +51,7 @@ object Helpers {
         mask.r.findFirstIn(Option(build.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
     }
 
-    implicit class RichBuildServer(sBuildServer: SBuildServer) {
+    implicit class RichBuildServer(val sBuildServer: SBuildServer) extends AnyVal {
       def findPreviousStatus(build: SBuild): Status = {
 
         def filterEntry(x: SFinishedBuild): Boolean = if (build.getBranch == null)
