@@ -59,11 +59,14 @@ object Helpers {
         else
           Option(x.getBranch).exists(_.getDisplayName == build.getBranch.getDisplayName)
 
-        sBuildServer.getHistory.getEntriesBefore(build, false).asScala
-          .filter(filterEntry)
-          .find(!_.isPersonal)
+        val history = sBuildServer.getHistory.getEntriesBefore(build, false).asScala
+
+        history.view
+          .filter(filterEntry)         // branch name filter
+          .filter(!_.isPersonal)       // ignore personal builds
           .map(_.getBuildStatus)
-          .getOrElse(Status.UNKNOWN)
+          .find(_ != Status.UNKNOWN) // ignore cancelled and aborted builds
+          .getOrElse(Status.NORMAL)
       }
     }
   }
