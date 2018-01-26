@@ -93,11 +93,17 @@ class HelpersTest extends FlatSpec with MockFactory with Matchers {
         (List(
           PreviousBuild(Some("default"), Status.NORMAL),
           PreviousBuild(Some("master"), Status.FAILURE)
-        ), None, Status.UNKNOWN),
+        ), None, Status.NORMAL),
         (List(
           PreviousBuild(Some("default"), Status.NORMAL),
           PreviousBuild(Some("master"), Status.FAILURE)
-        ), Some("awesome"), Status.UNKNOWN)
+        ), Some("awesome"), Status.NORMAL),
+        (Nil, Some("awesome"), Status.NORMAL),
+        (List(
+          PreviousBuild(Some("default"), Status.UNKNOWN),
+          PreviousBuild(Some("default"), Status.NORMAL),
+          PreviousBuild(Some("master"), Status.FAILURE)
+        ), Some("awesome"), Status.NORMAL)
       )
   }
 }
