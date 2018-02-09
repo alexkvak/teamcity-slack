@@ -3,7 +3,7 @@
 <c:if test="${not empty error}">
     <b>${error}</b>
 </c:if>
-<form action="/app/slackIntegration/config" method="post">
+<form action="${serverSummary.rootURL}/app/slackIntegration/config" method="post">
     <table class="runnerFormTable">
         <tbody>
             <tr>

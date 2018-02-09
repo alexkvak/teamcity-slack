@@ -2,11 +2,11 @@
 
 <script type="text/javascript">
     window.slackNotifier = {
-       buildSettingListUrl: "${buildSettingListUrl}?buildTypeId=${buildTypeId}",
-       buildSettingEditUrl: "${buildSettingEditUrl}?buildTypeId=${buildTypeId}",
-       buildSettingTryUrl: "${buildSettingTryUrl}",
-       buildSettingSaveUrl: "${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
-       buildSettingDeleteUrl: "${buildSettingDeleteUrl}"
+       buildSettingListUrl: "${serverSummary.rootURL}${buildSettingListUrl}?buildTypeId=${buildTypeId}",
+       buildSettingEditUrl: "${serverSummary.rootURL}${buildSettingEditUrl}?buildTypeId=${buildTypeId}",
+       buildSettingTryUrl: "${serverSummary.rootURL}${buildSettingTryUrl}",
+       buildSettingSaveUrl: "${serverSummary.rootURL}${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
+       buildSettingDeleteUrl: "${serverSummary.rootURL}${buildSettingDeleteUrl}"
     };
 </script>
 
