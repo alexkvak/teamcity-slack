@@ -78,6 +78,10 @@ User defined build number.
 ###### {branch}
 Branch display name, i.e. name to show to user. *Unknown* if not applicable.
 
+Please make sure that your VCS settings are correct!
+
+See [TeamCity Docs](https://confluence.jetbrains.com/x/iwt2B#WorkingwithFeatureBranches-Logicalbranchname) and [#21](https://github.com/alexkvak/teamcity-slack/issues/21)
+
 ###### {status}
 *succeeded* if build successful, *started* if started, *canceled* if canceled, *failed* otherwise.
 
