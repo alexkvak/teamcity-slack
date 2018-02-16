@@ -89,7 +89,10 @@ See [TeamCity Docs](https://confluence.jetbrains.com/x/iwt2B#WorkingwithFeatureB
 URL to view results page.
 
 ###### {mentions}
-Slack users mentions. Unknown users will be skipped.
+Slack users mentions only if build fails. Unknown users will be skipped.
+
+###### {users}
+TeamCity user name list only if build fails. Unknown users will be skipped.
 
 ###### {changes}
 Concatenated description of head 5 changes from build with author name (from VCS) 

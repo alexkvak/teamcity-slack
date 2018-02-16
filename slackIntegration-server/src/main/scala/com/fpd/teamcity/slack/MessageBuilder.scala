@@ -54,7 +54,11 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
-      build.committees.map(context.userByEmail).collect { case Some(x) ⇒ s"<@$x>" }.mkString(" ")
+      build.committeeEmails.map(context.userByEmail).collect { case Some(x) ⇒ s"<@$x>" }.mkString(" ")
+    }
+
+    def users = if (build.getBuildStatus.isSuccessful) "" else {
+      build.committees.map(user ⇒ user.getDescriptiveName).mkString(", ")
     }
 
     def reason = if (build.getBuildStatus.isSuccessful) "" else {
@@ -72,6 +76,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       case "artifactLinks" ⇒ artifactLinks
       case "link" ⇒ context.getViewResultsUrl(build)
       case "mentions" ⇒ mentions
+      case "users" ⇒ users
       case "reason" ⇒ reason
       case x if x.startsWith("%") && x.endsWith("%") ⇒
         context.getBuildParameter(build, x.substring(1, x.length - 1).trim) match {

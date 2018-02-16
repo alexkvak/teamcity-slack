@@ -21,7 +21,7 @@ trait NotificationSender {
   def send(build: SBuild, flags: Set[BuildSettingFlag]): Future[Vector[MessageSent]] = {
     val settings = prepareSettings(build, flags)
 
-    lazy val emails = build.committees
+    lazy val emails = build.committeeEmails
     lazy val messageBuilder = messageBuilderFactory.createForBuild(build)
     lazy val sendPersonal = shouldSendPersonal(build)
 

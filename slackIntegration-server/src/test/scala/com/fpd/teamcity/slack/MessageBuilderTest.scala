@@ -323,6 +323,24 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
+  "MessageBuilder.compile" should "compile template with users placeholders" in {
+    implicit val build = stub[SBuild]
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.FAILURE
+    build.getContainingChanges _ when() returns mockChanges
+
+    val messageTemplate = """{name}
+                            |{users}
+                          """.stripMargin
+
+    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+      """Full name
+        |name1, name2
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+  }
+
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
     val vcsModification2 = stub[SVcsModification]

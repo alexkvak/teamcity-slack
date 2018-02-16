@@ -42,10 +42,11 @@ object Helpers {
     }
 
     implicit class RichBuild(val build: SBuild) extends AnyVal {
-      def committees: Vector[String] = {
-        val users = build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
-        users.map(user ⇒ Option(user.getEmail).getOrElse("")).filter(_.length > 0)
-      }
+      def committees: Vector[SUser] =
+        build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
+
+      def committeeEmails: Vector[String] =
+        committees.map(user ⇒ Option(user.getEmail)).collect { case Some(x) if x.length > 0 ⇒ x }
 
       def matchBranch(mask: String): Boolean =
         mask.r.findFirstIn(Option(build.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
