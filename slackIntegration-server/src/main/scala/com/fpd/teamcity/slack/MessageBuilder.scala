@@ -102,7 +102,7 @@ object MessageBuilder {
 
     def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
 
-    def userByEmail: (String) ⇒ Option[String] = email ⇒ gateway.session.map(_.findUserByEmail(email).getId)
+    def userByEmail: (String) ⇒ Option[String] = email ⇒ gateway.session.flatMap(s ⇒ Option(s.findUserByEmail(email))).map(_.getId)
 
     def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
 
