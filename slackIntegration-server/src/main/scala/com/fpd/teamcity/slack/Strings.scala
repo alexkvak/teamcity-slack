@@ -13,6 +13,7 @@ object Strings {
   object MessageBuilder {
     lazy val unknownBranch = "Unknown"
     lazy val unknownReason = "Unknown"
+    lazy val unknownParameter = ""
     lazy val statusSucceeded = "succeeded"
     lazy val statusFailed = "failed"
     lazy val statusCanceled = "canceled"

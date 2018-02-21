@@ -81,7 +81,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       case x if x.startsWith("%") && x.endsWith("%") ⇒
         context.getBuildParameter(build, x.substring(1, x.length - 1).trim) match {
         case Some(value) ⇒ value
-        case _ ⇒ m.group(0)
+        case _ ⇒ unknownParameter
       }
       case _ ⇒ m.group(0)
     })
@@ -114,7 +114,7 @@ object MessageBuilder {
     def artifactsPublicUrl: Option[String] = configManager.publicUrl
 
     def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
-      Option(build.getBuildType.getParameter(name).getValue)
+      Option(build.getParametersProvider.get(name))
   }
 }
 
