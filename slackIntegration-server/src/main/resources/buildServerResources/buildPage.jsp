@@ -1,12 +1,14 @@
 <%@ include file="/include.jsp" %>
 
 <script type="text/javascript">
+    var rootUrl = "${serverSummary.rootURL}/".replace(/^https?:\/\//, '').split('/', 2)[1];
+
     window.slackNotifier = {
-       buildSettingListUrl: "${serverSummary.rootURL}${buildSettingListUrl}?buildTypeId=${buildTypeId}",
-       buildSettingEditUrl: "${serverSummary.rootURL}${buildSettingEditUrl}?buildTypeId=${buildTypeId}",
-       buildSettingTryUrl: "${serverSummary.rootURL}${buildSettingTryUrl}",
-       buildSettingSaveUrl: "${serverSummary.rootURL}${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
-       buildSettingDeleteUrl: "${serverSummary.rootURL}${buildSettingDeleteUrl}"
+       buildSettingListUrl: rootUrl + "${buildSettingListUrl}?buildTypeId=${buildTypeId}",
+       buildSettingEditUrl: rootUrl + "${buildSettingEditUrl}?buildTypeId=${buildTypeId}",
+       buildSettingTryUrl: rootUrl + "${buildSettingTryUrl}",
+       buildSettingSaveUrl: rootUrl + "${buildSettingSaveUrl}?buildTypeId=${buildTypeId}",
+       buildSettingDeleteUrl: rootUrl + "${buildSettingDeleteUrl}"
     };
 </script>
 
