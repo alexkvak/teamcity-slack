@@ -35,7 +35,8 @@ Go to [api.slack.com](https://api.slack.com/)
 * Create new app.
 * Go to Features - Incoming Webhooks and Activate Incoming Webhooks
 * Go to Bot Users - Add Bot User
-* Now go to **OAuth & Permissions** and copy **Bot User OAuth Access Token**.
+* Go to **OAuth & Permissions** and click **Install App in Workspace**
+* Now copy **Bot User OAuth Access Token**.
 
 Paste this token into **Administration -> Slack -> OAuth Access Token** field.
 
