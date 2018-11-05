@@ -14,7 +14,7 @@ class BuildSettingsDelete(configManager: ConfigManager,
                          )
   extends SlackController {
 
-  controllerManager.registerController(Resources.buildSettingDelete.url, this)
+  controllerManager.registerController(Resources.buildSettingDelete.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val result = for {

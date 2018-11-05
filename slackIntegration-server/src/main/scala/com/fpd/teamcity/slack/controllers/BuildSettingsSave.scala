@@ -19,7 +19,7 @@ class BuildSettingsSave(val configManager: ConfigManager,
                        )
   extends SlackController {
 
-  controllerManager.registerController(Resources.buildSettingSave.url, this)
+  controllerManager.registerController(Resources.buildSettingSave.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView =
     ajaxView(handleSave(request))

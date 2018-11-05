@@ -15,7 +15,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
                            val permissionManager: PermissionManager,
                            config: ConfigManager
                           ) extends SlackController {
-  controllerManager.registerController(Resources.buildSettingEdit.url, this)
+  controllerManager.registerController(Resources.buildSettingEdit.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     import com.fpd.teamcity.slack.Helpers.Implicits._

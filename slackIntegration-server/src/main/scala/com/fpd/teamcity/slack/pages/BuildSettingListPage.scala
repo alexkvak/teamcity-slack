@@ -18,7 +18,7 @@ class BuildSettingListPage(controllerManager: WebControllerManager,
                            val permissionManager: PermissionManager,
                            projectManager: ProjectManager
                           ) extends BaseController with SlackController {
-  controllerManager.registerController(Resources.buildSettingList.url, this)
+  controllerManager.registerController(Resources.buildSettingList.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val view = descriptor.getPluginResourcesPath(Resources.buildSettingList.view)
