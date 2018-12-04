@@ -31,7 +31,7 @@ class BuildSettingsTry(buildHistory: BuildHistory,
   import BuildSettingsTry._
   import Strings.BuildSettingsTry._
 
-  controllerManager.registerController(Resources.buildSettingTry.url, this)
+  controllerManager.registerController(Resources.buildSettingTry.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = Try {
     val id = request.param("id")

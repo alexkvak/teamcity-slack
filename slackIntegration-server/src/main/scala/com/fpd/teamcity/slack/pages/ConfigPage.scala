@@ -31,6 +31,7 @@ class ConfigPage(
 
     model.putAll(extension.details.mapValues(_.getOrElse("")).asJava)
     model.put("error", request.param("error").getOrElse(""))
+    model.put("saveConfigSubmitUrl", Resources.configPage.controllerUrl)
   }
 
   override def getGroup: String = Groupable.SERVER_RELATED_GROUP

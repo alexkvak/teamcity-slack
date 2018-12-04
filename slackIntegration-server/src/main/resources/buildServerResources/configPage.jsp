@@ -1,9 +1,11 @@
 <%@ include file="/include.jsp" %>
 
+<c:url value="${saveConfigSubmitUrl}" var="submitUrl"/>
+
 <c:if test="${not empty error}">
     <b>${error}</b>
 </c:if>
-<form action="${serverSummary.rootURL}/app/slackIntegration/config" method="post">
+<form action="${submitUrl}" method="post">
     <table class="runnerFormTable">
         <tbody>
             <tr>

@@ -20,7 +20,7 @@ class ConfigController(
   import ConfigController._
   import Helpers.Implicits._
 
-  controllerManager.registerController(Resources.configPage.url, this)
+  controllerManager.registerController(Resources.configPage.controllerUrl, this)
 
   override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
     val result = for {
@@ -47,13 +47,13 @@ class ConfigController(
 
     val either = result.getOrElse(Right(oauthKeyParamMissing))
 
-    redirectTo(createRedirect(either), response)
+    redirectTo(createRedirect(either, request.getContextPath), response)
   }
 }
 
 object ConfigController {
-  private def createRedirect(either: Either[Boolean, String]): String = either match {
-    case Left(_) ⇒ s"/admin/admin.html?item=${Strings.tabId}"
-    case Right(error) ⇒ s"/admin/admin.html?item=${Strings.tabId}&error=${URLEncoder.encode(error, "UTF-8")}"
+  private def createRedirect(either: Either[Boolean, String], context: String): String = either match {
+    case Left(_) ⇒ s"$context/admin/admin.html?item=${Strings.tabId}"
+    case Right(error) ⇒ s"$context/admin/admin.html?item=${Strings.tabId}&error=${URLEncoder.encode(error, "UTF-8")}"
   }
 }
