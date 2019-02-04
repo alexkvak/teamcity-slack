@@ -66,21 +66,21 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
     }
 
     val text = """\{([\s\w._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
-      case "name" ⇒ build.getFullName
+      case "name" ⇒ encodeText(build.getFullName)
       case "number" ⇒ build.getBuildNumber
       case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse(unknownBranch)
       case "status" ⇒ status
-      case "changes" ⇒ changes
+      case "changes" ⇒ encodeText(changes)
       case "allArtifactsDownloadUrl" ⇒ artifacts
       case "artifactsRelUrl" ⇒ artifactsRelUrl
       case "artifactLinks" ⇒ artifactLinks
       case "link" ⇒ context.getViewResultsUrl(build)
       case "mentions" ⇒ mentions
       case "users" ⇒ users
-      case "reason" ⇒ reason
+      case "reason" ⇒ encodeText(reason)
       case x if x.startsWith("%") && x.endsWith("%") ⇒
         context.getBuildParameter(build, x.substring(1, x.length - 1).trim) match {
-        case Some(value) ⇒ value
+        case Some(value) ⇒ encodeText(value)
         case _ ⇒ unknownParameter
       }
       case _ ⇒ m.group(0)
@@ -116,6 +116,11 @@ object MessageBuilder {
     def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
       Option(build.getParametersProvider.get(name))
   }
+
+  private def encodeText(text: String) =
+    text.replaceAllLiterally("&", "&amp;")
+      .replaceAllLiterally("<", "&lt;")
+      .replaceAllLiterally(">", "&gt;")
 }
 
 class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths, configManager: ConfigManager) {
