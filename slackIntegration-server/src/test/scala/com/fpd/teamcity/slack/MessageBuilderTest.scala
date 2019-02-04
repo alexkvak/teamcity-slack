@@ -37,6 +37,25 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, MessageBuilder.statusNormalColor)
   }
 
+  "MessageBuilder.compile" should "compile default template with encoded build name" in {
+    implicit val build: SBuild = stub[SBuild]
+    val branch = stub[Branch]
+
+    build.getFullName _ when() returns "Deploy -> test-host.io & demo-host.io <-"
+    build.getDuration _ when() returns 100
+    build.getBuildNumber _ when() returns "2"
+    build.getBranch _ when() returns branch
+    branch.getDisplayName _ when() returns "default"
+    build.getBuildStatus _ when() returns Status.NORMAL
+
+    val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+      s"""<$viewResultsUrl|Deploy -&gt; test-host.io &amp; demo-host.io &lt;- - 2>
+        |Branch: default
+        |Status: ${Strings.MessageBuilder.statusSucceeded}
+      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+  }
+
   "MessageBuilder.compile" should "compile failure template" in {
     implicit val build = stub[SBuild]
     val branch = stub[Branch]
