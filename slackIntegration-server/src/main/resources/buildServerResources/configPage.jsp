@@ -31,7 +31,7 @@
             </tr>
             <tr class="js-toggable">
                 <td>
-                    <label for="publicUrl">Sender name</label>
+                    <label for="senderName">Sender name</label>
                 </td><td>
                     <input type="text" id="senderName" name="senderName" value="${senderName}" class="longField">
                 </td>
