@@ -6,14 +6,14 @@ This plugin allows you to integrate your CI with Slack.
 
 The main feature is that you can specify not exact branch name but the [regexp branch mask](#build-configuration).
 
-For example you have separate build configurations for feature branches and common branches. Then it is easy to
+For example, if you have separate build configurations for feature branches and common branches, then it is easy to
 setup notifications into corresponding Slack channels.
 
-The second big thing is that your can compose your own messages using [template placeholders](#message-placeholders) and [Slack formatting](https://api.slack.com/docs/message-formatting).
+The second big thing is that you can compose your own messages using [template placeholders](#message-placeholders) and [Slack formatting](https://api.slack.com/docs/message-formatting).
 
-And you can easily send notification without running the build with *Try it* feature.
+And you can easily send notifications without running the build with the *Try it* feature.
 
-Plugin automatically backups its settings after each modification.
+The plugin automatically backs up its settings after each modification.
 
 ![Successful build](_doc/build-success.png)
 ![Failed build](_doc/build-fail.png)
@@ -59,8 +59,8 @@ Sample configuration:
 Notifications for branches captured by regular expression will be sent to slack channel or/and private chat.
 Message will be compiled according to template.
 
-The *Only trigger when build changes* options allows you to notify only when previous build status changed from failure to success or vice versa.
-The previous build is the latest build on the same branch as current build (or without branch if current has no branch), and
+The *Only trigger when build changes* option allows you to be notified when the previous build status changes from failure to success, or vice versa.
+The previous build is the latest build on the same branch as the current build (or not if the current build has no branch), and
 its status is determined (failure or success) and it's not a personal build.
 
 **Note.** Please avoid using heading `#` in channel name.
@@ -71,20 +71,20 @@ in one channel, and for release branches in another one.
 ## Message placeholders <a name="message-placeholders"></a>
 
 ###### {name} 
-Full name of the build configuration, has form "project_name :: buildconfig_name".
+Full name of the build configuration, has the format "project_name :: buildconfig_name".
 
 ###### {number}
 User defined build number.
 
 ###### {branch}
-Branch display name, i.e. name to show to user. *Unknown* if not applicable.
+Branch display name, i.e. name to show to the user. *Unknown* if not applicable.
 
 Please make sure that your VCS settings are correct!
 
 See [TeamCity Docs](https://confluence.jetbrains.com/x/iwt2B#WorkingwithFeatureBranches-Logicalbranchname) and [#21](https://github.com/alexkvak/teamcity-slack/issues/21)
 
 ###### {status}
-*succeeded* if build successful, *started* if started, *canceled* if canceled, *failed* otherwise.
+*succeeded* if build is successful, *started* if started, *canceled* if canceled, *failed* otherwise.
 
 ###### {link}
 URL to view results page.
