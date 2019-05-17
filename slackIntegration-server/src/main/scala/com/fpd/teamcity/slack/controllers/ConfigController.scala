@@ -36,7 +36,8 @@ class ConfigController(
           publicUrl,
           request.param("personalEnabled").isDefined,
           request.param("enabled").isDefined,
-          senderName
+          senderName,
+          request.param("sendAsAttachment").isDefined
         )
       } match {
         case Success(true) ⇒ Left(true)

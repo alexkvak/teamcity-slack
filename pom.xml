@@ -9,10 +9,10 @@
       <teamcity-version>2017.1</teamcity-version>
   </properties>
   <repositories>
-    <repository>
-        <id>JetBrains</id>
-        <url>http://repository.jetbrains.com/all</url>
-    </repository>
+      <repository>
+          <id>jetbrains-all</id>
+          <url>https://download.jetbrains.com/teamcity-repository/</url>
+      </repository>
   </repositories>
   <pluginRepositories>
       <pluginRepository>

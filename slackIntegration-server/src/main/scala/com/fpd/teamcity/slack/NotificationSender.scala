@@ -2,7 +2,7 @@ package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
-import com.fpd.teamcity.slack.SlackGateway.{Destination, MessageSent, SlackChannel, SlackUser}
+import com.fpd.teamcity.slack.SlackGateway.{Destination, MessageSent, SlackChannel, SlackUser, attachmentToSlackMessage}
 import jetbrains.buildServer.serverSide.SBuild
 
 import scala.collection.mutable
@@ -17,6 +17,8 @@ trait NotificationSender {
   import Helpers.Implicits._
 
   type SendResult = Vector[Future[MessageSent]]
+
+  private def sendAsAttachment = configManager.sendAsAttachment.exists(x ⇒ x)
 
   def send(build: SBuild, flags: Set[BuildSettingFlag]): Future[Vector[MessageSent]] = {
     val settings = prepareSettings(build, flags)
@@ -50,7 +52,9 @@ trait NotificationSender {
         }
       }
 
-      acc ++ destinations.toVector.map(x ⇒ gateway.sendMessage(x, attachment))
+      acc ++ destinations.toVector.map(x ⇒
+        gateway.sendMessage(x, attachmentToSlackMessage(attachment, sendAsAttachment))
+      )
     }
 
     implicit val ec = scala.concurrent.ExecutionContext.global

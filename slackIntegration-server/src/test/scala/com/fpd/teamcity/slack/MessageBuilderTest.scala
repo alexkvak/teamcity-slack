@@ -19,7 +19,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
   import MessageBuilderTest._
 
   "MessageBuilder.compile" should "compile default template" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
     val branch = stub[Branch]
 
     build.getFullName _ when() returns "Full name"
@@ -34,7 +34,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusSucceeded}
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile default template with encoded build name" in {
@@ -53,11 +53,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""<$viewResultsUrl|Deploy -&gt; test-host.io &amp; demo-host.io &lt;- - 2>
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusSucceeded}
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile failure template" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
     val branch = stub[Branch]
 
     build.getFullName _ when() returns "Full name"
@@ -74,11 +74,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusFailed}
         |<@nick1> <@nick2>
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template with unknown placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -91,11 +91,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
         |{unknown}
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template with mentions placeholders and replace it with empty string" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildStatus _ when() returns Status.NORMAL
@@ -104,11 +104,12 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{mentions}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment("Full name", MessageBuilder.statusNormalColor)
+    messageBuilder().compile(messageTemplate) shouldEqual
+      SlackAttachment("Full name", MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template with mentions placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -122,11 +123,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
         |<@nick1> <@nick2>
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template with changes placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -141,11 +142,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """Full name
         |- Did some changes Second line [name1]
         |- Did another changes [name2]
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template with reason placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -160,11 +161,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |Reason: ${reasons.mkString("\n")}
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template without reason placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -176,12 +177,12 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{reason}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
-      "Full name", MessageBuilder.statusNormalColor)
+    messageBuilder().compile(messageTemplate) shouldEqual
+      SlackAttachment("Full name", MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template with artifacts placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -196,11 +197,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder(downloadArtifactsUrl = downloadUrl).compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |<$downloadUrl|Download all artifacts>
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template with artifactsRelUrl placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -216,11 +217,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder(artifactsPath = "/full/artifacts/path/").compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |my/build/folder
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template with parameter placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     val teamcityParam = "teamcity.param"
     val teamcityParamValue = "teamcity.param.value"
@@ -238,11 +239,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder(params = Map(teamcityParam → teamcityParamValue)).compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |$teamcityParamValue
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template with changes placeholders with non-teamcity committer" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -256,11 +257,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
         |- Did some changes [user@unknown.com]
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   "MessageBuilder.compile" should "compile template for canceled build" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getDuration _ when() returns 0
@@ -274,11 +275,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |${Strings.MessageBuilder.statusCanceled}
-      """.stripMargin.trim, Status.UNKNOWN.getHtmlColor)
+      """.stripMargin.trim, Status.UNKNOWN.getHtmlColor, "⚪")
   }
 
   "MessageBuilder.compile" should "compile template for started build" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getDuration _ when() returns 0
@@ -292,11 +293,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       s"""Full name
         |${Strings.MessageBuilder.statusStarted}
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor,"✅")
   }
 
   "MessageBuilder.compile" should "compile template with artifactLinks placeholder" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getDuration _ when() returns 100
@@ -322,11 +323,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""Full name
         |${artifactsPublicUrl}directory/artifact.txt
         |${artifactsPublicUrl}directory/folder/artifact2.txt
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template for build without branch" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getDuration _ when() returns 100
@@ -339,11 +340,11 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       s"""<$viewResultsUrl|Full name - 2>
                           |Branch: ${Strings.MessageBuilder.unknownBranch}
                           |Status: ${Strings.MessageBuilder.statusSucceeded}
-      """.stripMargin.trim, MessageBuilder.statusNormalColor)
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
   "MessageBuilder.compile" should "compile template with users placeholders" in {
-    implicit val build = stub[SBuild]
+    implicit val build: SBuild = stub[SBuild]
 
     build.getFullName _ when() returns "Full name"
     build.getBuildNumber _ when() returns "2"
@@ -357,7 +358,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
       """Full name
         |name1, name2
-      """.stripMargin.trim, Status.FAILURE.getHtmlColor)
+      """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
   private def mockChanges = {

@@ -24,6 +24,7 @@ The plugin automatically backs up its settings after each modification.
 2. [Build configuration](#build-configuration)
 3. [Message placeholders](#message-placeholders)
 4. [Artifact links](#artifact-links)
+5. [Message preview](#message-preview)
 
 ## Install plugin <a name="install-plugin"></a>
 Download from [releases](https://github.com/alexkvak/teamcity-slack/releases) or compile 
@@ -128,3 +129,14 @@ location /art/ {
     autoindex on;
 }
 ```
+
+## Message preview <a name="message-preview"></a>
+By default Slack plugin sends messages as attachments. 
+But there is one inconvenience — there is no message preview in push notifications. 
+It can be easily fixed by turning off the *Send message as attachment* checkbox in [Plugin setup](#install-plugin).
+
+Now Slack messages look like
+
+![Successful build with emoji](_doc/build-success-emoji.png)
+
+The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and other build statuses respectively.
