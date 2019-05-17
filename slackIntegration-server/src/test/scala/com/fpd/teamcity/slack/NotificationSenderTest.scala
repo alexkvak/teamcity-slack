@@ -74,8 +74,8 @@ object NotificationSenderTest {
     val gateway: SlackGateway = stub[SlackGateway]
     val messageBuilderFactory: MessageBuilderFactory = stub[MessageBuilderFactory]
 
-    val builder = stub[MessageBuilder]
-    builder.compile _ when(*, *) returns SlackAttachment("", "")
+    private val builder = stub[MessageBuilder]
+    builder.compile _ when(*, *) returns SlackAttachment("", "", "")
     messageBuilderFactory.createForBuild _ when * returns builder
 
     val sender = new NotificationSenderStub(manager, gateway, messageBuilderFactory)

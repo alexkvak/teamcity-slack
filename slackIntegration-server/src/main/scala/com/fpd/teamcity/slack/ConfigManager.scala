@@ -33,6 +33,7 @@ class ConfigManager(paths: ServerPaths) {
   def senderName: Option[String] = config.flatMap(_.senderName).filter(_.nonEmpty)
   def enabled: Option[Boolean] = config.flatMap(_.enabled)
   def personalEnabled: Option[Boolean] = config.flatMap(_.personalEnabled)
+  def sendAsAttachment: Option[Boolean] = config.flatMap(_.sendAsAttachment)
 
   def allBuildSettingList: BuildSettings = config.map(_.buildSettings).getOrElse(Map.empty)
 
@@ -75,14 +76,18 @@ class ConfigManager(paths: ServerPaths) {
     updateAndPersist(c.copy(buildSettings = newSettings))
   }
 
-  def update(authKey: String, pubUrl: String, personalEnabled: Boolean, enabled: Boolean, sender: String): Boolean = config match {
+  def update(authKey: String, pubUrl: String, personalEnabled: Boolean, enabled: Boolean, sender: String, sendAsAttachment: Boolean): Boolean = config match {
     case Some(c) ⇒
       updateAndPersist(c.copy(
-        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled), enabled = Some(enabled), senderName = Some(sender)
+        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled),
+        enabled = Some(enabled), senderName = Some(sender),
+        sendAsAttachment = Some(sendAsAttachment)
       ))
     case None ⇒
       updateAndPersist(Config(
-        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled), enabled = Some(enabled), senderName = Some(sender)
+        authKey, publicUrl = Some(pubUrl), personalEnabled = Some(personalEnabled),
+        enabled = Some(enabled), senderName = Some(sender),
+        sendAsAttachment = Some(sendAsAttachment)
       ))
   }
 
@@ -95,7 +100,8 @@ class ConfigManager(paths: ServerPaths) {
     "publicUrl" → publicUrl,
     "senderName" → senderName,
     "enabled" → enabled.filter(x ⇒ x).map(_ ⇒ "1"),
-    "personalEnabled" → personalEnabled.filter(x ⇒ x).map(_ ⇒ "1")
+    "personalEnabled" → personalEnabled.filter(x ⇒ x).map(_ ⇒ "1"),
+    "sendAsAttachment" → sendAsAttachment.filter(x ⇒ x).map(_ ⇒ "1")
   )
 
   def isAvailable: Boolean = config.exists(c ⇒ c.enabled.exists(b ⇒ b) && c.oauthKey.length > 0)
@@ -159,6 +165,7 @@ object ConfigManager {
                     buildSettings: BuildSettings = Map.empty,
                     publicUrl: Option[String] = None,
                     personalEnabled: Option[Boolean] = Some(true),
+                    sendAsAttachment: Option[Boolean] = Some(true),
                     enabled: Option[Boolean] = Some(true),
                     senderName: Option[String] = None
                    )

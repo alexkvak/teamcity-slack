@@ -9,7 +9,7 @@ import com.ullink.slack.simpleslackapi.replies.{ParsedSlackReply, SlackMessageRe
 import com.ullink.slack.simpleslackapi.{SlackChatConfiguration, SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
 import jetbrains.buildServer.serverSide.TeamCityProperties
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.{Failure, Success, Try}
 
@@ -29,19 +29,21 @@ object SlackGateway {
     lazy val isEmpty: Boolean = message.isEmpty && attachment.isEmpty
   }
 
-  case class SlackAttachment(text: String, color: String)
+  case class SlackAttachment(text: String, color: String, emoji: String)
 
   implicit def stringToSlackMessage(message: String): SlackMessage = SlackMessage(message)
 
   type MessageSent = Try[SlackMessageHandle[SlackMessageReply]]
 
-  implicit def attachmentToSlackMessage(attachment: SlackAttachment): SlackMessage = {
+  def attachmentToSlackMessage(attachment: SlackAttachment, asAttachment: Boolean): SlackMessage = if (asAttachment) {
     val apiSlackAttachment = new ApiSlackAttachment()
     apiSlackAttachment.setColor(attachment.color)
     apiSlackAttachment.addMarkdownIn("fields")
     apiSlackAttachment.addField("", attachment.text, false)
 
     SlackMessage("", Some(apiSlackAttachment))
+  } else {
+    SlackMessage(s"${attachment.emoji} ${attachment.text}")
   }
 
   val networkTimeout = 10L
@@ -104,7 +106,7 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       logger.log("Empty message")
       Future.successful(Failure(SendMessageError("Empty message")))
     } else {
-      implicit val ec = scala.concurrent.ExecutionContext.global
+      implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
        Future {
         val handle = sendMessageInternal(destination, message)
         handle.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS))

@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.Helpers.Implicits._
-import com.fpd.teamcity.slack.SlackGateway.{Destination, SlackChannel, SlackUser}
+import com.fpd.teamcity.slack.SlackGateway.{Destination, SlackChannel, SlackUser, attachmentToSlackMessage}
 import com.fpd.teamcity.slack._
 import jetbrains.buildServer.serverSide.{BuildHistory, SFinishedBuild}
 import jetbrains.buildServer.users.SUser
@@ -43,7 +43,11 @@ class BuildSettingsTry(buildHistory: BuildHistory,
 
     detectDestination(setting, SessionUser.getUser(request)) match {
       case Some(dest) ⇒
-        val future = gateway.sendMessage(dest, messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)))
+        val future = gateway.sendMessage(dest,
+          attachmentToSlackMessage(
+            messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)),
+            configManager.sendAsAttachment.exists(x ⇒ x)
+          ))
         Await.result(future, 10 seconds) match {
           case Failure(error) ⇒ throw HandlerException(error.getMessage)
           case _ ⇒ messageSent(dest.toString)

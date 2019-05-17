@@ -86,7 +86,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       case _ ⇒ m.group(0)
     })
 
-    SlackAttachment(text.trim, statusColor(build.getBuildStatus))
+    SlackAttachment(text.trim, statusColor(build.getBuildStatus), statusEmoji(build.getBuildStatus))
   }
 }
 
@@ -102,12 +102,18 @@ object MessageBuilder {
 
   private def statusColor(status: Status) = if (status == Status.NORMAL) statusNormalColor else status.getHtmlColor
 
+  private def statusEmoji(status: Status) = status match {
+    case Status.NORMAL ⇒ "✅"
+    case Status.FAILURE ⇒ "⛔"
+    case _ ⇒ "⚪"
+  }
+
   case class MessageBuilderContext(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths, configManager: ConfigManager) {
-    def getViewResultsUrl: (SBuild) ⇒ String = webLinks.getViewResultsUrl
+    def getViewResultsUrl: SBuild ⇒ String = webLinks.getViewResultsUrl
 
-    def getDownloadAllArtifactsUrl: (SBuild) ⇒ String = webLinks.getDownloadAllArtefactsUrl
+    def getDownloadAllArtifactsUrl: SBuild ⇒ String = webLinks.getDownloadAllArtefactsUrl
 
-    def userByEmail: (String) ⇒ Option[String] = email ⇒ gateway.session.flatMap(s ⇒ Option(s.findUserByEmail(email))).map(_.getId)
+    def userByEmail: String ⇒ Option[String] = email ⇒ gateway.session.flatMap(s ⇒ Option(s.findUserByEmail(email))).map(_.getId)
 
     def getArtifactsPath: String = paths.getArtifactsDirectory.getPath
 
