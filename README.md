@@ -48,10 +48,10 @@ That's it! Now you can open any build configuration home and choose **Slack** ta
 By default personal notifications (private notifications) are disabled. 
 Personal notifications notify only about failed builds.
 
-**Slack** tab in classic UI
+**Slack** tab in classic UI:
 ![Slack tab](_doc/slack-tab.png "Slack tab")
 
-**Slack** tab in experimental UI
+**Slack** tab in experimental UI:
 ![Slack tab](_doc/slack-tab-experimental-UI.png "Slack tab")
 Only admins and projects admins have rights to access these settings. 
 
