@@ -16,6 +16,10 @@
       <label class="tableLabel" for="notifyCommitter">and/or notify committers:</label>
       <input type="checkbox" name="notifyCommitter" id="notifyCommitter" value="1" <c:if test="${model.notifyCommitter}">checked</c:if>/>
     </div>
+    <div class="group">
+      <label class="tableLabel" for="maxVcsChanges">Max VCS changes count:</label>
+      <span><input className="mediumField textField" name="maxVcsChanges" expandable="false" type="number" min="1" max="300" step="1" value="${model.maxVcsChanges}"/></span>
+    </div>
     <div class="message-template">
       <label class="tableLabel" for="messageTemplate">Message template:</label>
       <span><forms:textField className="mediumField textAreaField" name="messageTemplate" expandable="true"

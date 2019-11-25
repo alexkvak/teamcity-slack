@@ -49,10 +49,11 @@ class BuildSettingsSave(val configManager: ConfigManager,
       lazy val artifactsMask = request.param("artifactsMask")
       val channel = request.param("slackChannel")
       val notifyCommitter = request.param("notifyCommitter").isDefined
+      val maxVcsChanges = request.param("maxVcsChanges").getOrElse(BuildSetting.defaultMaxVCSChanges.toString).toInt
 
       // store build setting
       def updateConfig() = configManager.updateBuildSetting(
-        BuildSetting(buildId, branch, channel.getOrElse(""), message, flags, artifactsMask.getOrElse(""), request.param("deepLookup").isDefined, notifyCommitter),
+        BuildSetting(buildId, branch, channel.getOrElse(""), message, flags, artifactsMask.getOrElse(""), request.param("deepLookup").isDefined, notifyCommitter, maxVcsChanges),
         request.param("key")
       )
 
