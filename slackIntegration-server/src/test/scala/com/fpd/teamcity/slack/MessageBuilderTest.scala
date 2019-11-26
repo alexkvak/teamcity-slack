@@ -361,6 +361,15 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
   }
 
+  "MessageBuilder.compile" should "compile template with limited changes placeholders" in {
+    implicit val build: SBuild = stub[SBuild]
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getContainingChanges _ when() returns mockChanges
+    val messageTemplate = "{changes}"
+    messageBuilder().compile(messageTemplate, Some(BuildSetting("", "", "", "", maxVcsChanges = 1))) shouldEqual SlackAttachment(
+      "- Did some changes Second line [name1]", MessageBuilder.statusNormalColor, "✅")
+  }
+
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
     val vcsModification2 = stub[SVcsModification]
