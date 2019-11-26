@@ -15,7 +15,7 @@ import scala.collection.mutable.ArrayBuffer
 class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
   import Helpers.Implicits._
 
-  def compile(template: String, setting: Option[BuildSetting] = None): SlackAttachment = {
+  def compile(template: String, setting: BuildSetting): SlackAttachment = {
     def status = if (build.getDuration == 0) {
       if (build.getBuildStatus.isSuccessful)
         statusStarted
@@ -29,9 +29,9 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
 
     lazy val artifactsRelUrl = build.getArtifactsDirectory.getPath.stripPrefix(context.getArtifactsPath).stripPrefix("/")
 
-    def artifactLinks = if (setting.isDefined && !setting.get.artifactsMask.isEmpty) {
+    def artifactLinks = if (!setting.artifactsMask.isEmpty) {
       val links = ArrayBuffer.empty[String]
-      val compiledMask = setting.get.artifactsMask.r
+      val compiledMask = setting.artifactsMask.r
       val publicUrl = context.artifactsPublicUrl.getOrElse("").reverse.dropWhile(_ == '/').reverse
 
       build.getArtifacts(BuildArtifactsViewMode.VIEW_DEFAULT_WITH_ARCHIVES_CONTENT).iterateArtifacts((artifact: BuildArtifact) ⇒ {
@@ -39,7 +39,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
           links += s"$publicUrl/$artifactsRelUrl/${artifact.getRelativePath}"
         }
 
-        if (!artifact.isArchive && (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.get.deepLookup)))
+        if (!artifact.isArchive && (artifact.getRelativePath == "" || !artifact.isDirectory || (artifact.isDirectory && setting.deepLookup)))
           Continuation.CONTINUE
         else
           Continuation.SKIP_CHILDREN
@@ -48,7 +48,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       links.mkString("\n")
     } else ""
 
-    def changes = build.getContainingChanges.asScala.take(if (setting.isDefined) setting.get.maxVcsChanges else BuildSetting.defaultMaxVCSChanges).map { change ⇒
+    def changes = build.getContainingChanges.asScala.take(setting.maxVcsChanges).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse(change.getUserName)
       s"- ${change.getDescription.replace("\n", " ").trim} [$name]"
     } mkString "\n"

@@ -18,6 +18,8 @@ import scala.collection.JavaConverters._
 class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
   import MessageBuilderTest._
 
+  val buildSetting = BuildSetting("", "", "art", "", artifactsMask = ".*")
+
   "MessageBuilder.compile" should "compile default template" in {
     implicit val build: SBuild = stub[SBuild]
     val branch = stub[Branch]
@@ -30,7 +32,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getBuildStatus _ when() returns Status.NORMAL
 
     val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
-    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage, buildSetting) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusSucceeded}
@@ -49,7 +51,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getBuildStatus _ when() returns Status.NORMAL
 
     val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
-    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage, buildSetting) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Deploy -&gt; test-host.io &amp; demo-host.io &lt;- - 2>
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusSucceeded}
@@ -69,7 +71,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getContainingChanges _ when() returns mockChanges
 
     val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
-    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage, buildSetting) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Full name - 2>
         |Branch: default
         |Status: ${Strings.MessageBuilder.statusFailed}
@@ -88,7 +90,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{unknown}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       """Full name
         |{unknown}
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -104,7 +106,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{mentions}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual
       SlackAttachment("Full name", MessageBuilder.statusNormalColor, "✅")
   }
 
@@ -120,7 +122,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{mentions}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       """Full name
         |<@nick1> <@nick2>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -138,7 +140,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{changes}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       """Full name
         |- Did some changes Second line [name1]
         |- Did another changes [name2]
@@ -158,7 +160,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{reason}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |Reason: ${reasons.mkString("\n")}
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -177,7 +179,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{reason}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual
       SlackAttachment("Full name", MessageBuilder.statusNormalColor, "✅")
   }
 
@@ -194,7 +196,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
     val downloadUrl = "http://my.teamcity/download/artifacts.zip"
-    messageBuilder(downloadArtifactsUrl = downloadUrl).compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder(downloadArtifactsUrl = downloadUrl).compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |<$downloadUrl|Download all artifacts>
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -214,7 +216,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
 
-    messageBuilder(artifactsPath = "/full/artifacts/path/").compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder(artifactsPath = "/full/artifacts/path/").compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |my/build/folder
       """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
@@ -236,7 +238,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                           """.stripMargin
 
 
-    messageBuilder(params = Map(teamcityParam → teamcityParamValue)).compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder(params = Map(teamcityParam → teamcityParamValue)).compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |$teamcityParamValue
       """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
@@ -254,7 +256,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{changes}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       """Full name
         |- Did some changes [user@unknown.com]
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -272,7 +274,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{status}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |${Strings.MessageBuilder.statusCanceled}
       """.stripMargin.trim, Status.UNKNOWN.getHtmlColor, "⚪")
@@ -290,7 +292,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{status}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       s"""Full name
         |${Strings.MessageBuilder.statusStarted}
       """.stripMargin.trim, MessageBuilder.statusNormalColor,"✅")
@@ -319,7 +321,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{artifactLinks}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate, Some(BuildSetting("", "", "art", "", artifactsMask = ".*"))) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, BuildSetting("", "", "art", "", artifactsMask = ".*")) shouldEqual SlackAttachment(
       s"""Full name
         |${artifactsPublicUrl}directory/artifact.txt
         |${artifactsPublicUrl}directory/folder/artifact2.txt
@@ -336,7 +338,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getBuildStatus _ when() returns Status.NORMAL
 
     val viewResultsUrl = "http://localhost:8111/viewLog.html?buildId=2"
-    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage) shouldEqual SlackAttachment(
+    messageBuilder(viewResultsUrl).compile(MessageBuilder.defaultMessage, buildSetting) shouldEqual SlackAttachment(
       s"""<$viewResultsUrl|Full name - 2>
                           |Branch: ${Strings.MessageBuilder.unknownBranch}
                           |Status: ${Strings.MessageBuilder.statusSucceeded}
@@ -355,7 +357,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
                             |{users}
                           """.stripMargin
 
-    messageBuilder().compile(messageTemplate) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
       """Full name
         |name1, name2
       """.stripMargin.trim, Status.FAILURE.getHtmlColor, "⛔")
@@ -366,7 +368,7 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
     build.getBuildStatus _ when() returns Status.NORMAL
     build.getContainingChanges _ when() returns mockChanges
     val messageTemplate = "{changes}"
-    messageBuilder().compile(messageTemplate, Some(BuildSetting("", "", "", "", maxVcsChanges = 1))) shouldEqual SlackAttachment(
+    messageBuilder().compile(messageTemplate, BuildSetting("", "", "", "", maxVcsChanges = 1)) shouldEqual SlackAttachment(
       "- Did some changes Second line [name1]", MessageBuilder.statusNormalColor, "✅")
   }
 
@@ -406,7 +408,7 @@ object MessageBuilderTest extends MockFactory {
 
   private val artifactsPublicUrl = "https://team.city/download/"
 
-  def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "", artifactsPath: String = "", params: Map[String, String] = Map.empty)(implicit build: SBuild) = {
+  def messageBuilder(viewResultsUrl: String = "", downloadArtifactsUrl: String = "", artifactsPath: String = "", params: Map[String, String] = Map.empty)(implicit build: SBuild): MessageBuilder = {
     val context = stub[MessageBuilderContext]
     context.getArtifactsPath _ when() returns artifactsPath
     context.getViewResultsUrl _ when() returns (_ ⇒ viewResultsUrl)
