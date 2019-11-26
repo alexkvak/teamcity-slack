@@ -48,7 +48,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       links.mkString("\n")
     } else ""
 
-    def changes = build.getContainingChanges.asScala.take(5).map { change ⇒
+    def changes = build.getContainingChanges.asScala.take(if (setting.isDefined) setting.get.maxVcsChanges else BuildSetting.defaultMaxVCSChanges).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse(change.getUserName)
       s"- ${change.getDescription.replace("\n", " ").trim} [$name]"
     } mkString "\n"

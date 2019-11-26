@@ -127,7 +127,8 @@ object ConfigManager {
                           flags: Set[BuildSettingFlag] = Set.empty,
                           artifactsMask: String = "",
                           deepLookup: Boolean = false,
-                          notifyCommitter: Boolean = false
+                          notifyCommitter: Boolean = false,
+                          maxVcsChanges: Int = BuildSetting.defaultMaxVCSChanges
                          ) {
     // Getters for JSP
     lazy val getBranchMask: String = branchMask
@@ -136,6 +137,7 @@ object ConfigManager {
     lazy val getArtifactsMask: String = artifactsMask
     lazy val getDeepLookup: Boolean = deepLookup
     lazy val getNotifyCommitter: Boolean = notifyCommitter
+    lazy val getMaxVcsChanges: Int = maxVcsChanges
     // Flags
     lazy val getSuccess: Boolean = flags.contains(BuildSettingFlag.success)
     lazy val getFailureToSuccess: Boolean = flags.contains(BuildSettingFlag.failureToSuccess)
@@ -160,6 +162,10 @@ object ConfigManager {
       }
       pure
     }
+  }
+
+  object BuildSetting {
+    lazy val defaultMaxVCSChanges = 5
   }
 
   case class Config(oauthKey: String,
