@@ -148,6 +148,8 @@ The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and oth
 
 
 ## Troubleshooting <a name="troubleshooting"></a>
-Q: I followed all the instructions, but I get error message `not_allowed_token_type` when I try to save my Bot token into TeamCity!
-A: This plugin does not yet support the new Slack detailed OAuth scopes. When trying to save a token created for a Bot User using the new scopes, the Slack API will return that error message. When creating a new Slack App for this integration, do NOT opt into using the updated/beta scopes. If you have already opted in, you will need to create a new Slack App - there is no way to downgrade at this time.
-(_doc/slack-beta-bot-scopes.png)
+**Q:** I followed all the instructions, but I get error message `not_allowed_token_type` when I try to save my Bot token into TeamCity!
+
+**A:** This plugin does not yet support the new Slack detailed OAuth scopes. When trying to save or use a token created for a Bot User using the new scopes, the Slack API will return that error message. When creating a new Slack App for this integration, do NOT opt into using the updated/beta scopes. If you have already opted in, you will need to create a new Slack App - there is no way to downgrade at this time.
+
+![Beta Slack bot scopes](_doc/slack-beta-bot-scopes.png)
