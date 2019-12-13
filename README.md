@@ -25,6 +25,7 @@ The plugin automatically backs up its settings after each modification.
 3. [Message placeholders](#message-placeholders)
 4. [Artifact links](#artifact-links)
 5. [Message preview](#message-preview)
+6. [Troubleshooting](#troubleshooting)
 
 ## Install plugin <a name="install-plugin"></a>
 Download from [releases](https://github.com/alexkvak/teamcity-slack/releases) or compile 
@@ -144,3 +145,11 @@ Now Slack messages look like
 ![Successful build with emoji](_doc/build-success-emoji.png)
 
 The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and other build statuses respectively.
+
+
+## Troubleshooting <a name="troubleshooting"></a>
+**Q:** I followed all the instructions, but I get error message `not_allowed_token_type` when I try to save my Bot token into TeamCity!
+
+**A:** This plugin does not yet support the new Slack detailed OAuth scopes. When trying to save or use a token created for a Bot User using the new scopes, the Slack API will return that error message. When creating a new Slack App for this integration, do NOT opt into using the updated/beta scopes. If you have already opted in, you will need to create a new Slack App - there is no way to downgrade at this time. The only supported scope is the classic `bot` scope. 
+
+![Beta Slack bot scopes](_doc/slack-beta-bot-scopes.png)
