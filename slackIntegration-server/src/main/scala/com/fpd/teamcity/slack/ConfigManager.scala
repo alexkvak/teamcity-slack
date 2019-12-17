@@ -5,7 +5,6 @@ import java.io.{File, PrintWriter}
 import jetbrains.buildServer.serverSide.ServerPaths
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import org.json4s.native.Serialization
 import org.json4s.native.Serialization._
 import org.json4s.ext.EnumNameSerializer
 import Helpers.Implicits._
@@ -16,7 +15,9 @@ class ConfigManager(paths: ServerPaths) {
 
   import ConfigManager._
 
-  private implicit val formats = Serialization.formats(NoTypeHints) + new EnumNameSerializer(BuildSettingFlag)
+  private implicit val formats: Formats = new DefaultFormats {
+    override def alwaysEscapeUnicode: Boolean = true
+  } + new EnumNameSerializer(BuildSettingFlag)
 
   private def configFile = new File(s"${paths.getConfigDir}/slackIntegration.json")
 
