@@ -28,7 +28,7 @@ trait NotificationSender {
     lazy val sendPersonal = shouldSendPersonal(build)
 
     val result = settings.foldLeft(Vector(): SendResult) { (acc, setting) ⇒
-      val attachment = messageBuilder.compile(setting.messageTemplate, Some(setting))
+      val attachment = messageBuilder.compile(setting.messageTemplate, setting)
       val destinations = mutable.Set.empty[Destination]
       if (build.isPersonal) {
         // If build is personal we need inform only build's owner if needed

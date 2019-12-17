@@ -45,7 +45,7 @@ class BuildSettingsTry(buildHistory: BuildHistory,
       case Some(dest) ⇒
         val future = gateway.sendMessage(dest,
           attachmentToSlackMessage(
-            messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, Some(setting)),
+            messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, setting),
             configManager.sendAsAttachment.exists(x ⇒ x)
           ))
         Await.result(future, 10 seconds) match {
