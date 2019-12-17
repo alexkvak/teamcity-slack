@@ -51,6 +51,15 @@
                     </label>
                 </td>
             </tr>
+            <tr class="js-toggable">
+                <td colspan="2">
+                    <label>
+                        <input type="checkbox" id="sendAsAttachment" name="sendAsAttachment" value="1" <c:if test="${not empty sendAsAttachment}">checked</c:if>>
+                        Send message as attachment. <br />
+                        It adds vertical color line, but does not show message preview in push notifications.
+                    </label>
+                </td>
+            </tr>
         </tbody>
     </table>
     <input type="submit" class="btn btn-default" value="Submit">
