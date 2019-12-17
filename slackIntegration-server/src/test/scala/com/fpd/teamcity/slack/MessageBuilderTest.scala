@@ -18,7 +18,7 @@ import scala.collection.JavaConverters._
 class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
   import MessageBuilderTest._
 
-  val buildSetting = BuildSetting("", "", "art", "", artifactsMask = ".*")
+  private val buildSetting = BuildSetting("", "", "art", "", artifactsMask = ".*")
 
   "MessageBuilder.compile" should "compile default template" in {
     implicit val build: SBuild = stub[SBuild]
