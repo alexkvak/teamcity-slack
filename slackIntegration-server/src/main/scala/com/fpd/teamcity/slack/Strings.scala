@@ -14,10 +14,10 @@ object Strings {
     lazy val unknownBranch = "Unknown"
     lazy val unknownReason = "Unknown"
     lazy val unknownParameter = ""
-    lazy val statusSucceeded = "succeeded"
-    lazy val statusFailed = "failed"
-    lazy val statusCanceled = "canceled"
-    lazy val statusStarted = "started"
+    lazy val statusSucceeded = "Succeeded"
+    lazy val statusFailed = "Failed"
+    lazy val statusCanceled = "Canceled"
+    lazy val statusStarted = "Started"
   }
 
   object BuildSettingsController {
