@@ -65,11 +65,11 @@ Sample configuration:
 Notifications for branches captured by regular expression will be sent to slack channel or/and private chat.
 Message will be compiled according to template.
 
+**Note:** Please avoid using heading `#` in channel name. The proper relation between the user of the code repository and the slack user is established by the e-Mail address. This requires the same e-Mail address for both accounts. Otherwise the private message and the `{mentions}` placeholder for messages can't work properly 
+
 The *Only trigger when build changes* option allows you to be notified when the previous build status changes from failure to success, or vice versa.
 The previous build is the latest build on the same branch as the current build (or not if the current build has no branch), and
 its status is determined (failure or success) and it's not a personal build.
-
-**Note.** Please avoid using heading `#` in channel name.
 
 The build settings number is not limited, so you can set up notifications for feature branches 
 in one channel, and for release branches in another one.
