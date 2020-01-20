@@ -65,7 +65,7 @@ Sample configuration:
 Notifications for branches captured by regular expression will be sent to slack channel or/and private chat.
 Message will be compiled according to template.
 
-**Note:** Please avoid using heading `#` in channel name. The proper relation between the user of the code repository and the slack user is established by the e-Mail address. This requires the same e-Mail address for both accounts. Otherwise the private message and the `{mentions}` placeholder for messages can't work properly 
+**Note:** Please avoid using heading `#` in channel name.
 
 The *Only trigger when build changes* option allows you to be notified when the previous build status changes from failure to success, or vice versa.
 The previous build is the latest build on the same branch as the current build (or not if the current build has no branch), and
@@ -153,3 +153,7 @@ The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and oth
 **A:** This plugin does not yet support the new Slack detailed OAuth scopes. When trying to save or use a token created for a Bot User using the new scopes, the Slack API will return that error message. When creating a new Slack App for this integration, do NOT opt into using the updated/beta scopes. If you have already opted in, you will need to create a new Slack App - there is no way to downgrade at this time. The only supported scope is the classic `bot` scope. 
 
 ![Beta Slack bot scopes](_doc/slack-beta-bot-scopes.png)
+
+**Q:** I checked the option to send private messages and added the `{mention}` placeholder to the message, but neither the message was send to the slack user nor the name was mentioned in the slack message!
+
+**A:** This plugin identifies the slack user by the email address of the committing user in the code repository. This requires that both accounts use the same email address. 
