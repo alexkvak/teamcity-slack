@@ -16,8 +16,8 @@
         </tr>
         <c:forEach items="${list}" var="item">
             <tr data-id="${item.key}">
-                <td>${item.value.branchMask}</td>
-                <td>${item.value.slackChannel}</td>
+                <td><c:out value="${item.value.branchMask}"/></td>
+                <td><c:out value="${item.value.slackChannel}"/></td>
                 <td>
                     <ul class="options-list">
                         <li><c:if test="${item.value.success}">Trigger when build is successful</c:if></li>
