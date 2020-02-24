@@ -65,7 +65,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       "Reason: " + (if (build.getFailureReasons.isEmpty) unknownReason else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n"))
     }
 
-    val text = """\{([\s\w._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
+    val text = """\{([\s\w-._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ encodeText(build.getFullName)
       case "number" ⇒ build.getBuildNumber
       case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse(unknownBranch)

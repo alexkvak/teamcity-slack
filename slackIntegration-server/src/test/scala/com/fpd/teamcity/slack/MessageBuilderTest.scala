@@ -244,6 +244,28 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
   }
 
+  "MessageBuilder.compile" should "compile template with parameter placeholder containing emphasis in name" in {
+    implicit val build: SBuild = stub[SBuild]
+
+    val teamcityParam = "teamcity-param"
+    val teamcityParamValue = "teamcity.param.value"
+
+    build.getFullName _ when() returns "Full name"
+    build.getBuildNumber _ when() returns "2"
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getContainingChanges _ when() returns mockChanges
+
+    val messageTemplate = s"""{name}
+                            |{%$teamcityParam%}
+                          """.stripMargin
+
+
+    messageBuilder(params = Map(teamcityParam → teamcityParamValue)).compile(messageTemplate, buildSetting) shouldEqual SlackAttachment(
+      s"""Full name
+        |$teamcityParamValue
+      """.stripMargin.trim, MessageBuilder.statusNormalColor, "✅")
+  }
+
   "MessageBuilder.compile" should "compile template with changes placeholders with non-teamcity committer" in {
     implicit val build: SBuild = stub[SBuild]
 
