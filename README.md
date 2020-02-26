@@ -116,6 +116,9 @@ Link to download all artifacts as zip archive.
 ###### {artifactsRelUrl}
 Artifacts relative path. It is necessary if you want to construct artifact link manually.
 
+###### {formattedDuration}
+Build duration in TeamCity format. 
+
 ###### Parameters placeholders
 You can also use project and build parameters, e.g. *{%my.awesome.teamcity.param%}*
 

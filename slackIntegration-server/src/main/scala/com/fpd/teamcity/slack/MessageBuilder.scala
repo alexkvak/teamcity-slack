@@ -77,6 +77,7 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
       case "link" ⇒ context.getViewResultsUrl(build)
       case "mentions" ⇒ mentions
       case "users" ⇒ users
+      case "formattedDuration" ⇒ build.formattedDuration
       case "reason" ⇒ encodeText(reason)
       case x if x.startsWith("%") && x.endsWith("%") ⇒
         context.getBuildParameter(build, x.substring(1, x.length - 1).trim) match {

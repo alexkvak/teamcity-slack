@@ -50,6 +50,9 @@ object Helpers {
 
       def matchBranch(mask: String): Boolean =
         mask.r.findFirstIn(Option(build.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
+
+      def formattedDuration: String =
+        encodeDuration(build.getDuration)
     }
 
     implicit class RichBuildServer(val sBuildServer: SBuildServer) extends AnyVal {
@@ -69,6 +72,29 @@ object Helpers {
           .find(_ != Status.UNKNOWN) // ignore cancelled and aborted builds
           .getOrElse(Status.NORMAL)
       }
+    }
+
+    private def encodeDuration(seconds: Long): String = {
+      val oneMinute = 60
+      val oneHour = oneMinute * 60
+      val oneDay = oneHour * 24
+
+      def encodeDuration(result: List[String], seconds: Long): List[String] = {
+        seconds match {
+          case seconds if seconds <= 0 =>
+            List.empty[String]
+          case seconds if seconds < oneMinute =>
+            result ::: List(s"${seconds}s")
+          case seconds if seconds >= oneMinute && seconds < oneHour =>
+            List(s"${seconds / oneMinute}m") ::: encodeDuration(result, seconds % oneMinute)
+          case seconds if seconds >= oneHour && seconds < oneDay =>
+            List(s"${seconds / oneHour}h") ::: encodeDuration(result, seconds % oneHour)
+          case seconds =>
+            List(s"${seconds / oneDay}d") ::: encodeDuration(result, seconds % oneDay)
+        }
+      }
+
+      encodeDuration(List.empty[String], seconds).mkString(":")
     }
   }
 }

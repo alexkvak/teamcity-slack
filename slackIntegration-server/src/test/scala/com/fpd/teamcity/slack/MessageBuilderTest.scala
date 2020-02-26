@@ -394,6 +394,15 @@ class MessageBuilderTest extends FlatSpec with MockFactory with Matchers {
       "- Did some changes Second line [name1]", MessageBuilder.statusNormalColor, "✅")
   }
 
+  "MessageBuilder.compile" should "compile template with formattedDuration placeholder" in {
+    implicit val build: SBuild = stub[SBuild]
+    build.getBuildStatus _ when() returns Status.NORMAL
+    build.getDuration _ when() returns 10L
+    val messageTemplate = "{formattedDuration}"
+    messageBuilder().compile(messageTemplate, BuildSetting("", "", "", "", maxVcsChanges = 1)) shouldEqual SlackAttachment(
+      "10s", MessageBuilder.statusNormalColor, "✅")
+  }
+
   private def mockChanges = {
     val vcsModification1 = stub[SVcsModification]
     val vcsModification2 = stub[SVcsModification]

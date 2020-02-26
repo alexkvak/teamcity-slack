@@ -39,6 +39,30 @@ class HelpersTest extends FlatSpec with MockFactory with Matchers {
     build.matchBranch(".*") shouldEqual true
   }
 
+  "RichBuild.formattedDuration" should "format duration" in {
+    forAll(data) { (duration: Long, formatted: String) ⇒
+      val build = stub[SBuild]
+      build.getDuration _ when() returns duration
+
+      build.formattedDuration shouldEqual formatted
+    }
+
+    def data =
+      Table(
+        ("duration", "formatted"), // First tuple defines column names
+        (1L, "1s"),
+        (10L, "10s"),
+        (60L, "1m"),
+        (670L, "11m:10s"),
+        (3600L, "1h"),
+        (3780L, "1h:3m"),
+        (3782L, "1h:3m:2s"),
+        (3602L, "1h:2s"),
+        (86402L, "1d:2s"),
+        (8640000L, "100d")
+      )
+  }
+
   "RichBuildServer.findPreviousStatus" should "work properly" in {
     def stubBranch(branchName: Option[String]) = branchName.map { b ⇒
       val branch = stub[Branch]
