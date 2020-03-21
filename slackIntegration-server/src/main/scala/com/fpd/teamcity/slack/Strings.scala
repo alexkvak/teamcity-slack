@@ -6,7 +6,6 @@ object Strings {
   lazy val logCategory = "Slack Integration"
   def label: String = "Slack"
   def tabId: String = "Slack"
-  lazy val channelMessageOwner = "TeamCity"
 
   private def unableToCreateSessionByConfig(reason: String): String = s"Unable to create session by config: $reason"
 

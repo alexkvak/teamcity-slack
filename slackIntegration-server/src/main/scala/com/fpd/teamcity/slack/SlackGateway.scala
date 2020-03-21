@@ -121,7 +121,12 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
     }
 
   private def channelChatConfiguration =
-    SlackChatConfiguration.getConfiguration.withName(configManager.senderName.getOrElse(Strings.channelMessageOwner))
+    configManager.senderName match {
+      case Some(senderName) ⇒
+        SlackChatConfiguration.getConfiguration.withName(senderName)
+      case _ ⇒
+        SlackChatConfiguration.getConfiguration.asUser()
+    }
 
   private def sendMessageInternal(destination: Destination, message: SlackMessage): MessageSent = session match {
     case Some(x) ⇒
