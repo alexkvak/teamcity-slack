@@ -17,6 +17,7 @@ object Strings {
     lazy val statusFailed = "Failed"
     lazy val statusCanceled = "Canceled"
     lazy val statusStarted = "Started"
+    lazy val statusQueued = "Queued"
   }
 
   object BuildSettingsController {

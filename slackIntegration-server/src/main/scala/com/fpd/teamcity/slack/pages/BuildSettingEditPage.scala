@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 import com.fpd.teamcity.slack.Helpers.Implicits._
 import com.fpd.teamcity.slack.controllers.SlackController
-import com.fpd.teamcity.slack.{ConfigManager, MessageBuilder, PermissionManager, Resources}
+import com.fpd.teamcity.slack.{ConfigManager, SBuildMessageBuilder, PermissionManager, Resources}
 import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
 import org.springframework.web.servlet.ModelAndView
 
@@ -29,7 +29,7 @@ class BuildSettingEditPage(controllerManager: WebControllerManager,
       new ModelAndView(view, Map("model" → model, "key" → key).asJava)
     }
 
-    result getOrElse new ModelAndView(view, Map("defaultMessage" → MessageBuilder.defaultMessage).asJava)
+    result getOrElse new ModelAndView(view, Map("defaultMessage" → SBuildMessageBuilder.defaultMessage).asJava)
   }
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =
