@@ -6,7 +6,8 @@
     <div class="group">
       <label class="tableLabel" for="branchMask">Branch:</label>
       <span><forms:textField className="mediumField textField" name="branchMask" expandable="false" value="${model.branchMask}"/></span>
-      <div class="smallNote">Regular expressions are allowed</div>
+      <div class="smallNote">Regular expressions are allowed. </div>
+      <div class="smallNote">For all branches, use .*</div>
     </div>
     <div class="group">
       <label class="tableLabel" for="slackChannel">Slack channel:</label>
