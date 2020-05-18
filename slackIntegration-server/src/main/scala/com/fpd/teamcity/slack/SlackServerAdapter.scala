@@ -4,7 +4,7 @@ import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.Helpers.Implicits._
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SRunningBuild}
+import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SQueuedBuild, SRunningBuild}
 
 class SlackServerAdapter(sBuildServer: SBuildServer,
                          val configManager: ConfigManager,
@@ -30,6 +30,9 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
 
   override def buildInterrupted(build: SRunningBuild): Unit = if (configManager.isAvailable)
     send(build, Set(BuildSettingFlag.canceled))
+
+  override def buildTypeAddedToQueue(build: SQueuedBuild): Unit = if (configManager.isAvailable)
+    send(build, Set(BuildSettingFlag.queued))
 }
 
 object SlackServerAdapter {

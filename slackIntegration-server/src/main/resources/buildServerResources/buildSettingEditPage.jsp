@@ -71,6 +71,13 @@
         Trigger when build is canceled
       </label>
     </div>
+    <div class="checkboxes-group">
+      <label class="flagLabel">
+        <input type="checkbox" name="queued" value="1" <c:if test="${model.queued}">checked</c:if>/>
+        Trigger when build is queued
+	<small>(some placeholders will not be accessible)</small>
+      </label>
+    </div>
   </div>
 
   <div class="status">

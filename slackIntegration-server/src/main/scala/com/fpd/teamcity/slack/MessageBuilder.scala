@@ -1,21 +1,30 @@
 package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
-import com.fpd.teamcity.slack.MessageBuilder._
+import com.fpd.teamcity.slack.SBuildMessageBuilder._
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import com.fpd.teamcity.slack.Strings.MessageBuilder._
 import jetbrains.buildServer.messages.Status
 import jetbrains.buildServer.serverSide.artifacts.BuildArtifacts.BuildArtifactsProcessor.Continuation
 import jetbrains.buildServer.serverSide.artifacts.{BuildArtifact, BuildArtifactsViewMode}
-import jetbrains.buildServer.serverSide.{SBuild, ServerPaths, WebLinks}
+import jetbrains.buildServer.serverSide.{SBuild, SQueuedBuild, ServerPaths, WebLinks}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
-class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
+abstract class MessageBuilder {
+  def compile(template: String, setting: BuildSetting): SlackAttachment
+
+  protected def encodeText(text: String) =
+    text.replaceAllLiterally("&", "&amp;")
+      .replaceAllLiterally("<", "&lt;")
+      .replaceAllLiterally(">", "&gt;")
+}
+
+class SBuildMessageBuilder(build: SBuild, context: MessageBuilderContext) extends MessageBuilder {
   import Helpers.Implicits._
 
-  def compile(template: String, setting: BuildSetting): SlackAttachment = {
+  override def compile(template: String, setting: BuildSetting): SlackAttachment = {
     def status = if (build.getDuration == 0) {
       if (build.getBuildStatus.isSuccessful)
         statusStarted
@@ -91,7 +100,36 @@ class MessageBuilder(build: SBuild, context: MessageBuilderContext) {
   }
 }
 
-object MessageBuilder {
+class SQueuedBuildMessageBuilder(build: SQueuedBuild,  context: MessageBuilderContext) extends MessageBuilder {
+  override def compile(template: String, setting: BuildSetting): SlackAttachment = {
+
+    val text = """\{([\s\w-._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
+      case "name" ⇒ encodeText(context.getQueuedBuildName(build)) //  "" // encodeText(build.getFullName)
+      case "number" ⇒ "" // has no number yet
+      case "branch" ⇒ context.getQueuedBuildBranch(build)
+      case "status" ⇒ statusQueued
+      case "changes" ⇒ "" // changes is unknown now
+      case "allArtifactsDownloadUrl" ⇒ ""
+      case "artifactsRelUrl" ⇒ ""
+      case "artifactLinks" ⇒ ""
+      case "link" ⇒ context.getQueuedBuildUrl(build)
+      case "mentions" ⇒ ""  // changes is unknown now
+      case "users" ⇒ "" // changes is unknown now
+      case "formattedDuration" ⇒ "" // build only queued
+      case "reason" ⇒ ""
+      case x if x.startsWith("%") && x.endsWith("%") ⇒
+        context.getQueuedBuildParameter(build, x.substring(1, x.length - 1).trim) match {
+          case Some(value) ⇒ encodeText(value)
+          case _ ⇒ unknownParameter
+        }
+      case _ ⇒ m.group(0)
+    })
+
+    SlackAttachment(text.trim, statusNormalColor, "⚪")
+  }
+}
+
+object SBuildMessageBuilder {
   lazy val statusNormalColor = "#02c456"
 
   lazy val defaultMessage: String =
@@ -122,17 +160,24 @@ object MessageBuilder {
 
     def getBuildParameter: (SBuild, String) ⇒ Option[String] = (build, name) ⇒
       Option(build.getParametersProvider.get(name))
-  }
 
-  private def encodeText(text: String) =
-    text.replaceAllLiterally("&", "&amp;")
-      .replaceAllLiterally("<", "&lt;")
-      .replaceAllLiterally(">", "&gt;")
+    def getQueuedBuildName: SQueuedBuild => String = build => build.getBuildType.getFullName
+
+    def getQueuedBuildUrl: SQueuedBuild => String = webLinks.getQueuedBuildUrl
+
+    def getQueuedBuildBranch: SQueuedBuild => String = build =>
+      Option(build.getBuildPromotion.getBranch).map(_.getDisplayName).getOrElse(unknownBranch)
+
+    def getQueuedBuildParameter: (SQueuedBuild, String) ⇒ Option[String] = (build, name) =>
+      Option(build.getBuildPromotion.getParameterValue(name))
+
+  }
 }
 
 class MessageBuilderFactory(webLinks: WebLinks, gateway: SlackGateway, paths: ServerPaths, configManager: ConfigManager) {
   private val context = MessageBuilderContext(webLinks, gateway, paths, configManager)
 
-  def createForBuild(build: SBuild) = new MessageBuilder(build, context)
+  def createForBuild(build: SBuild) = new SBuildMessageBuilder(build, context)
+  def createForBuild(build: SQueuedBuild) = new SQueuedBuildMessageBuilder(build, context)
 }
 

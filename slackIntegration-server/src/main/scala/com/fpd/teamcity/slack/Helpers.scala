@@ -3,7 +3,7 @@ package com.fpd.teamcity.slack
 import javax.servlet.http.HttpServletRequest
 
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{SBuild, SBuildServer, SFinishedBuild}
+import jetbrains.buildServer.serverSide.{SBuild, SBuildServer, SFinishedBuild, SQueuedBuild}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.web.util.SessionUser
 
@@ -53,6 +53,11 @@ object Helpers {
 
       def formattedDuration: String =
         encodeDuration(build.getDuration)
+    }
+
+    implicit class RichQueuedBuild(val build: SQueuedBuild) extends AnyVal {
+      def matchBranch(mask: String): Boolean =
+        mask.r.findFirstIn(Option(build.getBuildPromotion.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
     }
 
     implicit class RichBuildServer(val sBuildServer: SBuildServer) extends AnyVal {
