@@ -2,13 +2,11 @@ package com.fpd.teamcity.slack.controllers
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.SlackGateway.{Destination, SlackChannel, SlackUser}
-import jetbrains.buildServer.serverSide.{Branch, BuildHistory, SFinishedBuild}
+import jetbrains.buildServer.serverSide.{Branch, SFinishedBuild}
 import jetbrains.buildServer.users.SUser
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.TableDrivenPropertyChecks._
-
-import scala.collection.JavaConverters._
+import org.scalatest.{FlatSpec, Matchers}
 
 class BuildSettingsTryTest extends FlatSpec with MockFactory with Matchers {
   "BuildSettingsTry.findPreviousBuild" should "work" in {
@@ -34,36 +32,31 @@ class BuildSettingsTryTest extends FlatSpec with MockFactory with Matchers {
     buildMaster.getBranch _ when() returns branchMaster
     buildMaster.getBuildTypeId _ when() returns buildTypeId
 
-    // Build histories
-    val emptyBuildHistory = stub[BuildHistory]
-    emptyBuildHistory.getEntries _ when * returns Seq[SFinishedBuild]().asJava
+    val buildPersonal = stub[SFinishedBuild]
+    buildPersonal.isPersonal _ when() returns true
 
-    val buildHistoryWithMatch = stub[BuildHistory]
-    buildHistoryWithMatch.getEntries _ when * returns Seq(buildWithoutBranch).asJava
-
-    val buildHistoryWithMatch2 = stub[BuildHistory]
-    buildHistoryWithMatch2.getEntries _ when * returns Seq(buildDefault).asJava
-
-    val buildHistoryWithoutMatch = stub[BuildHistory]
-    buildHistoryWithoutMatch.getEntries _ when * returns Seq(buildMaster).asJava
+    val buildWithPrevious = stub[SFinishedBuild]
+    buildWithPrevious.isPersonal _ when() returns true
+    buildWithPrevious.getPreviousFinished _ when() returns buildMaster
 
     // settings
     val settingMatchAll = BuildSetting(buildTypeId, ".*", "", "")
     val settingMatchDefault = BuildSetting(buildTypeId, "default", "", "")
 
     // Assertion
-    forAll(data) { (buildHistory: BuildHistory, buildSetting: BuildSetting, found: Option[SFinishedBuild]) ⇒
-      BuildSettingsTry.findPreviousBuild(buildHistory, buildSetting) shouldEqual found
+    forAll(data) { (build: SFinishedBuild, buildSetting: BuildSetting, found: Option[SFinishedBuild]) ⇒
+      BuildSettingsTry.filterMatchBuild(buildSetting)(build) shouldEqual found
     }
 
     def data =
       Table(
-        ("buildHistory", "buildSetting", "found"), // First tuple defines column names
+        ("build", "buildSetting", "found"), // First tuple defines column names
         // Subsequent tuples define the data
-        (emptyBuildHistory, settingMatchAll, None),
-        (buildHistoryWithMatch, settingMatchAll, Some(buildWithoutBranch)),
-        (buildHistoryWithoutMatch, settingMatchDefault, None),
-        (buildHistoryWithMatch2, settingMatchDefault, Some(buildDefault))
+        (buildWithoutBranch, settingMatchAll, Some(buildWithoutBranch)),
+        (buildDefault, settingMatchDefault, Some(buildDefault)),
+        (buildMaster, settingMatchDefault, None),
+        (buildPersonal, settingMatchAll, None),
+        (buildWithPrevious, settingMatchAll, Some(buildMaster))
       )
   }
 
