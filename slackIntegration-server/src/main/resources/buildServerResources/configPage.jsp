@@ -6,6 +6,7 @@
     <b>${error}</b>
 </c:if>
 <form action="${submitUrl}" method="post">
+    <input type="hidden" name="tc-csrf-token" value="${tcCsrfToken}">
     <table class="runnerFormTable">
         <tbody>
             <tr>

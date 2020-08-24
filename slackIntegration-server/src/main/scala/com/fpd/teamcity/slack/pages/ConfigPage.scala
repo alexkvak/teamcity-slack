@@ -1,10 +1,11 @@
 package com.fpd.teamcity.slack.pages
 
 import java.util
-import javax.servlet.http.HttpServletRequest
 
+import javax.servlet.http.HttpServletRequest
 import com.fpd.teamcity.slack.{ConfigManager, PermissionManager, Resources, Strings}
 import jetbrains.buildServer.controllers.admin.AdminPage
+import jetbrains.buildServer.web.CSRFFilter
 import jetbrains.buildServer.web.openapi.{Groupable, PagePlaces, PluginDescriptor}
 
 class ConfigPage(
@@ -32,6 +33,7 @@ class ConfigPage(
     model.putAll(extension.details.mapValues(_.getOrElse("")).asJava)
     model.put("error", request.param("error").getOrElse(""))
     model.put("saveConfigSubmitUrl", Resources.configPage.controllerUrl)
+    model.put("tcCsrfToken", request.getSession.getAttribute(CSRFFilter.ATTRIBUTE))
   }
 
   override def getGroup: String = Groupable.SERVER_RELATED_GROUP
