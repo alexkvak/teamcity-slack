@@ -7,17 +7,22 @@ BS.SlackNotifierDialog = OO.extend(BS.AbstractModalDialog, {
 jQuery(function ($) {
     loadBuildSettingsList();
 
-    $('.buildSettingsList').on('click', '.add-button', function () {
+    $('.buildSettingsList').on('click', '.add-button', function (event) {
+        event.preventDefault();
         buildSettingEdit();
-    }).on('click', '.js-edit', function () {
+    }).on('click', '.js-edit', function (event) {
+        event.preventDefault();
         buildSettingEdit($(this).closest('tr').data('id'));
-    }).on('click', '.js-delete', function () {
+    }).on('click', '.js-delete', function (event) {
+        event.preventDefault();
         buildSettingDelete($(this).closest('tr').data('id'));
-    }).on('click', '.js-try', function () {
+    }).on('click', '.js-try', function (event) {
+        event.preventDefault();
         buildSettingTry($(this).closest('tr').data('id'));
     });
 
-    $('#mainContent').on('click', '.closeDialog', function () {
+    $('#mainContent').on('click', '.closeDialog', function (event) {
+        event.preventDefault();
         BS.SlackNotifierDialog.close();
     });
 
