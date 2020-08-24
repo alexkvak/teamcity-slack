@@ -15,7 +15,7 @@ import scala.collection.mutable.ArrayBuffer
 abstract class MessageBuilder {
   def compile(template: String, setting: BuildSetting): SlackAttachment
 
-  protected def encodeText(text: String) =
+  protected def encodeText(text: String): String =
     text.replaceAllLiterally("&", "&amp;")
       .replaceAllLiterally("<", "&lt;")
       .replaceAllLiterally(">", "&gt;")
@@ -59,7 +59,7 @@ class SBuildMessageBuilder(build: SBuild, context: MessageBuilderContext) extend
 
     def changes = build.getContainingChanges.asScala.take(setting.maxVcsChanges).map { change ⇒
       val name = change.getCommitters.asScala.headOption.map(_.getDescriptiveName).getOrElse(change.getUserName)
-      s"- ${change.getDescription.replace("\n", " ").trim} [$name]"
+      s"- ${change.getDescription.takeWhile(_ != '\n')} [$name]"
     } mkString "\n"
 
     def mentions = if (build.getBuildStatus.isSuccessful) "" else {
@@ -74,7 +74,7 @@ class SBuildMessageBuilder(build: SBuild, context: MessageBuilderContext) extend
       "Reason: " + (if (build.getFailureReasons.isEmpty) unknownReason else build.getFailureReasons.asScala.map(_.getDescription).mkString("\n"))
     }
 
-    val text = """\{([\s\w-._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
+    val text = """\{([\s\w-._%]+)}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ encodeText(build.getFullName)
       case "number" ⇒ build.getBuildNumber
       case "branch" ⇒ Option(build.getBranch).map(_.getDisplayName).getOrElse(unknownBranch)
@@ -103,7 +103,7 @@ class SBuildMessageBuilder(build: SBuild, context: MessageBuilderContext) extend
 class SQueuedBuildMessageBuilder(build: SQueuedBuild,  context: MessageBuilderContext) extends MessageBuilder {
   override def compile(template: String, setting: BuildSetting): SlackAttachment = {
 
-    val text = """\{([\s\w-._%]+)\}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
+    val text = """\{([\s\w-._%]+)}""".r.replaceAllIn(template, m ⇒ m.group(1) match {
       case "name" ⇒ encodeText(context.getQueuedBuildName(build)) //  "" // encodeText(build.getFullName)
       case "number" ⇒ "" // has no number yet
       case "branch" ⇒ context.getQueuedBuildBranch(build)
