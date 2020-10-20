@@ -1,0 +1,3 @@
+{
+  "extends": "./node_modules/@jetbrains/teamcity-api/plugin.tsconfig.json"
+}

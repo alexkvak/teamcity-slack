@@ -1,3 +1,8 @@
 target
 .idea
 *.iml
+
+# Frontend
+slackIntegration-server/src/main/resources/buildServerResources/bundle.js
+slackIntegration-server/src/main/resources/buildServerResources/bundle-report.html
+frontend/node_modules

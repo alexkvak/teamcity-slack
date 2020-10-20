@@ -11,6 +11,7 @@
     <bean class="com.fpd.teamcity.slack.controllers.BuildSettingsSave"/>
     <bean class="com.fpd.teamcity.slack.controllers.BuildSettingsDelete"/>
     <bean class="com.fpd.teamcity.slack.controllers.BuildSettingsTry"/>
+    <bean class="com.fpd.teamcity.slack.controllers.SakuraUIPluginController"/>
     <bean class="com.fpd.teamcity.slack.MessageBuilderFactory"/>
     <bean class="com.fpd.teamcity.slack.ConfigManager"/>
     <bean class="com.fpd.teamcity.slack.SlackNotifier"/>

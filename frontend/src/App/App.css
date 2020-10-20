@@ -1,0 +1,12 @@
+.wrapper {
+  padding: 0 28px;
+}
+
+.name {
+  cursor: pointer;
+}
+
+.item {
+  margin: 0;
+  padding: 0;
+}

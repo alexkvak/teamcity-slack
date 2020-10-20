@@ -6,7 +6,7 @@
   <version>1.0.0</version>
   <packaging>pom</packaging>
   <properties>
-      <teamcity-version>2017.1</teamcity-version>
+      <teamcity-version>2020.2-SNAPSHOT</teamcity-version>
   </properties>
   <repositories>
       <repository>
