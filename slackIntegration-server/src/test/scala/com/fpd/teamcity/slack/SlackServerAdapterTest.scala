@@ -5,12 +5,16 @@ import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.SlackServerAdapter._
 import jetbrains.buildServer.messages.Status
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.{FlatSpec, Matchers}
 
-class SlackServerAdapterTest extends FlatSpec with MockFactory with Matchers {
+class SlackServerAdapterTest
+    extends AnyFlatSpec
+    with MockFactory
+    with Matchers {
   "SlackServerAdapter.statusChanged" should "work properly" in {
-    forAll(data) { (previous: Status, current: Status, changed: Boolean) ⇒
+    forAll(data) { (previous: Status, current: Status, changed: Boolean) =>
       statusChanged(previous, current) shouldEqual changed
     }
 
@@ -34,8 +38,9 @@ class SlackServerAdapterTest extends FlatSpec with MockFactory with Matchers {
   }
 
   "SlackServerAdapter.calculateFlags" should "work properly" in {
-    forAll(data) { (previous: Status, current: Status, flags: Set[BuildSettingFlag]) ⇒
-      calculateFlags(previous, current) shouldEqual flags
+    forAll(data) {
+      (previous: Status, current: Status, flags: Set[BuildSettingFlag]) =>
+        calculateFlags(previous, current) shouldEqual flags
     }
 
     import BuildSettingFlag._

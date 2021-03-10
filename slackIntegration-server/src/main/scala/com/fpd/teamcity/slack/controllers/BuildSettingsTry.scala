@@ -2,93 +2,129 @@ package com.fpd.teamcity.slack.controllers
 
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.Helpers.Implicits._
-import com.fpd.teamcity.slack.SlackGateway.{Destination, SlackChannel, SlackUser, attachmentToSlackMessage}
+import com.fpd.teamcity.slack.SlackGateway.{
+  Destination,
+  SlackChannel,
+  SlackUser,
+  attachmentToSlackMessage
+}
 import com.fpd.teamcity.slack._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import jetbrains.buildServer.serverSide.{ProjectManager, SFinishedBuild}
 import jetbrains.buildServer.users.SUser
-import jetbrains.buildServer.web.openapi.{PluginDescriptor, WebControllerManager}
+import jetbrains.buildServer.web.openapi.{
+  PluginDescriptor,
+  WebControllerManager
+}
 import jetbrains.buildServer.web.util.SessionUser
 import org.springframework.web.servlet.ModelAndView
 
 import scala.annotation.tailrec
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure, Try}
 
-class BuildSettingsTry(projectManager: ProjectManager,
-                       configManager: ConfigManager,
-                       gateway: SlackGateway,
-                       controllerManager: WebControllerManager,
-                       val permissionManager: PermissionManager,
-                       messageBuilderFactory: MessageBuilderFactory,
-                       implicit val descriptor: PluginDescriptor
-                      )
-  extends SlackController {
+class BuildSettingsTry(
+    projectManager: ProjectManager,
+    configManager: ConfigManager,
+    gateway: SlackGateway,
+    controllerManager: WebControllerManager,
+    val permissionManager: PermissionManager,
+    messageBuilderFactory: MessageBuilderFactory,
+    implicit val descriptor: PluginDescriptor
+) extends SlackController {
 
   import BuildSettingsTry._
   import Strings.BuildSettingsTry._
 
-  controllerManager.registerController(Resources.buildSettingTry.controllerUrl, this)
+  controllerManager.registerController(
+    Resources.buildSettingTry.controllerUrl,
+    this
+  )
 
-  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = Try {
-    val id = request.param("id")
+  override def handle(
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): ModelAndView = Try {
+    val id = request
+      .param("id")
       .getOrElse(throw HandlerException(emptyIdParam))
-    val setting = configManager.buildSetting(id)
+    val setting = configManager
+      .buildSetting(id)
       .getOrElse(throw HandlerException(buildSettingNotFound))
     val build = findPreviousBuild(projectManager, setting)
       .getOrElse(throw HandlerException(previousBuildNotFound))
 
     detectDestination(setting, SessionUser.getUser(request)) match {
-      case Some(dest) ⇒
-        val future = gateway.sendMessage(dest,
+      case Some(dest) =>
+        val attachment = messageBuilderFactory
+          .createForBuild(build)
+          .compile(setting.messageTemplate, setting)
+
+        val future = gateway.sendMessage(
+          dest,
           attachmentToSlackMessage(
-            messageBuilderFactory.createForBuild(build).compile(setting.messageTemplate, setting),
-            configManager.sendAsAttachment.exists(x ⇒ x)
-          ))
-        Await.result(future, 10 seconds) match {
-          case Failure(error) ⇒ throw HandlerException(error.getMessage)
-          case _ ⇒ messageSent(dest.toString)
+            attachment,
+            configManager.sendAsAttachment.exists(x => x)
+          )
+        )
+
+        Try(Await.result(future, 30 seconds)) match {
+          case Failure(error) => throw HandlerException(error.getMessage)
+          case _              => messageSent(dest.toString)
         }
-      case _ ⇒
+      case _ =>
         throw HandlerException(unknownDestination)
     }
-  } recover { case x: HandlerException ⇒ s"Error: ${x.getMessage}" } map {
+  } recover { case x: HandlerException => s"Error: ${x.getMessage}" } map {
     ajaxView
   } get
 
   override protected def checkPermission(request: HttpServletRequest): Boolean =
-    request.param("id").exists(id ⇒ permissionManager.settingAccessPermitted(request, id))
+    request
+      .param("id")
+      .exists(id => permissionManager.settingAccessPermitted(request, id))
 }
 
 object BuildSettingsTry {
   @tailrec
-  def filterMatchBuild(setting: BuildSetting)(build: SFinishedBuild): Option[SFinishedBuild] = {
+  def filterMatchBuild(
+      setting: BuildSetting
+  )(build: SFinishedBuild): Option[SFinishedBuild] = {
     if (!build.isPersonal && build.matchBranch(setting.branchMask))
       Some(build)
     else {
       Option(build.getPreviousFinished) match {
-        case Some(previous) ⇒ filterMatchBuild(setting)(previous)
-        case None ⇒ None
+        case Some(previous) => filterMatchBuild(setting)(previous)
+        case None           => None
       }
     }
   }
 
-  def findPreviousBuild(projectManager: ProjectManager, setting: BuildSetting): Option[SFinishedBuild] = {
-    val buildTypes = projectManager.findBuildTypes(Vector(setting.buildTypeId).asJava)
+  def findPreviousBuild(
+      projectManager: ProjectManager,
+      setting: BuildSetting
+  ): Option[SFinishedBuild] = {
+    val buildTypes =
+      projectManager.findBuildTypes(Vector(setting.buildTypeId).asJava)
     val foundBuildType = buildTypes.asScala.headOption
 
-    foundBuildType.flatMap(buildType ⇒ filterMatchBuild(setting)(buildType.getLastChangesFinished))
+    foundBuildType.flatMap(buildType =>
+      filterMatchBuild(setting)(buildType.getLastChangesFinished)
+    )
   }
 
-  def detectDestination(setting: BuildSetting, user: ⇒ SUser): Option[Destination] = setting.slackChannel.isEmpty match {
-    case true if setting.notifyCommitter ⇒
+  def detectDestination(
+      setting: BuildSetting,
+      user: => SUser
+  ): Option[Destination] = setting.slackChannel.isEmpty match {
+    case true if setting.notifyCommitter =>
       Some(SlackUser(user.getEmail))
-    case false ⇒
+    case false =>
       Some(SlackChannel(setting.slackChannel))
-    case _ ⇒
+    case _ =>
       None
   }
 

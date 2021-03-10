@@ -1,17 +1,22 @@
 package com.fpd.teamcity.slack
 
-import java.net.Proxy
-import java.util.concurrent.TimeUnit
-
 import com.fpd.teamcity.slack.Strings.SlackGateway._
-import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory
-import com.ullink.slack.simpleslackapi.replies.{ParsedSlackReply, SlackMessageReply}
-import com.ullink.slack.simpleslackapi.{SlackChatConfiguration, SlackMessageHandle, SlackSession, SlackAttachment ⇒ ApiSlackAttachment}
+import com.slack.api.methods.request.chat.ChatPostMessageRequest
+import com.slack.api.methods.request.conversations.ConversationsListRequest
+import com.slack.api.methods.request.users.UsersLookupByEmailRequest
+import com.slack.api.methods.response.chat.ChatPostMessageResponse
+import com.slack.api.methods.{AsyncMethodsClient, SlackApiTextResponse}
+import com.slack.api.model.{Attachment, ConversationType, Field, User}
+import com.slack.api.{Slack, SlackConfig}
 import jetbrains.buildServer.serverSide.TeamCityProperties
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.jdk.CollectionConverters._
+import scala.jdk.FutureConverters._
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object SlackGateway {
 
@@ -25,21 +30,32 @@ object SlackGateway {
     override def toString: String = s"#$name"
   }
 
-  case class SlackMessage(message: String, attachment: Option[ApiSlackAttachment] = None) {
+  case class SlackMessage(
+      message: String,
+      attachment: Option[Attachment] = None
+  ) {
     lazy val isEmpty: Boolean = message.isEmpty && attachment.isEmpty
+    def attachmentsList: Seq[Attachment] = attachment match {
+      case Some(attach) => Seq(attach)
+      case _            => Seq()
+    }
   }
 
   case class SlackAttachment(text: String, color: String, emoji: String)
 
-  implicit def stringToSlackMessage(message: String): SlackMessage = SlackMessage(message)
+  implicit def stringToSlackMessage(message: String): SlackMessage =
+    SlackMessage(message)
 
-  type MessageSent = Try[SlackMessageHandle[SlackMessageReply]]
-
-  def attachmentToSlackMessage(attachment: SlackAttachment, asAttachment: Boolean): SlackMessage = if (asAttachment) {
-    val apiSlackAttachment = new ApiSlackAttachment()
+  def attachmentToSlackMessage(
+      attachment: SlackAttachment,
+      asAttachment: Boolean
+  ): SlackMessage = if (asAttachment) {
+    val apiSlackAttachment = new Attachment()
     apiSlackAttachment.setColor(attachment.color)
-    apiSlackAttachment.addMarkdownIn("fields")
-    apiSlackAttachment.addField("", attachment.text, false)
+    apiSlackAttachment.setMrkdwnIn(Seq("fields").asJava)
+    apiSlackAttachment.setFields(
+      Seq(new Field("", attachment.text, false)).asJava
+    )
 
     SlackMessage("", Some(apiSlackAttachment))
   } else {
@@ -53,7 +69,8 @@ object SlackGateway {
   }
 
   def getStringProperty(key: String): Option[String] = {
-    Try(Option(System.getProperty(key))).getOrElse(None)
+    Try(Option(System.getProperty(key)))
+      .getOrElse(None)
       .trimEmptyString
       .orElse(
         Option(TeamCityProperties.getPropertyOrNull(s"teamcity.$key"))
@@ -68,110 +85,170 @@ object SlackGateway {
       )
 
   case class SendMessageError(message: String) extends Exception(message)
+
+  case class SlackApiError(message: String) extends Exception(message)
+
+  private def prepareConfig: SlackConfig = {
+    val config = new SlackConfig
+
+    val proxyHost = getStringProperty("https.proxyHost")
+    val proxyPort = getIntProperty("https.proxyPort")
+
+    val proxyUrl = proxyHost.map(host =>
+      if (proxyPort > 0) s"$host:$proxyPort"
+      else host
+    )
+
+    proxyUrl.foreach(x => config.setProxyUrl(x))
+
+    for {
+      url <- proxyUrl
+      proxyLogin <- getStringProperty("https.proxyLogin")
+      proxyPassword <- getStringProperty("https.proxyPassword")
+    } yield config.setProxyUrl(s"$proxyLogin:$proxyPassword@$url")
+
+    config
+  }
+
+  private def processResult[T <: SlackApiTextResponse](
+      result: Future[T]
+  ): Future[T] = result.flatMap(response => {
+    if (response.isOk) Future.successful(response)
+    else Future.failed(SlackApiError(response.getError))
+  })
 }
 
 class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
   import SlackGateway._
 
-  var sessions = Map.empty[String, SlackSession]
+  private val slack = Slack.getInstance(prepareConfig)
 
-  lazy private val proxyHost = getStringProperty("https.proxyHost")
-  lazy private val proxyPort = getIntProperty("https.proxyPort")
-  lazy private val proxyLogin = getStringProperty("https.proxyLogin")
-  lazy private val proxyPassword = getStringProperty("https.proxyPassword")
+  var methodsClients = Map.empty[String, AsyncMethodsClient]
 
-  def session: Option[SlackSession] = configManager.config.flatMap(x ⇒ sessionByConfig(x).toOption)
+  private def methods: Option[AsyncMethodsClient] =
+    configManager.config.map(x => sessionByConfig(x))
 
-  def sessionByConfig(config: ConfigManager.Config): Try[SlackSession] = sessions.get(config.oauthKey).filter(_.isConnected) match {
-    case Some(x) ⇒ Success(x)
-    case _ ⇒
-      val session = if (proxyHost.isDefined)
-        SlackSessionFactory
-          .getSlackSessionBuilder(config.oauthKey)
-          .withAutoreconnectOnDisconnection(true)
-          .withConnectionHeartbeat(0, null)
-          .withProxy(Proxy.Type.HTTP, proxyHost.get, proxyPort, proxyLogin.orNull, proxyPassword.orNull)
-          .build()
-      else
-        SlackSessionFactory.createWebSocketSlackSession(config.oauthKey)
+  def sessionByConfig(config: ConfigManager.Config): AsyncMethodsClient =
+    methodsClients.get(config.oauthKey) match {
+      case Some(x) => x
+      case _ =>
+        val methods = slack.methodsAsync(config.oauthKey)
+        methodsClients = methodsClients + (config.oauthKey -> methods)
 
-      val option = Try(session.connect()).map(_ ⇒ session)
-      option.foreach(s ⇒ sessions = sessions + (config.oauthKey → s))
-      option
-  }
+        methods
+    }
 
-  def sendMessage(destination: Destination, message: SlackMessage): Future[MessageSent] =
+  def sendMessage(
+      destination: Destination,
+      message: SlackMessage
+  ): Future[Unit] =
     if (message.isEmpty) {
       logger.log("Empty message")
-      Future.successful(Failure(SendMessageError("Empty message")))
+      Future.failed(SendMessageError("Empty message"))
     } else {
-      implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
-       Future {
-        val handle = sendMessageInternal(destination, message)
-        handle.foreach(_.waitForReply(networkTimeout, TimeUnit.SECONDS))
-        handle
-      } transform (
-         result ⇒ processResult(destination, result),
-         exception ⇒ {
-           logger.log(exception.toString)
-           exception
-         }
-       )
-    }
+      methods match {
+        case Some(client) =>
+          val response = sendMessageInternal(client, destination, message)
 
-  private def channelChatConfiguration =
-    configManager.senderName match {
-      case Some(senderName) ⇒
-        SlackChatConfiguration.getConfiguration.withName(senderName)
-      case _ ⇒
-        SlackChatConfiguration.getConfiguration.asUser()
-    }
+          processResult(response).transform(
+            _ => logger.log(messageSent(destination)),
+            throwable => {
+              val message =
+                failedToSendToDestination(destination, throwable.getMessage)
+              logger.log(message)
 
-  private def sendMessageInternal(destination: Destination, message: SlackMessage): MessageSent = session match {
-    case Some(x) ⇒
-      destination match {
-        case SlackChannel(channelName) ⇒
-          Option(x.findChannelByName(channelName)) match {
-            case Some(channel) ⇒
-              Try(x.sendMessage(channel, message.message, message.attachment.orNull, channelChatConfiguration))
-            case _ ⇒
-              Failure(SendMessageError(channelNotFound(channelName)))
-          }
-        case SlackUser(email) ⇒
-          Option(x.findUserByEmail(email)) match {
-            case Some(user) ⇒
-              Try(x.sendMessageToUser(user, message.message, message.attachment.orNull))
-            case _ ⇒
-              Failure(SendMessageError(userNotFound(email)))
-        }
-        case _ ⇒
-          Failure(SendMessageError(unknownDestination))
+              SendMessageError(message)
+            }
+          )
+        case None =>
+          Future.failed(SendMessageError(emptySession))
       }
-    case _ ⇒
-      Failure(SendMessageError(emptySession))
-  }
+    }
 
-  private def processResult(destination: Destination, result: MessageSent): MessageSent = {
-    result match {
-      case Success(sent) if sent.getReply != null ⇒
-        parseReplyError(sent.getReply) match {
-          case Some(error) ⇒
-            val message = failedToSendToDestination(destination, error)
-            logger.log(message)
-            Failure(SendMessageError(message))
-          case _ ⇒
-            logger.log(messageSent(destination))
-            Success(sent)
-        }
-      case x @ Failure(reason) ⇒
-        logger.log(reason.getMessage)
-        x
+  def getUserByEmail(email: String): Option[User] = methods.flatMap { client =>
+    {
+      val request = UsersLookupByEmailRequest.builder().email(email).build()
+
+      val response = client.usersLookupByEmail(request).asScala
+
+      val user = processResult(response).map(_.getUser)
+
+      Try(Await.result(user, 10 seconds)).fold(
+        exception => {
+          logger.log(exception.getMessage)
+          None
+        },
+        response => Some(response)
+      )
     }
   }
 
-  private def parseReplyError(reply: ParsedSlackReply): Option[String] =
-    if (!reply.isOk) {
-      Some(reply.getErrorMessage)
-    } else None
+  def isChannelExists(channel: String): Option[Boolean] = methods.map {
+    client =>
+      {
+        val types =
+          Seq(ConversationType.PUBLIC_CHANNEL, ConversationType.PRIVATE_CHANNEL)
+
+        val request =
+          ConversationsListRequest
+            .builder()
+            .limit(1000)
+            .excludeArchived(true)
+            .types(types.asJava)
+            .build()
+
+        val response = client.conversationsList(request).asScala
+
+        val channels = processResult(response).map(_.getChannels.asScala)
+
+        Try(Await.result(channels, 30 seconds)).fold(
+          exception => {
+            logger.log(exception.getMessage)
+            false
+          },
+          response => response.exists(_.getName == channel)
+        )
+      }
+  }
+
+//  private def channelChatConfiguration =
+//    configManager.senderName match {
+//      case Some(senderName) =>
+//        SlackChatConfiguration.getConfiguration.withName(senderName)
+//      case _ =>
+//        SlackChatConfiguration.getConfiguration.asUser()
+//    }
+
+  private def sendMessageInternal(
+      client: AsyncMethodsClient,
+      destination: Destination,
+      message: SlackMessage
+  ): Future[ChatPostMessageResponse] = {
+    val requestBuilder = ChatPostMessageRequest.builder()
+
+    destination match {
+      case SlackChannel(channelName) =>
+        val request = requestBuilder
+          .channel(channelName)
+          .text(message.message)
+          .attachments(message.attachmentsList.asJava)
+          .build()
+        client.chatPostMessage(request).asScala
+      case SlackUser(email) =>
+        getUserByEmail(email).map(_.getName) match {
+          case Some(value) =>
+            val request = requestBuilder
+              .username(value)
+              .text(message.message)
+              .attachments(message.attachmentsList.asJava)
+              .build()
+            client.chatPostMessage(request).asScala
+          case None =>
+            Future.failed(SendMessageError(userNotFound(email)))
+        }
+      case _ =>
+        Future.failed(SendMessageError(unknownDestination))
+    }
+  }
 }

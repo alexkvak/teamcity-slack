@@ -1,13 +1,17 @@
 package com.fpd.teamcity.slack
 
-import javax.servlet.http.HttpServletRequest
-
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{SBuild, SBuildServer, SFinishedBuild, SQueuedBuild}
+import jetbrains.buildServer.serverSide.{
+  SBuild,
+  SBuildServer,
+  SFinishedBuild,
+  SQueuedBuild
+}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.web.util.SessionUser
 
-import scala.collection.JavaConverters._
+import javax.servlet.http.HttpServletRequest
+import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.util.Random
 
@@ -16,10 +20,13 @@ object Helpers {
 
   object Implicits {
     implicit class RichHttpServletRequest(val request: Request) extends AnyVal {
-      def param(key: String): Option[String] = Option(request.getParameter(key)).map(_.trim).filterNot(_.isEmpty)
+      def param(key: String): Option[String] =
+        Option(request.getParameter(key)).map(_.trim).filterNot(_.isEmpty)
     }
 
-    implicit def requestToUser(request: Request): Option[SUser] = Option(SessionUser.getUser(request))
+    implicit def requestToUser(request: Request): Option[SUser] = Option(
+      SessionUser.getUser(request)
+    )
 
     implicit class RichRandom(val random: Random) extends AnyVal {
       def randomAlphaNumericString(length: Int): String = {
@@ -27,9 +34,12 @@ object Helpers {
         randomStringFromCharList(length, chars)
       }
 
-      private def randomStringFromCharList(length: Int, chars: Seq[Char]): String = {
+      private def randomStringFromCharList(
+          length: Int,
+          chars: Seq[Char]
+      ): String = {
         val sb = new StringBuilder
-        for (_ ← 1 to length) {
+        for (_ <- 1 to length) {
           val randomNum = util.Random.nextInt(chars.length)
           sb.append(chars(randomNum))
         }
@@ -43,13 +53,21 @@ object Helpers {
 
     implicit class RichBuild(val build: SBuild) extends AnyVal {
       def committees: Vector[SUser] =
-        build.getContainingChanges.asScala.toVector.flatMap(_.getCommitters.asScala).distinct
+        build.getContainingChanges.asScala.toVector
+          .flatMap(_.getCommitters.asScala)
+          .distinct
 
       def committeeEmails: Vector[String] =
-        committees.map(user ⇒ Option(user.getEmail)).collect { case Some(x) if x.length > 0 ⇒ x }
+        committees.map(user => Option(user.getEmail)).collect {
+          case Some(x) if x.nonEmpty => x
+        }
 
       def matchBranch(mask: String): Boolean =
-        mask.r.findFirstIn(Option(build.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
+        mask.r
+          .findFirstIn(
+            Option(build.getBranch).map(_.getDisplayName).getOrElse("")
+          )
+          .isDefined
 
       def formattedDuration: String =
         encodeDuration(build.getDuration)
@@ -57,22 +75,34 @@ object Helpers {
 
     implicit class RichQueuedBuild(val build: SQueuedBuild) extends AnyVal {
       def matchBranch(mask: String): Boolean =
-        mask.r.findFirstIn(Option(build.getBuildPromotion.getBranch).map(_.getDisplayName).getOrElse("")).isDefined
+        mask.r
+          .findFirstIn(
+            Option(build.getBuildPromotion.getBranch)
+              .map(_.getDisplayName)
+              .getOrElse("")
+          )
+          .isDefined
     }
 
-    implicit class RichBuildServer(val sBuildServer: SBuildServer) extends AnyVal {
+    implicit class RichBuildServer(val sBuildServer: SBuildServer)
+        extends AnyVal {
       def findPreviousStatus(build: SBuild): Status = {
 
-        def filterEntry(x: SFinishedBuild): Boolean = if (build.getBranch == null)
+        def filterEntry(x: SFinishedBuild): Boolean = if (
+          build.getBranch == null
+        )
           x.getBranch == null
         else
-          Option(x.getBranch).exists(_.getDisplayName == build.getBranch.getDisplayName)
+          Option(x.getBranch).exists(
+            _.getDisplayName == build.getBranch.getDisplayName
+          )
 
-        val history = sBuildServer.getHistory.getEntriesBefore(build, false).asScala
+        val history =
+          sBuildServer.getHistory.getEntriesBefore(build, false).asScala
 
         history.view
-          .filter(filterEntry)         // branch name filter
-          .filter(!_.isPersonal)       // ignore personal builds
+          .filter(filterEntry) // branch name filter
+          .filter(!_.isPersonal) // ignore personal builds
           .map(_.getBuildStatus)
           .find(_ != Status.UNKNOWN) // ignore cancelled and aborted builds
           .getOrElse(Status.NORMAL)
@@ -91,11 +121,20 @@ object Helpers {
           case seconds if seconds < oneMinute =>
             result ::: List(s"${seconds}s")
           case seconds if seconds >= oneMinute && seconds < oneHour =>
-            List(s"${seconds / oneMinute}m") ::: encodeDuration(result, seconds % oneMinute)
+            List(s"${seconds / oneMinute}m") ::: encodeDuration(
+              result,
+              seconds % oneMinute
+            )
           case seconds if seconds >= oneHour && seconds < oneDay =>
-            List(s"${seconds / oneHour}h") ::: encodeDuration(result, seconds % oneHour)
+            List(s"${seconds / oneHour}h") ::: encodeDuration(
+              result,
+              seconds % oneHour
+            )
           case seconds =>
-            List(s"${seconds / oneDay}d") ::: encodeDuration(result, seconds % oneDay)
+            List(s"${seconds / oneDay}d") ::: encodeDuration(
+              result,
+              seconds % oneDay
+            )
         }
       }
 

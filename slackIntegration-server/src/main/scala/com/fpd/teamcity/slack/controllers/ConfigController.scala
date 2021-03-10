@@ -1,49 +1,52 @@
 package com.fpd.teamcity.slack.controllers
 
-import java.net.URLEncoder
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-
-import com.fpd.teamcity.slack._
 import com.fpd.teamcity.slack.Strings.ConfigController._
+import com.fpd.teamcity.slack._
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
 
-import scala.util.{Failure, Success}
+import java.net.URLEncoder
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.util.Try
 
 class ConfigController(
-                        configManager: ConfigManager,
-                        controllerManager: WebControllerManager,
-                        val permissionManager: PermissionManager,
-                        slackGateway: SlackGateway
-                      )
-  extends SlackController {
+    configManager: ConfigManager,
+    controllerManager: WebControllerManager,
+    val permissionManager: PermissionManager,
+    slackGateway: SlackGateway
+) extends SlackController {
   import ConfigController._
   import Helpers.Implicits._
 
   controllerManager.registerController(Resources.configPage.controllerUrl, this)
 
-  override def handle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView = {
+  override def handle(
+      request: HttpServletRequest,
+      response: HttpServletResponse
+  ): ModelAndView = {
     val result = for {
-      oauthKey ← request.param("oauthKey")
+      oauthKey <- request.param("oauthKey")
     } yield {
       val newConfig = ConfigManager.Config(oauthKey)
       val publicUrl = request.param("publicUrl").getOrElse("")
       val senderName = request.param("senderName").getOrElse("")
 
-      slackGateway.sessionByConfig(newConfig).map { _ ⇒
-        configManager.update(
-          oauthKey,
-          publicUrl,
-          request.param("personalEnabled").isDefined,
-          request.param("enabled").isDefined,
-          senderName,
-          request.param("sendAsAttachment").isDefined
+      Try(slackGateway.sessionByConfig(newConfig))
+        .flatMap(_ =>
+          Try(
+            configManager.update(
+              oauthKey,
+              publicUrl,
+              request.param("personalEnabled").isDefined,
+              request.param("enabled").isDefined,
+              senderName,
+              request.param("sendAsAttachment").isDefined
+            )
+          )
         )
-      } match {
-        case Success(true) ⇒ Left(true)
-        case Success(_) ⇒ Right(oauthTokenUpdateFailed)
-        case Failure(e) ⇒ Right(sessionByConfigError(e.getMessage))
-      }
+        .toEither
+        .swap
+        .map(error => error.getMessage)
     }
 
     val either = result.getOrElse(Right(oauthKeyParamMissing))
@@ -53,8 +56,13 @@ class ConfigController(
 }
 
 object ConfigController {
-  private def createRedirect(either: Either[Boolean, String], context: String): String = either match {
-    case Left(_) ⇒ s"$context/admin/admin.html?item=${Strings.tabId}"
-    case Right(error) ⇒ s"$context/admin/admin.html?item=${Strings.tabId}&error=${URLEncoder.encode(error, "UTF-8")}"
+  private def createRedirect(
+      either: Either[Boolean, String],
+      context: String
+  ): String = either match {
+    case Left(_) => s"$context/admin/admin.html?item=${Strings.tabId}"
+    case Right(error) =>
+      s"$context/admin/admin.html?item=${Strings.tabId}&error=${URLEncoder
+        .encode(error, "UTF-8")}"
   }
 }
