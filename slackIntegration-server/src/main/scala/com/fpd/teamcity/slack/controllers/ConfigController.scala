@@ -31,22 +31,19 @@ class ConfigController(
       val publicUrl = request.param("publicUrl").getOrElse("")
       val senderName = request.param("senderName").getOrElse("")
 
-      Try(slackGateway.sessionByConfig(newConfig))
-        .flatMap(_ =>
-          Try(
-            configManager.update(
-              oauthKey,
-              publicUrl,
-              request.param("personalEnabled").isDefined,
-              request.param("enabled").isDefined,
-              senderName,
-              request.param("sendAsAttachment").isDefined
-            )
+      slackGateway.sessionByConfig(newConfig) match {
+        case Some(_) =>
+          configManager.update(
+            oauthKey,
+            publicUrl,
+            request.param("personalEnabled").isDefined,
+            request.param("enabled").isDefined,
+            senderName,
+            request.param("sendAsAttachment").isDefined
           )
-        )
-        .toEither
-        .swap
-        .map(error => error.getMessage)
+          Left(true)
+        case _ => Right(sessionByConfigError("auth error"))
+      }
     }
 
     val either = result.getOrElse(Right(oauthKeyParamMissing))

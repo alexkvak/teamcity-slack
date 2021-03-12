@@ -10,7 +10,7 @@
   <packaging>pom</packaging>
   <properties>
       <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
-      <teamcity.slackIntegration.plugin.version>2.0.0-beta.1</teamcity.slackIntegration.plugin.version>
+      <teamcity.slackIntegration.plugin.version>2.0.0-beta.2</teamcity.slackIntegration.plugin.version>
       <teamcity.slackIntegration.plugin.vendorName>Alex Kvak</teamcity.slackIntegration.plugin.vendorName>
       <teamcity.slackIntegration.plugin.vendorUrl>https://github.com/alexkvak</teamcity.slackIntegration.plugin.vendorUrl>
   </properties>

@@ -5,7 +5,11 @@ import com.slack.api.methods.request.chat.ChatPostMessageRequest
 import com.slack.api.methods.request.conversations.ConversationsListRequest
 import com.slack.api.methods.request.users.UsersLookupByEmailRequest
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
-import com.slack.api.methods.{AsyncMethodsClient, SlackApiTextResponse}
+import com.slack.api.methods.{
+  AsyncMethodsClient,
+  MethodsClient,
+  SlackApiTextResponse
+}
 import com.slack.api.model.{Attachment, ConversationType, Field, User}
 import com.slack.api.{Slack, SlackConfig}
 import jetbrains.buildServer.serverSide.TeamCityProperties
@@ -16,7 +20,7 @@ import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters._
 import scala.jdk.FutureConverters._
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object SlackGateway {
 
@@ -127,16 +131,42 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
   var methodsClients = Map.empty[String, AsyncMethodsClient]
 
   private def methods: Option[AsyncMethodsClient] =
-    configManager.config.map(x => sessionByConfig(x))
+    configManager.config.flatMap(x => sessionByConfig(x))
 
-  def sessionByConfig(config: ConfigManager.Config): AsyncMethodsClient =
+  private def checkConnection(methods: MethodsClient): Boolean = {
+    val request =
+      ConversationsListRequest
+        .builder()
+        .limit(1)
+        .build()
+
+    Try(methods.conversationsList(request)) match {
+      case Success(value) if (value.isOk) => true
+      case Success(value) =>
+        logger.log(value.getError)
+        false
+      case Failure(exception) =>
+        logger.log(exception.getMessage)
+        false
+    }
+  }
+
+  def sessionByConfig(
+      config: ConfigManager.Config
+  ): Option[AsyncMethodsClient] =
     methodsClients.get(config.oauthKey) match {
-      case Some(x) => x
-      case _ =>
-        val methods = slack.methodsAsync(config.oauthKey)
-        methodsClients = methodsClients + (config.oauthKey -> methods)
+      case None =>
+        val syncMethods = slack.methods(config.oauthKey)
 
-        methods
+        if (checkConnection(syncMethods)) {
+          val methods = slack.methodsAsync(config.oauthKey)
+          methodsClients = methodsClients + (config.oauthKey -> methods)
+
+          Some(methods)
+        } else {
+          None
+        }
+      case x => x
     }
 
   def sendMessage(
