@@ -141,7 +141,7 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
         .build()
 
     Try(methods.conversationsList(request)) match {
-      case Success(value) if (value.isOk) => true
+      case Success(value) if value.isOk => true
       case Success(value) =>
         logger.log(value.getError)
         false
@@ -242,43 +242,34 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       }
   }
 
-//  private def channelChatConfiguration =
-//    configManager.senderName match {
-//      case Some(senderName) =>
-//        SlackChatConfiguration.getConfiguration.withName(senderName)
-//      case _ =>
-//        SlackChatConfiguration.getConfiguration.asUser()
-//    }
-
   private def sendMessageInternal(
       client: AsyncMethodsClient,
       destination: Destination,
       message: SlackMessage
   ): Future[ChatPostMessageResponse] = {
-    val requestBuilder = ChatPostMessageRequest.builder()
+    val channelName = destination match {
+      case SlackChannel(channelName) => Right(channelName)
+      case SlackUser(email) =>
+        getUserByEmail(email).map(_.getName) match {
+          case Some(value) => Right(value)
+          case None =>
+            Left(userNotFound(email))
+        }
+      case _ => Left(unknownDestination)
+    }
 
-    destination match {
-      case SlackChannel(channelName) =>
-        val request = requestBuilder
-          .channel(channelName)
+    channelName match {
+      case Right(value) =>
+        val request = ChatPostMessageRequest
+          .builder()
+          .channel(value)
+          .username(configManager.senderName.orNull)
           .text(message.message)
           .attachments(message.attachmentsList.asJava)
           .build()
+
         client.chatPostMessage(request).asScala
-      case SlackUser(email) =>
-        getUserByEmail(email).map(_.getName) match {
-          case Some(value) =>
-            val request = requestBuilder
-              .username(value)
-              .text(message.message)
-              .attachments(message.attachmentsList.asJava)
-              .build()
-            client.chatPostMessage(request).asScala
-          case None =>
-            Future.failed(SendMessageError(userNotFound(email)))
-        }
-      case _ =>
-        Future.failed(SendMessageError(unknownDestination))
+      case Left(error) => Future.failed(SendMessageError(error))
     }
   }
 }

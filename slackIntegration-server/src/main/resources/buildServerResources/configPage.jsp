@@ -35,6 +35,10 @@
                     <label for="senderName">Sender name</label>
                 </td><td>
                     <input type="text" id="senderName" name="senderName" value="${senderName}" class="longField">
+                    <div class="smallNoteAttention">
+                        Send message as other user. <br />
+                        Please make sure that you granted the scope <code>chat:write.customize</code>
+                    </div>
                 </td>
             </tr>
             <tr class="js-toggable">
