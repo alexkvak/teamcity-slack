@@ -250,7 +250,7 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
     val channelName = destination match {
       case SlackChannel(channelName) => Right(channelName)
       case SlackUser(email) =>
-        getUserByEmail(email).map(_.getName) match {
+        getUserByEmail(email).map(_.getId) match {
           case Some(value) => Right(value)
           case None =>
             Left(userNotFound(email))
