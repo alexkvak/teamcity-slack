@@ -247,8 +247,17 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       destination: Destination,
       message: SlackMessage
   ): Future[ChatPostMessageResponse] = {
+    val requestBuilder = ChatPostMessageRequest
+      .builder()
+      .text(message.message)
+      .attachments(message.attachmentsList.asJava)
+
     val channelName = destination match {
-      case SlackChannel(channelName) => Right(channelName)
+      case SlackChannel(channelName) =>
+        // change sender name for channel only
+        requestBuilder.username(configManager.senderName.orNull)
+
+        Right(channelName)
       case SlackUser(email) =>
         getUserByEmail(email).map(_.getId) match {
           case Some(value) => Right(value)
@@ -260,12 +269,8 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
     channelName match {
       case Right(value) =>
-        val request = ChatPostMessageRequest
-          .builder()
+        val request = requestBuilder
           .channel(value)
-          .username(configManager.senderName.orNull)
-          .text(message.message)
-          .attachments(message.attachmentsList.asJava)
           .build()
 
         client.chatPostMessage(request).asScala
