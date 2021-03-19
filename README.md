@@ -34,10 +34,10 @@ sources with `mvn package`.
 Next upload `target/slackIntegration.zip` to TeamCity `data/plugins/` folder (restart is needed).
 
 Create Slack App:
-* Open [Create classic app](https://api.slack.com/apps?new_classic_app=1) form and fill it
-* Go to **App Home**. Create Bot with **Add Legacy Bot User** button (fill both fields correctly)
-* Go to **OAuth & Permissions**. Add scope **bot** in **Scopes** section. Then click **Install App in Workspace**
-* Now copy **Bot User OAuth Access Token**.
+* Open [Create app](https://api.slack.com/apps) form and fill it
+* Go to **OAuth & Permissions**. Add following scopes in **Scopes** section: `channels:read`, `chat:write`, `chat:write.public`, `im:write`, `users:read`, `users:read.email`. If you plan to change sender name, add also `chat:write.customize` scope.
+* Click **Install App in Workspace**
+* Now copy **Bot User OAuth Token**.
 
 Paste this token into **Administration -> Slack -> OAuth Access Token** field.
 
@@ -150,11 +150,6 @@ The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and oth
 
 
 ## Troubleshooting <a name="troubleshooting"></a>
-**Q:** I followed all the instructions, but I get error message `not_allowed_token_type` when I try to save my Bot token into TeamCity!
-
-**A:** This plugin does not yet support the new Slack detailed OAuth scopes. When trying to save or use a token created for a Bot User using the new scopes, the Slack API will return that error message. When creating a new Slack App for this integration, do NOT opt into using the updated/beta scopes. If you have already opted in, you will need to create a new Slack App - there is no way to downgrade at this time. The only supported scope is the classic `bot` scope. 
-
-![Beta Slack bot scopes](_doc/slack-beta-bot-scopes.png)
 
 **Q:** I checked the option to send private messages and added the `{mention}` placeholder to the message, but neither the message was send to the slack user nor the name was mentioned in the slack message!
 

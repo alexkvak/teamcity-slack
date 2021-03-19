@@ -8,5 +8,6 @@ import jetbrains.buildServer.web.openapi.SimplePageExtension
 trait SlackExtension extends SimplePageExtension {
   protected val permissionManager: PermissionManager
 
-  override def isAvailable(request: HttpServletRequest): Boolean = permissionManager.accessPermitted(request)
+  override def isAvailable(request: HttpServletRequest): Boolean =
+    permissionManager.accessPermitted(request)
 }

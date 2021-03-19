@@ -4,19 +4,28 @@ import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag
 import com.fpd.teamcity.slack.ConfigManager.BuildSettingFlag.BuildSettingFlag
 import com.fpd.teamcity.slack.Helpers.Implicits._
 import jetbrains.buildServer.messages.Status
-import jetbrains.buildServer.serverSide.{BuildServerAdapter, SBuildServer, SQueuedBuild, SRunningBuild}
+import jetbrains.buildServer.serverSide.{
+  BuildServerAdapter,
+  SBuildServer,
+  SQueuedBuild,
+  SRunningBuild
+}
 
-class SlackServerAdapter(sBuildServer: SBuildServer,
-                         val configManager: ConfigManager,
-                         val gateway: SlackGateway,
-                         val messageBuilderFactory: MessageBuilderFactory
-                        ) extends BuildServerAdapter with NotificationSender {
+class SlackServerAdapter(
+    sBuildServer: SBuildServer,
+    val configManager: ConfigManager,
+    val gateway: SlackGateway,
+    val messageBuilderFactory: MessageBuilderFactory
+) extends BuildServerAdapter
+    with NotificationSender {
 
   import SlackServerAdapter._
 
   sBuildServer.addListener(this)
 
-  override def buildFinished(build: SRunningBuild): Unit = if (configManager.isAvailable) {
+  override def buildFinished(build: SRunningBuild): Unit = if (
+    configManager.isAvailable
+  ) {
     val previousStatus = sBuildServer.findPreviousStatus(build)
 
     val flags = calculateFlags(previousStatus, build.getBuildStatus)
@@ -25,23 +34,33 @@ class SlackServerAdapter(sBuildServer: SBuildServer,
     }
   }
 
-  override def buildStarted(build: SRunningBuild): Unit = if (configManager.isAvailable)
+  override def buildStarted(build: SRunningBuild): Unit = if (
+    configManager.isAvailable
+  )
     send(build, Set(BuildSettingFlag.started))
 
-  override def buildInterrupted(build: SRunningBuild): Unit = if (configManager.isAvailable)
+  override def buildInterrupted(build: SRunningBuild): Unit = if (
+    configManager.isAvailable
+  )
     send(build, Set(BuildSettingFlag.canceled))
 
-  override def buildTypeAddedToQueue(build: SQueuedBuild): Unit = if (configManager.isAvailable)
+  override def buildTypeAddedToQueue(build: SQueuedBuild): Unit = if (
+    configManager.isAvailable
+  )
     send(build, Set(BuildSettingFlag.queued))
 }
 
 object SlackServerAdapter {
-  def calculateFlags(previous: Status, current: Status): Set[BuildSettingFlag] = {
+  def calculateFlags(
+      previous: Status,
+      current: Status
+  ): Set[BuildSettingFlag] = {
     import BuildSettingFlag._
 
     def changed = statusChanged(previous, current)
 
-    def applyIfChanged(flag1: BuildSettingFlag, flag2: BuildSettingFlag) = if (changed) Set(flag1, flag2) else Set(flag1)
+    def applyIfChanged(flag1: BuildSettingFlag, flag2: BuildSettingFlag) =
+      if (changed) Set(flag1, flag2) else Set(flag1)
 
     if (current.isSuccessful) {
       applyIfChanged(success, failureToSuccess)
