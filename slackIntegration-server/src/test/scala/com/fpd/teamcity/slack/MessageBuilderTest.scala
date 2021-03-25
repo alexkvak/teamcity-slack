@@ -1,7 +1,6 @@
 package com.fpd.teamcity.slack
 
 import java.io.File
-
 import com.fpd.teamcity.slack.ConfigManager.BuildSetting
 import com.fpd.teamcity.slack.SlackGateway.SlackAttachment
 import jetbrains.buildServer.BuildProblemData
@@ -11,7 +10,12 @@ import jetbrains.buildServer.serverSide.artifacts.{
   BuildArtifacts,
   BuildArtifactsViewMode
 }
-import jetbrains.buildServer.serverSide.{Branch, SBuild, SQueuedBuild}
+import jetbrains.buildServer.serverSide.{
+  Branch,
+  SBuild,
+  SQueuedBuild,
+  SRunningBuild
+}
 import jetbrains.buildServer.users.SUser
 import jetbrains.buildServer.vcs.SVcsModification
 import org.scalamock.scalatest.MockFactory
@@ -380,6 +384,56 @@ class SBuildMessageBuilderTest
     ) shouldEqual SlackAttachment(
       s"""Full name
         |${Strings.MessageBuilder.statusCanceled}
+      """.stripMargin.trim,
+      Status.UNKNOWN.getHtmlColor,
+      "⚪"
+    )
+  }
+
+  "MessageBuilder.compile" should "compile template for interrupted build" in {
+    implicit val build: SRunningBuild = stub[SRunningBuild]
+
+    (build.getFullName _).when().returns("Full name")
+    (build.getDuration _).when().returns(10)
+    (build.getBuildNumber _).when().returns("2")
+    (build.getBuildStatus _).when().returns(Status.UNKNOWN)
+    (build.isInterrupted _).when().returns(true)
+
+    val messageTemplate = """{name}
+                            |{status}
+                          """.stripMargin
+
+    messageBuilder().compile(
+      messageTemplate,
+      buildSetting
+    ) shouldEqual SlackAttachment(
+      s"""Full name
+        |${Strings.MessageBuilder.statusCanceled}
+      """.stripMargin.trim,
+      Status.UNKNOWN.getHtmlColor,
+      "⚪"
+    )
+  }
+
+  "MessageBuilder.compile" should "compile template for not interrupted build" in {
+    implicit val build: SRunningBuild = stub[SRunningBuild]
+
+    (build.getFullName _).when().returns("Full name")
+    (build.getDuration _).when().returns(10)
+    (build.getBuildNumber _).when().returns("2")
+    (build.getBuildStatus _).when().returns(Status.UNKNOWN)
+    (build.isInterrupted _).when().returns(false)
+
+    val messageTemplate = """{name}
+                            |{status}
+                          """.stripMargin
+
+    messageBuilder().compile(
+      messageTemplate,
+      buildSetting
+    ) shouldEqual SlackAttachment(
+      s"""Full name
+        |${Strings.MessageBuilder.statusFailed}
       """.stripMargin.trim,
       Status.UNKNOWN.getHtmlColor,
       "⚪"

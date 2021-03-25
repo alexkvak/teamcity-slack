@@ -13,6 +13,7 @@ import jetbrains.buildServer.serverSide.artifacts.{
 import jetbrains.buildServer.serverSide.{
   SBuild,
   SQueuedBuild,
+  SRunningBuild,
   ServerPaths,
   WebLinks
 }
@@ -44,6 +45,7 @@ class SBuildMessageBuilder(build: SBuild, context: MessageBuilderContext)
       else
         statusCanceled
     } else if (build.getBuildStatus.isSuccessful) statusSucceeded
+    else if (isInterrupted(build)) statusCanceled
     else statusFailed
 
     def artifacts =
@@ -218,6 +220,11 @@ object SBuildMessageBuilder {
     case Status.FAILURE => "⛔"
     case _              => "⚪"
   }
+
+  private def isInterrupted(build: SBuild): Boolean =
+    build.isInstanceOf[SRunningBuild] && build
+      .asInstanceOf[SRunningBuild]
+      .isInterrupted
 
   case class MessageBuilderContext(
       webLinks: WebLinks,
