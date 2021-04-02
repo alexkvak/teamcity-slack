@@ -55,7 +55,7 @@ class BuildSettingsTryTest extends AnyFlatSpec with MockFactory with Matchers {
           buildSetting: BuildSetting,
           found: Option[SFinishedBuild]
       ) =>
-        BuildSettingsTry.filterMatchBuild(buildSetting)(build) shouldEqual found
+        BuildSettingsTry.filterMatchBuild(buildSetting, build) shouldEqual found
     }
 
     def data =

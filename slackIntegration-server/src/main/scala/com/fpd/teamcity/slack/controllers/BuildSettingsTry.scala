@@ -91,13 +91,14 @@ class BuildSettingsTry(
 object BuildSettingsTry {
   @tailrec
   def filterMatchBuild(
-      setting: BuildSetting
-  )(build: SFinishedBuild): Option[SFinishedBuild] = {
+      setting: BuildSetting,
+      build: SFinishedBuild
+  ): Option[SFinishedBuild] = {
     if (!build.isPersonal && build.matchBranch(setting.branchMask))
       Some(build)
     else {
       Option(build.getPreviousFinished) match {
-        case Some(previous) => filterMatchBuild(setting)(previous)
+        case Some(previous) => filterMatchBuild(setting, previous)
         case None           => None
       }
     }
@@ -111,9 +112,9 @@ object BuildSettingsTry {
       projectManager.findBuildTypes(Vector(setting.buildTypeId).asJava)
     val foundBuildType = buildTypes.asScala.headOption
 
-    foundBuildType.flatMap(buildType =>
-      filterMatchBuild(setting)(buildType.getLastChangesFinished)
-    )
+    foundBuildType
+      .flatMap(buildType => Option(buildType.getLastChangesFinished))
+      .flatMap(build => filterMatchBuild(setting, build))
   }
 
   def detectDestination(
