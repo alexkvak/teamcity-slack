@@ -2,7 +2,10 @@ package com.fpd.teamcity.slack
 
 import com.fpd.teamcity.slack.Strings.SlackGateway._
 import com.slack.api.methods.request.chat.ChatPostMessageRequest
-import com.slack.api.methods.request.conversations.ConversationsListRequest
+import com.slack.api.methods.request.conversations.{
+  ConversationsListRequest,
+  ConversationsOpenRequest
+}
 import com.slack.api.methods.request.users.UsersLookupByEmailRequest
 import com.slack.api.methods.response.chat.ChatPostMessageResponse
 import com.slack.api.methods.{
@@ -242,6 +245,26 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
       }
   }
 
+  def startConversation(userId: String): Option[String] = methods.flatMap {
+    client =>
+      {
+        val request =
+          ConversationsOpenRequest.builder().users(List(userId).asJava).build()
+
+        val response = client.conversationsOpen(request).asScala
+
+        val channelId = processResult(response).map(_.getChannel.getId)
+
+        Try(Await.result(channelId, 30 seconds)).fold(
+          exception => {
+            logger.log(exception.getMessage)
+            None
+          },
+          response => Some(response)
+        )
+      }
+  }
+
   private def sendMessageInternal(
       client: AsyncMethodsClient,
       destination: Destination,
@@ -259,7 +282,9 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
 
         Right(channelName)
       case SlackUser(email) =>
-        getUserByEmail(email).map(_.getId) match {
+        val userId = getUserByEmail(email).map(_.getId)
+
+        userId.flatMap(startConversation) match {
           case Some(value) => Right(value)
           case None =>
             Left(userNotFound(email))
