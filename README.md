@@ -35,7 +35,7 @@ Next upload `target/slackIntegration.zip` to TeamCity `data/plugins/` folder (re
 
 Create Slack App:
 * Open [Create app](https://api.slack.com/apps) form and fill it
-* Go to **OAuth & Permissions**. Add following scopes in **Scopes** section: `channels:read`, `chat:write`, `chat:write.public`, `im:write`, `users:read`, `users:read.email`. If you plan to change sender name, add also `chat:write.customize` scope.
+* Go to **OAuth & Permissions**. Add following scopes in **Scopes** section: `channels:read`, `chat:write`, `chat:write.public`, `groups:read`, `im:read`, `im:write`, `mpim:read`, `users:read`, `users:read.email`. If you plan to change sender name, add also `chat:write.customize` scope.
 * Click **Install App in Workspace**
 * Now copy **Bot User OAuth Token**.
 
