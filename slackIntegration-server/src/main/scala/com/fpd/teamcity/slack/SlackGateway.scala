@@ -69,8 +69,6 @@ object SlackGateway {
     SlackMessage(s"${attachment.emoji} ${attachment.text}")
   }
 
-  val networkTimeout = 10L
-
   implicit class RichString(val opt: Option[String]) extends AnyVal {
     def trimEmptyString: Option[String] = opt.map(_.trim).filterNot(_.isEmpty)
   }
@@ -85,26 +83,33 @@ object SlackGateway {
       .trimEmptyString
   }
 
-  def getIntProperty(key: String): Int =
-    Try(System.getProperty(key).toInt)
-      .getOrElse(
-        TeamCityProperties.getInteger(s"teamcity.$key")
-      )
+  def toInt(s: String): Option[Int] = {
+    try {
+      Some(s.toInt)
+    } catch {
+      case _: Exception => None
+    }
+  }
+
+  def getIntProperty(key: String): Option[Int] =
+    getStringProperty(key).flatMap(toInt)
 
   case class SendMessageError(message: String) extends Exception(message)
 
   case class SlackApiError(message: String) extends Exception(message)
 
-  private def prepareConfig: SlackConfig = {
+  def prepareConfig: SlackConfig = {
     val config = new SlackConfig
 
-    val proxyHost = getStringProperty("https.proxyHost")
-    val proxyPort = getIntProperty("https.proxyPort")
+    val proxyHost = getStringProperty("slack.proxyHost")
+      .orElse(getStringProperty("http.proxyHost"))
+      .orElse(getStringProperty("https.proxyHost"))
+    val proxyPort = getIntProperty("slack.proxyPort")
+      .orElse(getIntProperty("http.proxyPort"))
+      .orElse(getIntProperty("https.proxyPort"))
+      .getOrElse(80)
 
-    val proxyUrl = proxyHost.map(host =>
-      if (proxyPort > 0) s"http://$host:$proxyPort"
-      else s"http://$host"
-    )
+    val proxyUrl = proxyHost.map(host => s"http://$host:$proxyPort")
 
     proxyUrl.foreach(x => config.setProxyUrl(x))
 

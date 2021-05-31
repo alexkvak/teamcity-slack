@@ -53,8 +53,8 @@
 
         <dependency>
             <groupId>com.slack.api</groupId>
-            <artifactId>bolt-socket-mode</artifactId>
-            <version>1.6.2</version>
+            <artifactId>slack-api-client</artifactId>
+            <version>1.8.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
