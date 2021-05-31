@@ -25,7 +25,8 @@ The plugin automatically backs up its settings after each modification.
 3. [Message placeholders](#message-placeholders)
 4. [Artifact links](#artifact-links)
 5. [Message preview](#message-preview)
-6. [Troubleshooting](#troubleshooting)
+6. [Proxy setup](#proxy-setup)
+7. [Troubleshooting](#troubleshooting)
 
 ## Install plugin <a name="install-plugin"></a>
 Download from [releases](https://github.com/alexkvak/teamcity-slack/releases) or compile 
@@ -148,6 +149,42 @@ Now Slack messages look like
 
 The message is prepended by Emoji ✅, ⛔ or ⚪ for successful, failed and other build statuses respectively.
 
+
+## Proxy setup <a name="proxy-setup"></a>
+Plugin fist lookup for Slack only proxy setting than uses default Java proxy. You can set up proxy by specifying JVM properties:
+
+```
+# proxy specified only for Slack 
+teamcity.slack.proxyHost=proxy.com
+teamcity.slack.proxyPort=8888
+
+# global JVM proxy
+http.proxyHost=proxy.com
+http.proxyPort=8888
+
+# or
+https.proxyHost=proxy.com
+https.proxyPort=8888 
+```
+
+The second way is to set up TeamCity internal properties (see https://www.jetbrains.com/help/teamcity/configuring-teamcity-server-startup-properties.html).
+In this case `teamcity.` prefix should be added.
+
+```
+# proxy specified only for Slack 
+teamcity.slack.proxyHost=proxy.com
+teamcity.slack.proxyPort=8888
+
+# global JVM proxy
+teamcity.http.proxyHost=proxy.com
+teamcity.http.proxyPort=8888
+
+# or
+teamcity.https.proxyHost=proxy.com
+teamcity.https.proxyPort=8888
+```
+
+In both ways the `proxyPort` property can be omitted and port `80` is used by default.
 
 ## Troubleshooting <a name="troubleshooting"></a>
 
