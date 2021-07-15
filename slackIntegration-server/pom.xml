@@ -54,7 +54,7 @@
         <dependency>
             <groupId>com.slack.api</groupId>
             <artifactId>slack-api-client</artifactId>
-            <version>1.8.0</version>
+            <version>1.8.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
