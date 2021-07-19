@@ -81,6 +81,21 @@ class SlackGatewayTest
     config.getProxyUrl shouldEqual "http://proxy.com:1234"
   }
 
+  "SlackGateway.prepareConfig" should "return correct config if both http and https proxy settings is set" in {
+    System.setProperty("http.proxyHost", "http-proxy.com")
+    System.setProperty("http.proxyPort", "1234")
+    System.setProperty("http.proxyLogin", "http-user")
+    System.setProperty("http.proxyPassword", "http-pass")
+
+    System.setProperty("https.proxyHost", "https-proxy.com")
+    System.setProperty("https.proxyPort", "5678")
+    System.setProperty("https.proxyLogin", "https-user")
+    System.setProperty("https.proxyPassword", "https-pass")
+    val config = SlackGateway.prepareConfig
+
+    config.getProxyUrl shouldEqual "http://http-user:http-pass@http-proxy.com:1234"
+  }
+
   "SlackGateway" should "be instantiated with proxy" in {
     System.setProperty("slack.proxyHost", "proxy.com")
     System.setProperty("slack.proxyPort", "wrong port")

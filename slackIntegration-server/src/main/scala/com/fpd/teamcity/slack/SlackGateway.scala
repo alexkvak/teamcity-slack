@@ -109,15 +109,23 @@ object SlackGateway {
       .orElse(getIntProperty("https.proxyPort"))
       .getOrElse(80)
 
-    val proxyUrl = proxyHost.map(host => s"http://$host:$proxyPort")
+    val proxyUrl = proxyHost.map(host => s"$host:$proxyPort")
 
-    proxyUrl.foreach(x => config.setProxyUrl(x))
+    proxyUrl.foreach(x => config.setProxyUrl(s"http://$x"))
+
+    val proxyLogin = getStringProperty("slack.proxyLogin")
+      .orElse(getStringProperty("http.proxyLogin"))
+      .orElse(getStringProperty("https.proxyLogin"))
+
+    val proxyPassword = getStringProperty("slack.proxyPassword")
+      .orElse(getStringProperty("http.proxyPassword"))
+      .orElse(getStringProperty("https.proxyLogin"))
 
     for {
       url <- proxyUrl
-      proxyLogin <- getStringProperty("https.proxyLogin")
-      proxyPassword <- getStringProperty("https.proxyPassword")
-    } yield config.setProxyUrl(s"http://$proxyLogin:$proxyPassword@$url")
+      login <- proxyLogin
+      password <- proxyPassword
+    } yield config.setProxyUrl(s"http://$login:$password@$url")
 
     config
   }
