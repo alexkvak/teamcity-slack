@@ -234,27 +234,46 @@ class SlackGateway(val configManager: ConfigManager, logger: Logger) {
     client =>
       {
         val types =
-          Seq(ConversationType.PUBLIC_CHANNEL, ConversationType.PRIVATE_CHANNEL)
+          Seq(
+            ConversationType.PUBLIC_CHANNEL,
+            ConversationType.PRIVATE_CHANNEL
+          ).asJava
 
-        val request =
-          ConversationsListRequest
-            .builder()
-            .limit(1000)
-            .excludeArchived(true)
-            .types(types.asJava)
-            .build()
+        def requestChannel(cursor: String = ""): Boolean = {
+          val request =
+            ConversationsListRequest
+              .builder()
+              .limit(1000)
+              .excludeArchived(true)
+              .types(types)
+              .cursor(cursor)
+              .build()
 
-        val response = client.conversationsList(request).asScala
+          val response = client.conversationsList(request).asScala
 
-        val channels = processResult(response).map(_.getChannels.asScala)
+          val result = processResult(response)
 
-        Try(Await.result(channels, 30 seconds)).fold(
-          exception => {
-            logger.log(exception.getMessage)
-            false
-          },
-          response => response.exists(_.getName == channel)
-        )
+          logger.log(s"Requesting channels with cursor: ${cursor}")
+
+          Try(Await.result(result, 30 seconds)).fold(
+            exception => {
+              logger.log(exception.getMessage)
+              false
+            },
+            response => {
+              val channels = response.getChannels.asScala
+              val nextCursor = response.getResponseMetadata.getNextCursor
+
+              channels.exists(_.getName == channel) match {
+                case true                  => true
+                case _ if nextCursor != "" => requestChannel(nextCursor)
+                case _                     => false
+              }
+            }
+          )
+        }
+
+        requestChannel()
       }
   }
 
